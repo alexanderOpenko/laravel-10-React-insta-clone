@@ -17,11 +17,16 @@ export default {
             },
             maxHeight: {
                 '148': '48rem',
-              },
-              padding: {
+            },
+            padding: {
                 '59': '59%',
-              }
-
+            },
+            flexGrow: {
+                2: '2'
+            },
+            maxWidth: {
+                '1/2': '50%',
+            }
         },
     },
 

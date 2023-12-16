@@ -4,7 +4,8 @@ import PrimaryButton from "@/Components/PrimaryButton";
 import TextInput from "@/Components/TextInput";
 import { useForm, usePage } from '@inertiajs/react';
 import Comments from "./Comment";
-import { Comment} from "./Comment";
+import { Comment } from "./Comment";
+import Avatar from "@/Components/Avatar";
 
 export default function ShowPostModal(props) {
     const { post } = props
@@ -37,9 +38,10 @@ export default function ShowPostModal(props) {
             }
 
             <div className="w-full max-w-md">
-                <div className="post-user border-b border-slate-100 border-solid p-4 flex justify-between">
-                    <div>
-                        {post.user.name}
+                <div className="post-user border-b border-slate-100 border-solid p-4 flex items-center justify-between">
+                    <div className="flex items-center">
+                        <Avatar user={post.user} size="sm" divClassName="mr-4" />
+                        <div>{post.user.name}</div>
                     </div>
 
                     <div>
@@ -49,14 +51,20 @@ export default function ShowPostModal(props) {
 
                 <div className="post-message p-4">
                     {
-                        !!post.message && 
-                        <p>{post.user.name} {post.message}</p>
+                        !!post.message &&
+                        <div className="flex mb-4">
+                            <Avatar size="sm" user={post.user} />
+
+                            <div className="px-4 py-1">
+                                {post.user.name} {post.message}
+                            </div>
+                        </div>
                     }
 
                     {
-                        !!post.post_comments && 
+                        !!post.post_comments &&
                         <div className="post-comments">
-                            <Comments comments={post.post_comments}/>
+                            <Comments comments={post.post_comments} />
                         </div>
                     }
 

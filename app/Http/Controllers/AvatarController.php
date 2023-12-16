@@ -2,16 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Post;
+use App\Models\Avatar;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
-class PostController extends Controller
+class AvatarController extends Controller
 {
-    public function __construct() {
-        $this->middleware('auth')->except('show');
-    }
     /**
      * Display a listing of the resource.
      */
@@ -23,9 +19,9 @@ class PostController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(User $user)
+    public function create()
     {
-       
+        //
     }
 
     /**
@@ -34,22 +30,20 @@ class PostController extends Controller
     public function store(Request $request, User $user)
     {
         $this->authorize('apply', $user);
-
-        $validated = $request->validate([
-            'message' => 'string|required|min:3'
+        
+        $request->validate([
+            'avatar' => 'required|mimes:jpg,bmp,png'
         ]);
 
-        $image_path = $request->file('images')->store('image/' . $request->user()->id, 'public');
+        $image_path = $request->file('avatar')->store('avatars/' . $request->user()->id, 'public');
 
-        $post = $user->posts()->create($validated);
-
-        $post->images()->create(['image_path' => $image_path]);
+        $user->avatar()->create(['avatar' => $image_path]);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Avatar $avatar)
     {
         //
     }
@@ -57,7 +51,7 @@ class PostController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Avatar $avatar)
     {
         //
     }
@@ -65,7 +59,7 @@ class PostController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Avatar $avatar)
     {
         //
     }
@@ -73,7 +67,7 @@ class PostController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Avatar $avatar)
     {
         //
     }

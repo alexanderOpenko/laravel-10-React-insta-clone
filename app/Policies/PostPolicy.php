@@ -29,8 +29,11 @@ class PostPolicy
      */
     public function create(User $user): bool
     {
-        //
     }
+
+    /**
+     * Determine whether the user can update the model.
+     */
 
     /**
      * Determine whether the user can update the model.

@@ -19,7 +19,7 @@ class ProfileController extends Controller
      */
     public function show(string $id) {
         return Inertia::render('Profile/Show', [
-            'user' => User::findOrFail($id)->load(['posts.postComments.user', 'posts.images', 'posts.user'])
+            'user' => User::findOrFail($id)->load(['posts.postComments.user.avatar', 'posts.images', 'posts.user.avatar'])->load('avatar')
         ]);
     }
     

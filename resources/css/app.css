@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.avatar-lg {
+    max-width: 300px;
+    max-height: 300px;
+}
+
+.avatar-sm {
+    max-width: 50px;
+    max-height: 50px;
+}

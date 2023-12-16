@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AvatarController;
 use App\Http\Controllers\PostCommentController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
@@ -46,6 +47,9 @@ Route::resource('posts.comments', PostCommentController::class)
     ->scoped()->only(['store']);
 
 Route::resource('comments', PostCommentController::class)->only(['destroy', 'update']);
+
+Route::resource('users.avatar', AvatarController::class)->only(['store', 'update']);
+
 // Route::get('', function () {
 //     return redirect()->route('home');
 // });

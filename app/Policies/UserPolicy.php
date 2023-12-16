@@ -27,17 +27,15 @@ class UserPolicy
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user, User $model): bool
+    public function create(User $user): bool
     {
-        return $user->id === $model->id;
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Post $post): bool
+    public function update(User $user): bool
     {
-        return $user->id === $model->id;
     }
 
     /**
@@ -62,5 +60,10 @@ class UserPolicy
     public function forceDelete(User $user, Post $post): bool
     {
         //
+    }
+
+    public function apply (User $user, User $model): bool
+    {
+        return $user->id === $model->id;
     }
 }
