@@ -3,6 +3,8 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Middleware;
 use Tightenco\Ziggy\Ziggy;
@@ -24,6 +26,10 @@ class HandleInertiaRequests extends Middleware
         return parent::version($request);
     }
 
+    public function checkForFollowing($user_id, $following_id) {
+        return DB::table('followers')->where('user_id', $user_id)->where('follower_id', $following_id)->exists();
+    }
+
     /**
      * Define the props that are shared by default.
      *
@@ -35,6 +41,8 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'auth' => [
                 'user' => $request->user(),
+                'guest' => fn() => Auth::id() != $request->route('id'),
+                'following' => fn() => $this->checkForFollowing(Auth::id(), $request->route('id'))
             ],
 
             'public_url' => asset('storage'),

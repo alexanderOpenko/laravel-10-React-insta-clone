@@ -28,6 +28,16 @@ class User extends Authenticatable
     {
         return $this->hasOne(Avatar::class);
     }
+
+    public function followers()
+    {
+        return $this->hasMany(Follower::class, 'follower_id');
+    }
+
+    public function following()
+    {
+        return $this->hasMany(Follower::class, 'user_id');
+    }
     /**
      * The attributes that are mass assignable.
      *

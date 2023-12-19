@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Avatar;
+use App\Models\Follower;
 use App\Models\User;
 use Illuminate\Http\Request;
 
-class AvatarController extends Controller
+class FollowerController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -29,23 +29,15 @@ class AvatarController extends Controller
      */
     public function store(Request $request, User $user)
     {
-        $this->authorize('apply', $user);
-        
-        $request->validate([
-            'avatar' => 'required|mimes:jpg,bmp,png'
-        ]);
-
-        $image_path = $request->file('avatar')->store('avatars/' . $request->user()->id, 'public');
-
-        $user->avatar()->create(['avatar' => $image_path]);
-
-        return back();
+        $following_id = $request->query('following_id');
+        $user->following()->create(['follower_id' => $following_id]);
+        return redirect()->back();
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Avatar $avatar)
+    public function show(Follower $followers)
     {
         //
     }
@@ -53,15 +45,15 @@ class AvatarController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Avatar $avatar)
+    public function edit(Follower $followers)
     {
-        //
+        
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Avatar $avatar)
+    public function update(Request $request, Follower $followers)
     {
         //
     }
@@ -69,8 +61,10 @@ class AvatarController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Avatar $avatar)
+    public function destroy(User $user, $follower)
     {
-        //
+        $user->following()->where('follower_id', $follower)->delete();
+
+        return redirect()->back();
     }
 }

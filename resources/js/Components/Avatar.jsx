@@ -8,10 +8,13 @@ export default function Avatar({ divClassName = '', imgClassName = '', size, use
         sm: 'avatar-sm'
     }[size]
 
+    const imgSrc = user.avatar ? public_url + '/' + user.avatar.avatar 
+    : public_url + '/' + 'avatar_placeholder.jpg'
+
     return <div className={`cursor-pointer flex ${sizeClass} ${divClassName}`}>
         <img
             className={"object-cover rounded-full" + imgClassName}
-            src={public_url + '/' + user.avatar.avatar || public_url + '/' + 'avatar_placeholder.jpg'}
+            src={imgSrc}
         />
     </div>
 }

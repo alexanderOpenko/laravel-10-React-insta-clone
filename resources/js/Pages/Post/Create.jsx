@@ -4,9 +4,13 @@ import Modal from "@/Components/Modal"
 import PrimaryButton from "@/Components/PrimaryButton";
 import SecondaryButton from "@/Components/SecondaryButton";
 import TextInput from "@/Components/TextInput";
-import { useForm } from "@inertiajs/react";
+import { useForm, useRemember } from "@inertiajs/react";
 
 export default function CreatePost(props) {
+    const [formState, setFormState] = useRemember({
+        message: null,
+    })
+
     const {
         data,
         setData,
@@ -33,9 +37,12 @@ export default function CreatePost(props) {
                 <TextInput
                     id="message"
                     type="text"
-                    value={data.message}
+                    value={data.message || formState.message}
                     name="message"
-                    onChange={(e) => setData('message', e.target.value)}
+                    onChange={(e) => { 
+                        setData('message', e.target.value)
+                        setFormState({'message': e.target.value})
+                    }}
                     placeholder="message"
                 />
 
