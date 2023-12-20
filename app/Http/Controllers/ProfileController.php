@@ -18,16 +18,14 @@ class ProfileController extends Controller
      * Display the user's profile form.
      */
     public function show(Request $request, string $id) {
+        $user = User::findOrFail($id)
+        ->load('avatar')
+          ->loadCount('followers')
+          ->loadCount('following');
+    
         return Inertia::render('Profile/Show', [
-            'user' => User::findOrFail($id)->load([
-                'posts.postComments.user.avatar', 
-                'posts.images', 
-                'posts.user.avatar'
-                ])
-                ->load('avatar')
-                ->load('followers')
-                ->load('following')
-            ]);
+            'user' => $user,
+        ]);
     }
     
     public function edit(Request $request): Response

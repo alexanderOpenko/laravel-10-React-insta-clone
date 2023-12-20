@@ -41,8 +41,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::resource('users.posts', PostController::class)
-    ->scoped();
+Route::resource('users.posts', PostController::class);
 
 Route::resource('posts.comments', PostCommentController::class)->only(['store']);
 

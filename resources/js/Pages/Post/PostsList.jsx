@@ -1,18 +1,38 @@
 import { usePage } from "@inertiajs/react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import ShowPostModal from '../Post/Show';
 
-export default function PostsList({ posts }) {
+export default function PostsList({ posts, userPostsRequest, nextPageUrl}) {
+    console.log(nextPageUrl,'nextPageUrl');
     const { public_url } = usePage().props
     const [post, setPost] = useState([])
     const [isOpenPost, setIsOpenPost] = useState(false)
+    let usedUrls = []
 
     useEffect(() => {
         if (post) {
             setPost(posts.find((el) => post.id === el.id))
         }
 
-    }, [posts]);
+        const onScroll = (e) => {
+            const scrollTop = Math.round(window.scrollY)
+            const scrollHeight = document.body.scrollHeight
+            const clientHeight = window.innerHeight
+
+console.log(usedUrls, 'usedUrls');
+            if (scrollTop + clientHeight >= scrollHeight - 50 && !usedUrls.includes(nextPageUrl)) {
+                userPostsRequest(nextPageUrl);
+                usedUrls.push(nextPageUrl)
+            }
+        };
+
+        document.addEventListener('scroll', onScroll);
+
+        return () => {
+            document.removeEventListener('scroll', onScroll);
+        };
+
+    }, [nextPageUrl]);
 
     const showPost = (post) => {
         setPost(post)

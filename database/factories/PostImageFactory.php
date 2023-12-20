@@ -5,9 +5,9 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Post>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\PostImage>
  */
-class PostFactory extends Factory
+class PostImageFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -17,9 +17,7 @@ class PostFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => null,
-            'message' => fake()->paragraph,
-            
+            'image_path' => 'image/5/EWYzN9s9ujdmu2ja69x13xMNBEm0GkfoAdlRNO2r.png'
         ];
     }
 }

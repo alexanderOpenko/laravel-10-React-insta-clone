@@ -15,9 +15,13 @@ class PostController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(User $user)
     {
-        //
+        $posts = $user->posts()
+                       ->with('postComments.user.avatar', 'images', 'user.avatar')
+                       ->paginate(6);
+    
+        return $posts;
     }
 
     /**
