@@ -8,6 +8,7 @@ import PostsList from '../Post/PostsList';
 
 import { reloadIfUpdatedTrick } from '@/reloadOnUpdateTrick';
 import ProfileInfo from './ProfileInfo';
+import PrimaryButton from '@/Components/PrimaryButton';
 
 export const AuthContext = createContext(null);
 const appURL = import.meta.env.VITE_APP_URL;
@@ -45,6 +46,7 @@ export default function Show({ auth, user }) {
     return (
         <AuthContext.Provider value={auth}>
             <AuthenticatedLayout
+                auth={auth}
                 user={auth.user}
                 header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Profile</h2>}
             >
@@ -54,9 +56,9 @@ export default function Show({ auth, user }) {
                     <ProfileInfo totalPosts={totalPosts} user={user} auth={auth} />
 
                     <div>
-                        <div onClick={openPostCreateForm}>
+                        <PrimaryButton onClick={openPostCreateForm} className='my-6'>
                             Add Post
-                        </div>
+                        </PrimaryButton>
 
                         {showPostCreateForm ? <CreatePost user={user} show={showPostCreateForm} onClose={closePostCreateForm} /> : null}
                     </div>

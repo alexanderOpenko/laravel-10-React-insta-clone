@@ -5,7 +5,10 @@ use App\Http\Controllers\FollowerController;
 use App\Http\Controllers\PostCommentController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
+use App\Models\Follower;
+use App\Models\User;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -33,9 +36,9 @@ Route::get('/home', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('home');
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile/{id}', [ProfileController::class, 'show'])->name('profile.show');
+Route::get('/profile/{id}', [ProfileController::class, 'show'])->name('profile.show');
 
+Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -50,6 +53,10 @@ Route::resource('comments', PostCommentController::class)->only(['destroy', 'upd
 Route::resource('users.avatar', AvatarController::class)->only(['store', 'update']);
 
 Route::resource('users.followers', FollowerController::class)->only(['store', 'destroy']);;
+
+Route::get('followers/{user}', [FollowerController::class, 'followers']);
+
+Route::get('following/{user}', [FollowerController::class, 'following']);
 
  
 require __DIR__.'/auth.php';

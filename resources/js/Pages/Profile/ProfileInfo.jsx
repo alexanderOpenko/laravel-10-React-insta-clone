@@ -4,25 +4,11 @@ import dayjs from 'dayjs';
 import PrimaryButton from '@/Components/PrimaryButton';
 import { strPlural } from '@/services';
 import Unfollow from './Unfollow';
+import Followers from "./Followers";
+import Follow from "./Follow";
 
 export default function ProfileInfo({user, auth, totalPosts }) {
     const { public_url } = usePage().props
-
-    const {
-        post,
-        processing
-    } = useForm({
-        user: auth.user.id
-    })
-
-    const followSubmit = (e) => {
-        e.preventDefault()
-        post(route('users.followers.store', { user: auth.user, following_id: user.id }), {
-            onSuccess: () => {
-                handleSuccess(user.id)
-            }
-        })
-    }
 
     return <div className='profile-info'>
         <div className='flex'>
@@ -39,16 +25,13 @@ export default function ProfileInfo({user, auth, totalPosts }) {
                     }
 
                     {(auth.guest && auth.following) && <Unfollow
-                        user={auth.user.id}
+                        user={auth.user && auth.user.id}
                         follower={user.id}
                     />}
 
-                    {(auth.guest && !auth.following) &&
-                        <form onSubmit={followSubmit}>
-                            <PrimaryButton className='bg-blue-600'>
-                                Follow
-                            </PrimaryButton>
-                        </form>
+                    {(auth.guest && !auth.following) && <Follow 
+                        user={auth.user && auth.user.id} 
+                        following_id={user.id}/>
                     }
 
                     {!auth.guest &&
@@ -61,18 +44,16 @@ export default function ProfileInfo({user, auth, totalPosts }) {
                         </Link>}
                 </div>
 
-                <div className='flex space-x-5 w-full font-medium text-lg mb-4'>
+                <div className='flex space-x-6 w-full font-medium text-lg mb-4'>
                     <div>
                         {strPlural('post', totalPosts)}
                     </div>
 
-                    <div>
-                        {strPlural('folower', user.followers_count)}
-                    </div>
-
-                    <div>
-                        {user.following_count} following
-                    </div>
+                    <Followers 
+                    followers_count={user.followers_count} 
+                    following_count={user.following_count}
+                    user_id={user.id}
+                    />
                 </div>
 
                 {/* bio */}

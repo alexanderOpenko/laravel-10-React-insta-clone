@@ -17,7 +17,6 @@ export default function Comments({ comments }) {
 }
 
 export function Comment({ user, comment, auth }) {
-    console.log(user, 'user');
     const [isOpenOptions, setIsOpenOptions] = useState(false)
     const {
         data,

@@ -10,7 +10,7 @@ use Inertia\Inertia;
 class PostController extends Controller
 {
     public function __construct() {
-        $this->middleware('auth')->except('show');
+        $this->middleware('auth')->only('store');
     }
     /**
      * Display a listing of the resource.

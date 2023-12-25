@@ -2,7 +2,7 @@ import { useForm } from "@inertiajs/react"
 import PrimaryButton from '@/Components/PrimaryButton';
 import { handleSuccess } from "@/reloadOnUpdateTrick";
 
-export default function Unfollow ({user, follower}) {
+export default function Unfollow ({ user, follower }) {
     const {
         delete: destroy,
         processing

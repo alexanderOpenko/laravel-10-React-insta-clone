@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Traits\LoadFollowRelations;
 use App\Models\Follower;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class FollowerController extends Controller
 {
+    use LoadFollowRelations;
     /**
      * Display a listing of the resource.
      */
@@ -47,7 +50,6 @@ class FollowerController extends Controller
      */
     public function edit(Follower $followers)
     {
-        
     }
 
     /**
@@ -66,5 +68,24 @@ class FollowerController extends Controller
         $user->following()->where('follower_id', $follower)->delete();
 
         return redirect()->back();
+    }
+
+    public function followers(User $user)
+    {
+        $followers = $user->followers()->paginate(10);
+        $followersCollection = $followers->getCollection();
+        $followers = $followers->toArray();
+        $followers['data'] = $this->loadFollowRelations($followersCollection, 'user_id');
+        return $followers;
+    }
+
+    public function following(User $user)
+    {
+        $following = $user->following()->paginate(10);
+        $followersCollection = $following->getCollection();
+        $following = $following->toArray();
+
+        $following['data'] = $this->loadFollowRelations($followersCollection, 'follower_id');
+        return $following;
     }
 }
