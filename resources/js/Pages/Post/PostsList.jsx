@@ -1,38 +1,18 @@
 import { usePage } from "@inertiajs/react"
 import { useState, useEffect, useRef } from "react"
 import ShowPostModal from '../Post/Show';
+import { UseInfiniteScroll } from "@/infinitePaginationHook";
 
 export default function PostsList({ posts, userPostsRequest, nextPageUrl }) {
     const { public_url } = usePage().props
     const [post, setPost] = useState([])
     const [isOpenPost, setIsOpenPost] = useState(false)
-    let usedUrls = []
 
     useEffect(() => {
         if (post) {
             setPost(posts.find((el) => post.id === el.id))
         }
-
-        const onScroll = (e) => {
-            const scrollTop = Math.round(window.scrollY)
-            const scrollHeight = document.body.scrollHeight
-            const clientHeight = window.innerHeight
-
-            if (scrollTop + clientHeight >= scrollHeight - 50 && !usedUrls.includes(nextPageUrl)) {
-                if (nextPageUrl) {
-                    userPostsRequest(nextPageUrl)
-                    usedUrls.push(nextPageUrl)
-                }
-            }
-        };
-
-        document.addEventListener('scroll', onScroll);
-
-        return () => {
-            document.removeEventListener('scroll', onScroll);
-        };
-
-    }, [nextPageUrl]);
+    }, []);
 
     const showPost = (post) => {
         setPost(post)
@@ -64,5 +44,7 @@ export default function PostsList({ posts, userPostsRequest, nextPageUrl }) {
                 </div>
             })
         }
+
+        <UseInfiniteScroll request={userPostsRequest} nextPageUrl={nextPageUrl} />
     </div>
 }

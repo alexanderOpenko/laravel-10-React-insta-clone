@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory(1000)->create();
+        // User::factory(1000)->create();
 
         $this->call(FollowSeeder::class);
         // \App\Models\User::factory(10)->create()->each(function ($user) {
@@ -40,10 +40,10 @@ class DatabaseSeeder extends Seeder
         //     ])
         // }
 
-        $user = User::find(5);
+        // $user = User::find(5);
 
-        Post::factory(100)->for($user)->create()->each(function($post) {
-            \App\Models\PostImage::factory()->for($post)->create();
-        });
+        // Post::factory(100)->for($user)->create()->each(function($post) {
+        //     \App\Models\PostImage::factory()->for($post)->create();
+        // });
     }
 }

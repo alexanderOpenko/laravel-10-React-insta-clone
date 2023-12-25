@@ -72,7 +72,7 @@ class FollowerController extends Controller
 
     public function followers(User $user)
     {
-        $followers = $user->followers()->paginate(10);
+        $followers = $user->followers()->paginate(5);
         $followersCollection = $followers->getCollection();
         $followers = $followers->toArray();
         $followers['data'] = $this->loadFollowRelations($followersCollection, 'user_id');
@@ -81,7 +81,7 @@ class FollowerController extends Controller
 
     public function following(User $user)
     {
-        $following = $user->following()->paginate(10);
+        $following = $user->following()->paginate(5);
         $followersCollection = $following->getCollection();
         $following = $following->toArray();
 
