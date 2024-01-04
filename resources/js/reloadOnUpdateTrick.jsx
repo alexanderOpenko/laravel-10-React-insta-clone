@@ -7,7 +7,6 @@ export const handleSuccess = ({id}) => {
 export const reloadIfUpdatedTrick = ({id}) => {
  if (localStorage.getItem("updated") && id != localStorage.getItem("updated")) {
     router.reload()
-    console.log('reload');
     localStorage.removeItem("updated")
 }
 }

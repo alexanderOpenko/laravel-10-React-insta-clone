@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AvatarController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\FollowerController;
 use App\Http\Controllers\PostCommentController;
 use App\Http\Controllers\PostController;
@@ -58,5 +59,14 @@ Route::get('followers/{user}', [FollowerController::class, 'followers']);
 
 Route::get('following/{user}', [FollowerController::class, 'following']);
 
+Route::middleware('auth')->group(function () {
+Route::group(['prefix' => 'chat', 'as' => 'chat.'], function() {
+    Route::get('/{receiverId?}', [ChatController::class, 'index'])->name('index');
+    Route::get('/lastMessage/{receiverId}', [ChatController::class, 'lastMessage'])->name('lastMessage');
+    Route::get('/lastChat/{receiverId}', [ChatController::class, 'getLastChat'])->name('getLastChat');
+    Route::post('/{receiverId?}', [ChatController::class, 'store'])->name('store');
+});
+Route::get('/chatList', [ChatController::class, 'getChatList'])->name('getChatList');
+});
  
 require __DIR__.'/auth.php';

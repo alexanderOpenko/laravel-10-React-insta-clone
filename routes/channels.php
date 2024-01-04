@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Support\Facades\Broadcast;
 
 /*
@@ -13,6 +14,21 @@ use Illuminate\Support\Facades\Broadcast;
 |
 */
 
-Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
-    return (int) $user->id === (int) $id;
+// Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
+//     return (int) $user->id === (int) $id;
+// });
+
+Broadcast::channel('messenger.{roomId}', function (User $user, int $roomId) {
+    if(true) {
+    return ['id' => $user->id, 'name' => $user->name];
+    }
+});
+
+Broadcast::channel('messagereaded.{user_id}', function (User $user) {
+    return !is_null($user);
+
+});
+
+Broadcast::channel('chatmessages.{user_id}', function (User $user) {
+    return !is_null($user);
 });
