@@ -4,7 +4,7 @@ import Login from "../Auth/Login";
 import Modal from "@/Components/Modal";
 import { useState } from "react";
 
-export default function Follow({ user, following_id }) {
+export default function Follow({ user, following_id, setFollowersList }) {
     const [isOpenLogin, setIsOpenLogin] = useState(false)
     const {
         post,
@@ -29,7 +29,18 @@ export default function Follow({ user, following_id }) {
 
         post(route('users.followers.store', { user: user, following_id: following_id }), {
             onSuccess: () => {
-                handleSuccess(user.id)
+                if (setFollowersList) {
+                    setFollowersList(prevFollowersList => {
+                        prevFollowersList.forEach((el) => {
+                            if (el.user.id === following_id) {
+                                el.authUserFollowed = true
+                            }
+                        })
+                        return prevFollowersList
+                    }
+
+                    )
+                }
             }
         })
     }

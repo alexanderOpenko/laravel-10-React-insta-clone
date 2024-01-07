@@ -1,7 +1,7 @@
 import { Link } from "@inertiajs/react";
+import Avatar from "../Avatar";
 
 export default function ChatSidebar({ recentMessages, receiverId, auth_id }) {
-    console.log(recentMessages, 'recentMessages');
     return (
         <div className="user-list overflow-y-auto">
             {recentMessages.map((el, index) => (
@@ -11,14 +11,7 @@ export default function ChatSidebar({ recentMessages, receiverId, auth_id }) {
                     className="flex px-5 py-3 transition hover:cursor-pointer hover:bg-slate-100"
                 >
                     <div className="pr-4">
-                        {el.user?.avatar !== undefined ? (
-                            <img
-                                src="https://cdn-icons-png.flaticon.com/512/194/194938.png"
-                                width="50"
-                            />
-                        ) : (
-                            <i className="fa fa-user-circle text-gray-300 text-5xl"></i>
-                        )}
+                        {el.user.avatar && <Avatar user={el.user} size="sm"/>}
                     </div>
 
                     <div className="w-full">

@@ -1,8 +1,7 @@
 import { useForm } from "@inertiajs/react"
 import PrimaryButton from '@/Components/PrimaryButton';
-import { handleSuccess } from "@/reloadOnUpdateTrick";
 
-export default function Unfollow ({ user, follower }) {
+export default function Unfollow({ user, follower, setFollowersList = null }) {
     const {
         delete: destroy,
         processing
@@ -10,9 +9,20 @@ export default function Unfollow ({ user, follower }) {
 
     const submit = (e) => {
         e.preventDefault()
-        destroy(route('users.followers.destroy', { user: user,  follower: follower }), {
+        destroy(route('users.followers.destroy', { user: user, follower: follower }), {
             onSuccess: () => {
-                handleSuccess(follower)
+                if (setFollowersList) {
+                    setFollowersList(prevFollowersList => {
+                        prevFollowersList.forEach((el) => {
+                            if (el.user.id === follower) {
+                                el.authUserFollowed = false
+                            }
+                        })
+                        return prevFollowersList
+                    }
+
+                    )
+                }
             }
         })
     }

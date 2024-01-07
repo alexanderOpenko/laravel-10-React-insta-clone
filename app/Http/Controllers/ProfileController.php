@@ -23,7 +23,7 @@ class ProfileController extends Controller
           ->loadCount('followers')
           ->loadCount('following');
     
-        return Inertia::render('Profile/Show', [
+        return Inertia::render('Profile/Profile', [
             'user' => $user,
         ]);
     }

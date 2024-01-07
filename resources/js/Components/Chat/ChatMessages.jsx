@@ -26,12 +26,11 @@ export default function ChatMessages({ receiver, messages: data, auth_id }) {
     }
 
     useEffect(() => {
-        const sortedUserIds = [auth_id, receiver?.id].sort();
-        const roomId = sortedUserIds.join('');
+        const sortedUserIds = [auth_id, receiver?.id].sort()
+        const roomId = sortedUserIds.join('')
 
         Echo.private(`messagereaded.${auth_id}`)
             .listen('MessageReaded', (e) => {
-                console.log(e, 'eааа');
                 setReadedMessages(true)
             })
 
@@ -53,7 +52,8 @@ export default function ChatMessages({ receiver, messages: data, auth_id }) {
             });
 
         return () => {
-            Echo.leaveChannel(`messenger.${roomId}`)
+            Echo.leave(`messenger.${roomId}`)
+            Echo.leave(`messagereaded.${auth_id}`)
         }
     }, [])
 

@@ -67,7 +67,7 @@ class FollowerController extends Controller
     {
         $user->following()->where('follower_id', $follower)->delete();
 
-        return redirect()->back();
+        // return redirect()->back();
     }
 
     public function followers(User $user)
@@ -75,6 +75,7 @@ class FollowerController extends Controller
         $followers = $user->followers()->paginate(5);
         $followersCollection = $followers->getCollection();
         $followers = $followers->toArray();
+        
         $followers['data'] = $this->loadFollowRelations($followersCollection, 'user_id');
         return $followers;
     }

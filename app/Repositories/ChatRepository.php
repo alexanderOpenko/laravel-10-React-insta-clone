@@ -48,8 +48,13 @@ class ChatRepository
         return Message::create($data);
     }
 
+    public static function checkForUnreadedMessages()
+    {
+        return Message::where('receiver_id', Auth::id())->where('status', '0')->exists();
+    }
+
     public function getUser($id) {
-       $user = User::where('id', $id)->first();
+       $user = User::where('id', $id)->first()->load('avatar');
        $user['online'] = $user->isOnline();
        return $user;
     }

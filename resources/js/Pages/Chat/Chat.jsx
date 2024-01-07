@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 
 export default function Chat(props) {
     const { auth, errors, recentMessages: chatsList, receiver, messages } = props;
-    const [chats, setChats] = useState(chatsList)
+    const [chats, setChats] = useState([])
 
     const getLastChat = async (userId = receiver.id) => {
         const resp = await fetch(`http://127.0.0.1:8000/chat/lastChat/${userId}`)
@@ -28,6 +28,8 @@ export default function Chat(props) {
     }
 
     useEffect(() => {
+        setChats(chatsList)
+
         Echo.private(`chatmessages.${auth.user.id}`)
             .listen('ChatMessageSent', (e) => {
                 getLastChat(e.user_id)
@@ -35,12 +37,13 @@ export default function Chat(props) {
 
         const intervalId = setInterval(() => {
             getUpdatedChats()
-        }, 18000);
+        }, 180000);
 
         return () => {
             clearInterval(intervalId)
+            Echo.leave(`chatmessages.${auth.user.id}`)
         }
-    }, [])
+    }, [chatsList])
 
     return (
         <AuthenticatedLayout auth={auth} errors={errors}>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Repositories\ChatRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -44,6 +45,8 @@ class HandleInertiaRequests extends Middleware
                 'guest' => fn() => Auth::id() != $request->route('id'),
                 'following' => fn() => $this->checkForFollowing(Auth::id(), $request->route('id'))
             ],
+
+            'new_messeges' => ChatRepository::checkForUnreadedMessages(),
 
             'public_url' => asset('storage'),
 

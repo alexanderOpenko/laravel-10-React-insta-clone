@@ -4,7 +4,7 @@ import Modal from "@/Components/Modal";
 import Avatar from "@/Components/Avatar";
 import Unfollow from "./Unfollow";
 import Follow from "./Follow";
-import { AuthContext } from "./Show";
+import { AuthContext } from "./Profile";
 import { UseInfiniteScroll } from "@/infinitePaginationHook";
 
 const appURL = import.meta.env.VITE_APP_URL;
@@ -16,11 +16,8 @@ export default function Followers({ followers_count, following_count, user_id })
     const [nextPageUrl, setNextPageUrl] = useState('')
 
     async function followersRequest (url) {
-        console.log();
         const resp = await fetch(url)
         const json = await resp.json()
-
-        console.log(json);
 
         setFollowersList([...followersList, ...json.data])
         setNextPageUrl(json.next_page_url)
@@ -31,7 +28,6 @@ export default function Followers({ followers_count, following_count, user_id })
         setFollowersList([])
         setIsOpenFollowersList(false)
     }
-
     return (
         <div>
             <div className="flex space-x-6">
@@ -60,12 +56,22 @@ export default function Followers({ followers_count, following_count, user_id })
                                     <Avatar size='sm' user={el.user} divClassName="mr-4" />
 
                                     {el.user.name}
+                                    {el.user.id}
                                 </div>
 
                                 {
-                                    el.authUserFollowed ? <Unfollow user={auth.user.id} follower={el.user.id} />
+                                    el.authUserFollowed ? <Unfollow 
+                                    user={auth.user.id} 
+                                    follower={el.user.id}
+                                    setFollowersList={setFollowersList}
+                                    />
                                         :
-                                        <Follow user={auth.user && auth.user.id} following_id={el.user.id} />
+                                        <Follow 
+                                        user={auth.user && auth.user.id}
+                                         following_id={el.user.id} 
+                                         setFollowersList={setFollowersList}
+
+                                         />
                                 }
                             </div>
                         })}

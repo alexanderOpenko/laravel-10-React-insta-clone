@@ -15,7 +15,7 @@ trait LoadFollowRelations
             $follower['authUserFollowed'] = false;
 
             if (Follower::where('user_id', Auth::id())
-                ->where('follower_id', $follower['user_id'])->exists()
+                ->where('follower_id', $follower[$followerOrFollowing])->exists()
             ) {
                 $follower['authUserFollowed'] = true;
             }

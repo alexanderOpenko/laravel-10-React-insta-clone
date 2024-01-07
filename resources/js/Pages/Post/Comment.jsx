@@ -1,7 +1,7 @@
 import Modal from "@/Components/Modal"
 import { useForm } from "@inertiajs/react"
 import { useContext, useEffect, useRef, useState } from "react"
-import { AuthContext } from "../Profile/Show"
+import { AuthContext } from "../Profile/Profile"
 import TransparentButton from "@/Components/TransparentButton"
 import Avatar from "@/Components/Avatar"
 
