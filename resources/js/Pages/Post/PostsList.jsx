@@ -3,16 +3,10 @@ import { useState, useEffect, useRef } from "react"
 import ShowPostModal from '../Post/Show';
 import { UseInfiniteScroll } from "@/infinitePaginationHook";
 
-export default function PostsList({ posts, userPostsRequest, nextPageUrl }) {
+export default function PostsList({ posts, postsRequest, nextPageUrl, grid = 'default' }) {
     const { public_url } = usePage().props
     const [post, setPost] = useState([])
     const [isOpenPost, setIsOpenPost] = useState(false)
-
-    useEffect(() => {
-        if (post) {
-            setPost(posts.find((el) => post.id === el.id))
-        }
-    }, []);
 
     const showPost = (post) => {
         setPost(post)
@@ -23,7 +17,12 @@ export default function PostsList({ posts, userPostsRequest, nextPageUrl }) {
         setIsOpenPost(false);
     };
 
-    return <div className='user-posts gap-x-2 gap-y-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'>
+    const gridClasses = {
+        'default': 'gap-x-2 gap-y-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+        'home': 'gap-y-4 grid grid-cols-1'
+    }[grid]
+
+    return <div className={'user-posts ' + gridClasses}>
         {
             isOpenPost ?
                 <ShowPostModal
@@ -45,6 +44,6 @@ export default function PostsList({ posts, userPostsRequest, nextPageUrl }) {
             })
         }
 
-        <UseInfiniteScroll request={userPostsRequest} nextPageUrl={nextPageUrl} />
+        <UseInfiniteScroll request={postsRequest} nextPageUrl={nextPageUrl} />
     </div>
 }

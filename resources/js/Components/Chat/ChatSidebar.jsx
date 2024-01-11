@@ -11,7 +11,7 @@ export default function ChatSidebar({ recentMessages, receiverId, auth_id }) {
                     className="flex px-5 py-3 transition hover:cursor-pointer hover:bg-slate-100"
                 >
                     <div className="pr-4">
-                        {el.user.avatar && <Avatar user={el.user} size="sm"/>}
+                        <Avatar user={el.user} size="sm"/>
                     </div>
 
                     <div className="w-full">

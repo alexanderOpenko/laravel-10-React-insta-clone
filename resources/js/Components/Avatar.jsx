@@ -5,7 +5,8 @@ export default function Avatar({ divClassName = '', imgClassName = '', size, use
 
     const sizeClass = {
         lg: 'avatar-lg',
-        sm: 'avatar-sm'
+        sm: 'avatar-sm',
+        xsm: 'avatar-xsm'
     }[size]
 
     const imgSrc = user.avatar ? public_url + '/' + user.avatar.avatar 

@@ -7,6 +7,7 @@ use App\Models\PostComment;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
 
 class PostCommentController extends Controller
 {
@@ -41,12 +42,13 @@ class PostCommentController extends Controller
     
         $user = User::find($request->user()->id);
     
-        // Создаем комментарий и связываем его с постом и пользователем
         $comment = $post->postComments()->create([
             'comment' => $validated['comment'],
         ]);
     
-        $user->postComments()->save($comment);    
+        $user->postComments()->save($comment);   
+
+        return $comment;
     }
 
     /**

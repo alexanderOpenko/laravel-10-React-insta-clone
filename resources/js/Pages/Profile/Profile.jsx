@@ -12,11 +12,11 @@ export const AuthContext = createContext(null);
 const appURL = import.meta.env.VITE_APP_URL;
 
 export default function Profile({ auth, user }) {
+    console.log(user, 'user');
     const [showPostCreateForm, setShowPostCreateForm] = useState(false)
     const [posts, setPosts] = useState([])
     const [totalPosts, setTotalPosts] = useState(0)
     const [nextPageUrl, setNextPageUrl] = useState('')
-    const [stale, setStale] = useState('')
 
     const userPostsRequest = async (url) => {
         const resp = await fetch(url)
@@ -33,11 +33,12 @@ export default function Profile({ auth, user }) {
 
     const openPostCreateForm = () => {
         setShowPostCreateForm(true);
-    };
+    }
 
     const closePostCreateForm = () => {
         setShowPostCreateForm(false);
-    };
+    }
+
     return (
         <AuthContext.Provider value={auth}>
             <AuthenticatedLayout
@@ -46,22 +47,22 @@ export default function Profile({ auth, user }) {
                 header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Profile</h2>}
             >
                 <Head title="Profile" />
-                <Link href={route('profile.show', 3)}>3</Link>
+
                 <Content>
                     <ProfileInfo totalPosts={totalPosts} user={user} auth={auth} />
 
-                    <div>
+                    {auth.user.id === user.id && <div>
                         <PrimaryButton onClick={openPostCreateForm} className='my-6'>
                             Add Post 
                         </PrimaryButton>
 
                         {showPostCreateForm ? <CreatePost user={user} show={showPostCreateForm} onClose={closePostCreateForm} /> : null}
-                    </div>
+                    </div>}
 
                     {
                         !!posts &&
                         <PostsList
-                            userPostsRequest={userPostsRequest}
+                            postsRequest={userPostsRequest}
                             nextPageUrl={nextPageUrl}
                             posts={posts}
                         />

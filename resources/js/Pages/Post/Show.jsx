@@ -1,31 +1,11 @@
-import InputError from "@/Components/InputError";
 import Modal from "@/Components/Modal";
-import PrimaryButton from "@/Components/PrimaryButton";
-import TextInput from "@/Components/TextInput";
-import { useForm, usePage } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
 import Comments from "./Comment";
-import { Comment } from "./Comment";
 import Avatar from "@/Components/Avatar";
 
 export default function ShowPostModal(props) {
     const { post } = props
     const { public_url } = usePage().props
-    const {
-        data,
-        setData,
-        post: create,
-        processing,
-        reset,
-        errors,
-    } = useForm({
-        comment: '',
-    });
-
-    const submitComment = (e) => {
-        e.preventDefault();
-
-        create(route('posts.comments.store', props.post.id))
-    }
 
     return <Modal {...props}>
         <div className="flex">
@@ -60,33 +40,10 @@ export default function ShowPostModal(props) {
                             </div>
                         </div>
                     }
-
-                    {
-                        !!post.post_comments &&
-                        <div className="post-comments">
-                            <Comments comments={post.post_comments} />
-                        </div>
-                    }
-
-                    <div className="post_comments_form">
-                        <form onSubmit={submitComment}>
-                            <div>
-                                <TextInput
-                                    type='text'
-                                    name='comment'
-                                    value={data.comment}
-                                    onChange={(e) => { setData('comment', e.target.value) }}
-                                    placeholder="Add a comment"
-                                />
-
-                                <InputError message={errors.comment} className="mt-2" />
-                            </div>
-
-                            <PrimaryButton className="ms-3" disabled={processing}>
-                                Post
-                            </PrimaryButton>
-                        </form>
-                    </div>
+                 
+                    <div className="post-comments">
+                        <Comments postId={post.id} />
+                    </div>     
                 </div>
             </div>
         </div>

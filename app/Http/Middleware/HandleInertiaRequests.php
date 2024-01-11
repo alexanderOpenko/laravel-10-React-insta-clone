@@ -41,7 +41,7 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $request->user()?->load('avatar'),
                 'guest' => fn() => Auth::id() != $request->route('id'),
                 'following' => fn() => $this->checkForFollowing(Auth::id(), $request->route('id'))
             ],

@@ -1,9 +1,7 @@
 // useInfiniteScroll.js
 import { useRef, useEffect } from "react";
 
-export const UseInfiniteScroll = (props) => {
-    const { request, nextPageUrl } = props
-    const children  = props.children
+export const UseInfiniteScroll = ({ request, nextPageUrl, children }) => {
     let usedUrls = [] 
     const scrollRef = useRef(null)
     
@@ -15,6 +13,7 @@ export const UseInfiniteScroll = (props) => {
             const clientHeight = children ? target.clientHeight : window.innerHeight;
 
             if (scrollTop + clientHeight >= scrollHeight - 50 && !usedUrls.includes(nextPageUrl)) {
+                console.log('tut');
                 if (nextPageUrl) {
                     console.log(nextPageUrl, 'nextPageUrll');
                     request(nextPageUrl);

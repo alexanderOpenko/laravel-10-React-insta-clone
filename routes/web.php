@@ -6,10 +6,12 @@ use App\Http\Controllers\FollowerController;
 use App\Http\Controllers\PostCommentController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
-use App\Models\Follower;
+use App\Models\Post;
+use App\Models\PostComment;
 use App\Models\User;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -33,8 +35,38 @@ Route::get('/', function () {
     ]);
 })->middleware(['auth', 'verified']);
 
+Route::get('/home-posts', function() {
+    DB::statement("SET SESSION sql_mode=''");
+
+    $user = User::find(Auth::id());
+    $posts = $user->following()
+    ->join('posts', 'posts.user_id', '=', 'followers.follower_id')
+    ->orderBy('posts.id', 'desc')
+    ->paginate(3);
+    $postCollection = $posts->getCollection();
+    
+    foreach($postCollection as $key => $post)
+    {
+        $postCollection[$key] = Post::find($post['id'])
+        ->load(['images', 'user.avatar']);
+    }
+
+    $posts = $posts->toArray();
+    $posts['data'] = $postCollection;
+
+    return $posts;
+});
+
+Route::get('/post-comments/{id}', function (string $id) {
+    $comments = PostComment::where('post_id', $id)
+    ->with('user.avatar')
+    ->paginate(9);
+
+    return $comments;
+});
+
 Route::get('/home', function () {
-    return Inertia::render('Dashboard');
+    return Inertia::render('Home');
 })->middleware(['auth', 'verified'])->name('home');
 
 Route::get('/profile/{id}', [ProfileController::class, 'show'])->name('profile.show');
@@ -66,6 +98,7 @@ Route::group(['prefix' => 'chat', 'as' => 'chat.'], function() {
     Route::get('/lastChat/{receiverId}', [ChatController::class, 'getLastChat'])->name('getLastChat');
     Route::post('/{receiverId?}', [ChatController::class, 'store'])->name('store');
 });
+
 Route::get('/chatList', [ChatController::class, 'getChatList'])->name('getChatList');
 });
  

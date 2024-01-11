@@ -15,32 +15,33 @@ class FollowSeeder extends Seeder
     {
         $users = User::all();
 
-        // foreach ($users as $user) {
-        //     $usersToFollow = $users->random(rand(1, 5));
+        foreach ($users as $user) {
+            $usersToFollow = $users->random(rand(1, 50));
 
-        //     foreach ($usersToFollow as $toFollow) {
-        //         if ($toFollow->id !== $user->id) {
-        //             \App\Models\Follower::create([
-        //                 'user_id' => $user->id,
-        //                 'follower_id' => $toFollow->id
-        //             ]);
-        //         }
-        //     }
-        // }
-        $usersToFollow = $users->random(rand(1, 50));
-
-        foreach ($usersToFollow as $toFollow) {
-                    if ($toFollow->id !== 5) {
-                        \App\Models\Follower::create([
-                            'user_id' => 5,
-                            'follower_id' => $toFollow->id
-                        ]);
-
-                        \App\Models\Follower::create([
-                            'user_id' => $toFollow->id,
-                            'follower_id' => 5
-                        ]);
-                    }
+            foreach ($usersToFollow as $toFollow) {
+                if ($toFollow->id !== $user->id) {
+                    \App\Models\Follower::create([
+                        'user_id' => $user->id,
+                        'follower_id' => $toFollow->id
+                    ]);
                 }
+            }
+        }
+
+        // $usersToFollow = $users->random(rand(1, 50));
+
+        // foreach ($usersToFollow as $toFollow) {
+        //             if ($toFollow->id !== 5) {
+        //                 \App\Models\Follower::create([
+        //                     'user_id' => 5,
+        //                     'follower_id' => $toFollow->id
+        //                 ]);
+
+        //                 \App\Models\Follower::create([
+        //                     'user_id' => $toFollow->id,
+        //                     'follower_id' => 5
+        //                 ]);
+        //             }
+        //         }
     }
 }

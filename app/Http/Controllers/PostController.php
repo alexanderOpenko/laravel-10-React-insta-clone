@@ -9,7 +9,8 @@ use Inertia\Inertia;
 
 class PostController extends Controller
 {
-    public function __construct() {
+    public function __construct()
+    {
         $this->middleware('auth')->only('store');
     }
     /**
@@ -18,9 +19,10 @@ class PostController extends Controller
     public function index(User $user)
     {
         $posts = $user->posts()
-                       ->with('postComments.user.avatar', 'images', 'user.avatar')
-                       ->paginate(6);
-    
+            ->orderByDesc('id')
+            ->with('images', 'user.avatar')
+            ->paginate(6);
+
         return $posts;
     }
 
@@ -29,7 +31,6 @@ class PostController extends Controller
      */
     public function create(User $user)
     {
-       
     }
 
     /**

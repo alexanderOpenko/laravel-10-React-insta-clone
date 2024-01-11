@@ -8,3 +8,6 @@ export function strPlural(string, n) {
     const suffix = suffixes.get(rule);
     return `${n} ${suffix}`;
 }
+
+export const appURL = import.meta.env.VITE_APP_URL;
+

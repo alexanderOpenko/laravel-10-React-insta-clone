@@ -1,11 +1,12 @@
 import './bootstrap';
 import '../css/app.css';
 
-import { createInertiaApp } from '@inertiajs/react'
-import { hydrateRoot } from 'react-dom/client'
+import { createInertiaApp, router } from '@inertiajs/react'
+import { createRoot, hydrateRoot } from 'react-dom/client'
 
 window.addEventListener('popstate', (event) => {
-    window.location.reload()
+    event.stopImmediatePropagation()
+    router.reload()
 });
 
 createInertiaApp({
@@ -14,8 +15,10 @@ createInertiaApp({
         return pages[`./Pages/${name}.jsx`]
     },
     setup({ el, App, props }) {
+        // createRoot(el).render(<App {...props} />)
         hydrateRoot(el, <App {...props} />)
     },
 })
 
+        //ssr command "build": "vite build && vite build --ssr"
 

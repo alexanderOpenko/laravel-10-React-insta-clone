@@ -15,35 +15,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(1000)->create();
+        User::factory(100)->create();
 
         $this->call(FollowSeeder::class);
-        // \App\Models\User::factory(10)->create()->each(function ($user) {
 
-        //     \App\Models\Post::factory()->count(9)
-        //         ->for($user)
-        //         ->create();
-        // });
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
-
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User1',
-        //     'email' => 'test@example1.com',
-        // ]);
-
-        // for($i = 0; $i < 100; $i++) {
-        //     \App\Models\PostImage::create([
-
-        //     ])
-        // }
-
-        // $user = User::find(5);
-
-        // Post::factory(100)->for($user)->create()->each(function($post) {
-        //     \App\Models\PostImage::factory()->for($post)->create();
-        // });
-    }
+        User::all()->each(function ($user) {
+            Post::factory(100)->for($user)->create()->each(function($post) {
+                \App\Models\PostImage::factory()->for($post)->create();
+            });
+        });
+    }   
 }
