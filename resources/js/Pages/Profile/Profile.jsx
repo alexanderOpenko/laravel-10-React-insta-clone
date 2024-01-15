@@ -12,7 +12,6 @@ export const AuthContext = createContext(null);
 const appURL = import.meta.env.VITE_APP_URL;
 
 export default function Profile({ auth, user }) {
-    console.log(user, 'user');
     const [showPostCreateForm, setShowPostCreateForm] = useState(false)
     const [posts, setPosts] = useState([])
     const [totalPosts, setTotalPosts] = useState(0)

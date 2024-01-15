@@ -3,6 +3,7 @@ import ChatMessages from "@/Components/Chat/ChatMessages";
 import ChatSidebar from "@/Components/Chat/ChatSidebar";
 import ChatUserInfoHeader from "@/Components/Chat/ChatUserInfoHeader";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import { appURL } from "@/services";
 import { useEffect, useState } from "react";
 
 export default function Chat(props) {
@@ -10,7 +11,7 @@ export default function Chat(props) {
     const [chats, setChats] = useState([])
 
     const getLastChat = async (userId = receiver.id) => {
-        const resp = await fetch(`http://127.0.0.1:8000/chat/lastChat/${userId}`)
+        const resp = await fetch(`${appURL}/chat/lastChat/${userId}`)
 
         const json = await resp.json()
 
@@ -22,7 +23,7 @@ export default function Chat(props) {
     }
 
     const getUpdatedChats = async () => {
-        const resp = await fetch(`http://127.0.0.1:8000/chatList`)
+        const resp = await fetch(`${appURL}/chatList`)
         const json = await resp.json()
         setChats(json)
     }

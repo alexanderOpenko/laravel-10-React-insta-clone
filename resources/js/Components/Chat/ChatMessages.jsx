@@ -1,8 +1,9 @@
+import { appURL } from "@/services";
 import { Fragment, useState, useEffect, useRef } from "react";
 
 export default function ChatMessages({ receiver, messages: data, auth_id }) {
     const chatContainerRef = useRef(null);
-
+    
     const [messages, setMessages] = useState(data)
     const [readedMesages, setReadedMessages] = useState(false)
 
@@ -14,7 +15,7 @@ export default function ChatMessages({ receiver, messages: data, auth_id }) {
         if (!receiver) {
             return
         }
-        const resp = await fetch(`http://127.0.0.1:8000/chat/lastMessage/${receiver.id}`)
+        const resp = await fetch(`${appURL}/chat/lastMessage/${receiver.id}`)
         const json = await resp.json()
 
         if (json.sender_id === auth_id) {
