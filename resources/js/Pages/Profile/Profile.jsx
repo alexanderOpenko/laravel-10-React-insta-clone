@@ -12,6 +12,7 @@ export const AuthContext = createContext(null);
 const appURL = import.meta.env.VITE_APP_URL;
 
 export default function Profile({ auth, user }) {
+    console.log(auth, user, 'auth, user');
     const [showPostCreateForm, setShowPostCreateForm] = useState(false)
     const [posts, setPosts] = useState([])
     const [totalPosts, setTotalPosts] = useState(0)
@@ -50,13 +51,15 @@ export default function Profile({ auth, user }) {
                 <Content>
                     <ProfileInfo totalPosts={totalPosts} user={user} auth={auth} />
 
-                    {auth.user.id === user.id && <div>
+                    {
+                    auth.user?.id == user?.id && <div>
                         <PrimaryButton onClick={openPostCreateForm} className='my-6'>
                             Add Post 
                         </PrimaryButton>
 
                         {showPostCreateForm ? <CreatePost user={user} show={showPostCreateForm} onClose={closePostCreateForm} /> : null}
-                    </div>}
+                    </div>
+                    }
 
                     {
                         !!posts &&

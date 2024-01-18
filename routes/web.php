@@ -27,13 +27,8 @@ use Inertia\Inertia;
 */
 
 Route::get('/', function () {
-    return Inertia::render('Dashboard', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-})->middleware(['auth', 'verified']);
+    return redirect()->route('profile.show', ['id' => 1]);
+})->name('mainUser');
 
 Route::get('/home-posts', function() {
     DB::statement("SET SESSION sql_mode=''");

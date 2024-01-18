@@ -35,7 +35,7 @@ export default function ProfileInfo({user, auth, totalPosts }) {
                     }
 
                     {
-                        auth.user.id !== user.id && <PrimaryButton>
+                        auth.user?.id !== user.id && <PrimaryButton>
                             <Link href={route('chat.index', user.id)}>
                                 Message
                             </Link>
