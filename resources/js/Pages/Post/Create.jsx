@@ -3,10 +3,14 @@ import InputLabel from "@/Components/InputLabel";
 import Modal from "@/Components/Modal"
 import PrimaryButton from "@/Components/PrimaryButton";
 import SecondaryButton from "@/Components/SecondaryButton";
+import TextArea from "@/Components/TextArea";
 import TextInput from "@/Components/TextInput";
-import { useForm, useRemember } from "@inertiajs/react";
+import { router, useForm, useRemember } from "@inertiajs/react";
+import { useRef, useState } from "react";
 
 export default function CreatePost(props) {
+    const addImageInput = useRef(null)
+    const [previewImage, setPreviewImage] = useState('')
     const [formState, setFormState] = useRemember({
         message: null,
     })
@@ -26,46 +30,96 @@ export default function CreatePost(props) {
     const submit = (e) => {
         e.preventDefault();
 
-        post(route('users.posts.store', props.user.id))
+        post(route('users.posts.store', props.user.id), {
+            onSuccess: () => {
+                router.visit('/profile/1')
+            }
+        })
+    }
+
+    const handleImageChange = (e) => {
+        const imgage = URL.createObjectURL(e.target.files[0])
+
+        setData('images', e.target.files[0])
+        setPreviewImage(imgage)
+    }
+
+    const handleAddingPostImage = () => {
+        addImageInput.current.click()
+    }
+
+    const handleDeletingPostImage = () => {
+        setData('images', '')
+        setPreviewImage('')
     }
 
     return (
         <Modal {...props} >
-            <form onSubmit={submit}>
-                <InputLabel htmlFor="message" value="Message" className="sr-only" />
+            <form onSubmit={submit} className="p-5">
+                <div className="mb-6">
+                    <InputLabel htmlFor="message" value="Message" className="sr-only" />
 
-                <TextInput
-                    id="message"
-                    type="text"
-                    value={data.message || formState.message}
-                    name="message"
-                    onChange={(e) => { 
-                        setData('message', e.target.value)
-                        setFormState({'message': e.target.value})
-                    }}
-                    placeholder="message"
-                />
+                    <TextArea
+                        id="message"
+                        type="text"
+                        value={data.message || formState.message}
+                        name="message"
+                        onChange={(e) => {
+                            setData('message', e.target.value)
+                            setFormState({ 'message': e.target.value })
+                        }}
+                        className="w-full"
+                        placeholder="message"
+                    />
 
-                <InputLabel htmlFor="image-path" value="Message" className="sr-only" />
+                    <InputError message={errors.message} className="mt-2" />
+                </div>
 
-                <TextInput
-                    id="image_path"
-                    type="file"
-                    name="images"
-                    onChange={(e) => setData('images', e.target.files[0])}
-                    placeholder="Image"
-                />
-           
-                <InputError message={errors.message} className="mt-2" />
+                {previewImage &&
+                    <div className="mb-6">
+                        <img src={previewImage} />
+                    </div>
+                }
 
-                <div className="mt-6 flex justify-end">
+                <div className="mb-6">
+                    <InputLabel htmlFor="image-path" value="Message" className="sr-only" />
+
+                    {!previewImage &&
+                        <PrimaryButton type='button' onClick={handleAddingPostImage}>
+                            Add image
+                        </PrimaryButton>
+                    }
+
+                    {
+                        previewImage &&
+                        <PrimaryButton type='button' onClick={handleDeletingPostImage}>
+                            Delete image
+                        </PrimaryButton>
+                    }
+
+                    <TextInput
+                        id="image_path"
+                        type="file"
+                        hidden={true}
+                        name="images"
+                        onChange={(e) => handleImageChange(e)}
+                        placeholder="Image"
+                        ref={addImageInput}
+                    />
+
+                    {!previewImage &&
+                        <InputError message={errors.images} className="mt-2" />
+                    }
+                </div>
+
+                <div className="flex">
+                    <PrimaryButton className="mr-3" disabled={processing}>
+                        Create Post
+                    </PrimaryButton>
+
                     <SecondaryButton onClick={props.onClose}>
                         Cancel
                     </SecondaryButton>
-
-                    <PrimaryButton className="ms-3" disabled={processing}>
-                        Create Post
-                    </PrimaryButton>
                 </div>
             </form>
         </Modal>

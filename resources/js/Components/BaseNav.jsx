@@ -30,7 +30,7 @@ export default function BaseNav() {
             <MenuItem>
                 <i className="fa fa-home mr-3 autowidth" aria-hidden="true"></i>
 
-                <Link>
+                <Link href={route('home')}>
                     Home
                 </Link>
             </MenuItem>

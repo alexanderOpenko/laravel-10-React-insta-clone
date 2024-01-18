@@ -1,44 +1,16 @@
 import Modal from "@/Components/Modal"
-import { useForm, router, usePage } from "@inertiajs/react"
+import { useForm, usePage } from "@inertiajs/react"
 import { useState, useEffect } from "react"
 import TransparentButton from "@/Components/TransparentButton"
 import Avatar from "@/Components/Avatar"
 import { UseInfiniteScroll } from "@/infinitePaginationHook"
 import { appURL } from "@/services";
-import PrimaryButton from "@/Components/PrimaryButton";
-import TextInput from "@/Components/TextInput";
-import InputError from "@/Components/InputError";
-import axios from "axios"
+import CommentsForm from "@/Components/CommentsForm";
 
 export default function Comments({ postId }) {
     const { auth } = usePage().props
     const [comments, setComments] = useState([])
     const [nextPageUrl, setNextPageUrl] = useState('')
-
-    const {
-        data,
-        setData,
-        post: create,
-        processing,
-        reset,
-        errors,
-    } = useForm({
-        comment: '',
-    });
-
-    const submitComment = async (e) => {
-        e.preventDefault();
-
-        const resp = await axios.post(route('posts.comments.store', {
-            post: postId,
-            comment: data.comment
-        }))
-
-        const comment = resp.data
-        comment.user = auth.user
-        const commentArr = [comment]
-        setComments(prevComments => {return [...commentArr, ...prevComments]})
-    }
 
     const commentsRequest = async (url) => {
         const resp = await fetch(url)
@@ -49,7 +21,7 @@ export default function Comments({ postId }) {
             const uniqueComments = json.data.filter(newComment => {
                 return !prevComments.some(prevComment => prevComment.id === newComment.id);
             });
-    
+
             return [...prevComments, ...uniqueComments];
         });
     }
@@ -59,33 +31,19 @@ export default function Comments({ postId }) {
     }, [])
 
     return (
-        <div>
-            <UseInfiniteScroll request={commentsRequest} nextPageUrl={nextPageUrl}>
+        <>
+            <UseInfiniteScroll request={commentsRequest} nextPageUrl={nextPageUrl}
+                childrenClassNames="max-h-[55vh] pb-[40px]"
+            >
                 {comments.map((comment) => {
                     return <Comment key={comment.id} user={comment.user} comment={comment} auth={auth} />
                 })}
             </UseInfiniteScroll>
 
-            <div className="post_comments_form">
-                <form onSubmit={submitComment}>
-                    <div>
-                        <TextInput
-                            type='text'
-                            name='comment'
-                            value={data.comment}
-                            onChange={(e) => { setData('comment', e.target.value) }}
-                            placeholder="Add a comment"
-                        />
-
-                        <InputError message={errors.comment} className="mt-2" />
-                    </div>
-
-                    <PrimaryButton className="ms-3" disabled={processing}>
-                        Post
-                    </PrimaryButton>
-                </form>
+            <div className="absolute bottom-[14px] left-[14px] right-[15px]">
+                <CommentsForm postId={postId} auth={auth} setComments={setComments}/>
             </div>
-        </div>
+        </>
     )
 }
 
@@ -117,7 +75,7 @@ export function Comment({ user, comment, auth }) {
     };
 
     return (
-        <div className="mb-4">
+        <div className="mb-4 flex justify-between">
             <div className="flex">
                 <Avatar size="sm" user={user} />
 

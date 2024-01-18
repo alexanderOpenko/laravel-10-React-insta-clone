@@ -1,7 +1,7 @@
-import { forwardRef, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
-export default forwardRef(function TextInput({ type = 'text', className = '', isFocused = false, hidden = false, ...props }, ref) {
-    const input = ref ? ref : useRef();
+export default function TextArea({ type = 'text', className = '', isFocused = false, ...props }) {
+    const input = useRef(null);
 
     useEffect(() => {
         if (isFocused) {
@@ -10,8 +10,7 @@ export default forwardRef(function TextInput({ type = 'text', className = '', is
     }, []);
 
     return (
-        <input
-            style={{ display: hidden ? 'none' : 'block' }}
+        <textarea
             {...props}
             type={type}
             className={
@@ -21,4 +20,4 @@ export default forwardRef(function TextInput({ type = 'text', className = '', is
             ref={input}
         />
     );
-});
+};

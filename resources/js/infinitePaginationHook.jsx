@@ -1,17 +1,19 @@
 // useInfiniteScroll.js
 import { useRef, useEffect } from "react";
 
-export const UseInfiniteScroll = ({ request, nextPageUrl, children }) => {
+export const UseInfiniteScroll = ({ request, nextPageUrl, children, childrenClassNames = '' }) => {
     let usedUrls = [] 
     const scrollRef = useRef(null)
     
     useEffect(() => {
         const onScroll = () => {
+        console.log('scroll');
+
             const refTarget =  scrollRef.current;
             const scrollTop = Math.round(children ?  target.scrollTop : window.scrollY);
             const scrollHeight = children ? target.scrollHeight : document.body.scrollHeight;
             const clientHeight = children ? target.clientHeight : window.innerHeight;
-
+console.log(scrollTop, clientHeight, scrollHeight, 'fffff');
             if (scrollTop + clientHeight >= scrollHeight - 50 && !usedUrls.includes(nextPageUrl)) {
                 console.log('tut');
                 if (nextPageUrl) {
@@ -23,6 +25,7 @@ export const UseInfiniteScroll = ({ request, nextPageUrl, children }) => {
         };
 
         const target = children ? scrollRef.current : document;
+        console.log(target, 'target');
          target.addEventListener('scroll', onScroll);
         
         return () => {
@@ -31,8 +34,10 @@ export const UseInfiniteScroll = ({ request, nextPageUrl, children }) => {
     }, [nextPageUrl]);
 
     return (
-        <div ref={scrollRef} className="followers_list max-h-96 h-full overflow-y-auto">
+        <div ref={scrollRef} className={childrenClassNames + " scrollableChildren overflow-y-auto"}>
              {!!children && children}
         </div>
     )
 }
+
+

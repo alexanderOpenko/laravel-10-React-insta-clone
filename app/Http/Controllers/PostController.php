@@ -41,7 +41,8 @@ class PostController extends Controller
         $this->authorize('apply', $user);
 
         $validated = $request->validate([
-            'message' => 'string|required|min:3'
+            'message' => 'string|required|min:3',
+            'images' => 'required'
         ]);
 
         $image_path = $request->file('images')->store('image/' . $request->user()->id, 'public');
@@ -49,6 +50,8 @@ class PostController extends Controller
         $post = $user->posts()->create($validated);
 
         $post->images()->create(['image_path' => $image_path]);
+
+        return redirect()->back();
     }
 
     /**

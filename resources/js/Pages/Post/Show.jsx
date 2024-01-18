@@ -17,7 +17,7 @@ export default function ShowPostModal(props) {
                 </div>
             }
 
-            <div className="w-full max-w-md">
+            <div className="w-full max-w-md relative">
                 <div className="post-user border-b border-slate-100 border-solid p-4 flex items-center justify-between">
                     <div className="flex items-center">
                         <Avatar user={post.user} size="sm" divClassName="mr-4" />
@@ -29,21 +29,23 @@ export default function ShowPostModal(props) {
                     </div>
                 </div>
 
-                <div className="post-message p-4">
-                    {
-                        !!post.message &&
-                        <div className="flex mb-4">
-                            <Avatar size="sm" user={post.user} />
+                <div className="p-4">
+                    <div className="post-message">
+                        {
+                            !!post.message &&
+                            <div className="flex mb-4">
+                                <Avatar size="sm" user={post.user} />
 
-                            <div className="px-4 py-1">
-                                {post.user.name} {post.message}
+                                <div className="px-4 py-1">
+                                    {post.user.name} {post.message}
+                                </div>
                             </div>
-                        </div>
-                    }
-                 
-                    <div className="post-comments">
+                        }
+                    </div>
+
+                    <div className="post-comments w-full">
                         <Comments postId={post.id} />
-                    </div>     
+                    </div>
                 </div>
             </div>
         </div>

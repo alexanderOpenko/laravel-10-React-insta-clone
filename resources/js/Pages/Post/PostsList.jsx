@@ -29,7 +29,7 @@ export default function PostsList({ posts, postsRequest, nextPageUrl, grid = 'de
                     post={post}
                     show={isOpenPost}
                     onClose={closePost}
-                    maxWidth='7xl'
+                    maxWidth='6xl'
                 />
                 : null
         }

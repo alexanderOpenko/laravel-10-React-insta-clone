@@ -15,7 +15,7 @@ export default function Followers({ followers_count, following_count, user_id })
     const [isOpenFollowersList, setIsOpenFollowersList] = useState(false)
     const [nextPageUrl, setNextPageUrl] = useState('')
 
-    async function followersRequest (url) {
+    async function followersRequest(url) {
         const resp = await fetch(url)
         const json = await resp.json()
 
@@ -44,37 +44,39 @@ export default function Followers({ followers_count, following_count, user_id })
                 </div>
             </div>
 
-           {isOpenFollowersList && <Modal maxWidth="md" show={isOpenFollowersList} onClose={closeFollowersListModal}>
-                <UseInfiniteScroll request={followersRequest} nextPageUrl={nextPageUrl} >
-                        <div className="border-b text-center p-3 font-medium" onClick={closeFollowersListModal}>
-                            Followers
-                        </div>
+            {isOpenFollowersList && <Modal maxWidth="md" show={isOpenFollowersList} onClose={closeFollowersListModal}>
+                <UseInfiniteScroll request={followersRequest} nextPageUrl={nextPageUrl}
+                    childrenClassNames="followers_list max-h-96 h-full"
+                >
+                    <div className="border-b text-center p-3 font-medium" onClick={closeFollowersListModal}>
+                        Followers
+                    </div>
 
-                        {followersList.map((el) => {
-                            return <div className="flex items-center p-4 justify-between">
-                                <div className="flex items-center">
-                                    <Avatar size='sm' user={el.user} divClassName="mr-4" />
+                    {followersList.map((el) => {
+                        return <div className="flex items-center p-4 justify-between">
+                            <div className="flex items-center">
+                                <Avatar size='sm' user={el.user} divClassName="mr-4" />
 
-                                    {el.user.name}
-                                    {el.user.id}
-                                </div>
+                                {el.user.name}
+                                {el.user.id}
+                            </div>
 
-                                {
-                                    el.authUserFollowed ? <Unfollow 
-                                    user={auth.user.id} 
+                            {
+                                el.authUserFollowed ? <Unfollow
+                                    user={auth.user.id}
                                     follower={el.user.id}
                                     setFollowersList={setFollowersList}
-                                    />
-                                        :
-                                        <Follow 
+                                />
+                                    :
+                                    <Follow
                                         user={auth.user && auth.user.id}
-                                         following_id={el.user.id} 
-                                         setFollowersList={setFollowersList}
+                                        following_id={el.user.id}
+                                        setFollowersList={setFollowersList}
 
-                                         />
-                                }
-                            </div>
-                        })}
+                                    />
+                            }
+                        </div>
+                    })}
                 </UseInfiniteScroll>
             </Modal>}
         </div>
