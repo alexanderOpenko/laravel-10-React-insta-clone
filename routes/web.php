@@ -78,7 +78,7 @@ Route::resource('posts.comments', PostCommentController::class)->only(['store'])
 
 Route::resource('comments', PostCommentController::class)->only(['destroy', 'update']);
 
-Route::resource('users.avatar', AvatarController::class)->only(['store', 'update']);
+Route::resource('users.avatar', AvatarController::class)->only(['store', 'destroy']);
 
 Route::resource('users.followers', FollowerController::class)->only(['store', 'destroy']);;
 

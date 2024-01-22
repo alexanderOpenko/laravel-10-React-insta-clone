@@ -1,7 +1,8 @@
 import Avatar from "@/Components/Avatar";
-import InputError from "@/Components/InputError";
 import Modal from "@/Components/Modal";
+import PreviewImageOnUploading from "@/Components/PreviewImageOnUploading";
 import PrimaryButton from "@/Components/PrimaryButton";
+import SecondaryButton from "@/Components/SecondaryButton";
 import { useForm,usePage } from "@inertiajs/react";
 import { useState } from "react";
 
@@ -24,13 +25,31 @@ export default function ProfileAvatar({ user }) {
         reset,
         errors
     } = useForm({
-        avatar: ''
+        avatar: null
     })
+
+    const {
+        delete: destroy
+    } = useForm()
 
     const avatarSubmit = (e) => {
         e.preventDefault()
 
-        post(route('users.avatar.store', user.id))
+        post(route('users.avatar.store', user.id), {
+            onSuccess: () => {
+                closeAvatarForm()
+            }
+        })
+    }
+
+    const deleteSubmit = (e) => {
+        e.preventDefault()
+
+        destroy(route('users.avatar.destroy', {'user': user, 'avatar': user.avatar}), {
+            onSuccess: () => {
+                closeAvatarForm()
+            }
+        })
     }
 
     return (
@@ -40,19 +59,33 @@ export default function ProfileAvatar({ user }) {
             </div>
 
             <Modal show={open} onClose={closeAvatarForm}>
-                <form onSubmit={avatarSubmit} className="mt-6 space-y-6">
-                    <input
-                        type="file"
-                        name="avatar"
-                        placeholder="avatar"
-                        onChange={(e) => setData('avatar', e.target.files[0])}
+                {
+                    user.avatar && <div>
+                        <form onSubmit={deleteSubmit}>
+                            <PrimaryButton>
+                                Delete profile image 
+                            </PrimaryButton>
+                        </form>
+                    </div>
+                }
+
+                <form onSubmit={avatarSubmit} className="space-y-6 p-5">
+                    <PreviewImageOnUploading 
+                        setData={setData} 
+                        inputName="avatar" 
+                        errors={errors}
+                        buttonLabel={user.avatar ? 'Change image' : 'Add image'}
                     />
 
-                    <InputError message={errors.avatar} className="mt-2"/>
+                    <div className="flex">
+                        <PrimaryButton disabled={processing} className="!mr-3">
+                            Save
+                        </PrimaryButton>
 
-                    <PrimaryButton>
-                        Save
-                    </PrimaryButton>
+                        <SecondaryButton onClick={closeAvatarForm}>
+                            Cancel
+                        </SecondaryButton>
+                    </div>
                 </form>
             </Modal>
         </div>
