@@ -5,7 +5,7 @@ import Avatar from "@/Components/Avatar";
 import Unfollow from "./Unfollow";
 import Follow from "./Follow";
 import { AuthContext } from "./Profile";
-import { UseInfiniteScroll } from "@/infinitePaginationHook";
+import UseInfiniteScroll from "@/infinitePaginationHook";
 
 const appURL = import.meta.env.VITE_APP_URL;
 
@@ -14,6 +14,8 @@ export default function Followers({ followers_count, following_count, user_id })
     const [followersList, setFollowersList] = useState([])
     const [isOpenFollowersList, setIsOpenFollowersList] = useState(false)
     const [nextPageUrl, setNextPageUrl] = useState('')
+
+    const scrollRef = useRef(null)
 
     async function followersRequest(url) {
         const resp = await fetch(url)
@@ -45,8 +47,11 @@ export default function Followers({ followers_count, following_count, user_id })
             </div>
 
             {isOpenFollowersList && <Modal maxWidth="md" show={isOpenFollowersList} onClose={closeFollowersListModal}>
-                <UseInfiniteScroll request={followersRequest} nextPageUrl={nextPageUrl}
+                <UseInfiniteScroll
+                    request={followersRequest}
+                    nextPageUrl={nextPageUrl}
                     childrenClassNames="followers_list max-h-96 h-full"
+                    ref={scrollRef}
                 >
                     <div className="border-b text-center p-3 font-medium" onClick={closeFollowersListModal}>
                         Followers

@@ -7,7 +7,7 @@ import { appURL } from "@/services";
 import { useEffect, useState } from "react";
 
 export default function Chat(props) {
-    const { auth, errors, recentMessages: chatsList, receiver, messages } = props;
+    const { auth, errors, recentMessages: chatsList, receiver } = props;
     const [chats, setChats] = useState([])
 
     const getLastChat = async (userId = receiver.id) => {
@@ -67,7 +67,6 @@ export default function Chat(props) {
                                         <div className="flex flex-col" style={{ maxHeight: 'calc(100vh - 180px)' }}>
                                             <ChatMessages
                                                 receiver={receiver}
-                                                messages={messages}
                                                 auth_id={auth?.user?.id}
                                             />
 

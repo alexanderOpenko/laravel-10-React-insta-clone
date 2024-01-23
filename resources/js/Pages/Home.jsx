@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 export default function Home({ auth }) {
     const [nextPageUrl, setNextPageUrl] = useState('')
     const [posts, setPosts] = useState([])
-    console.log(posts, 'posts');
+
     const postsRequest = async (url) => {
         const resp = await fetch(url)
         const json = await resp.json()

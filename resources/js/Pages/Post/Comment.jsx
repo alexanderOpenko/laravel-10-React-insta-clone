@@ -1,9 +1,9 @@
 import Modal from "@/Components/Modal"
 import { useForm, usePage } from "@inertiajs/react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import TransparentButton from "@/Components/TransparentButton"
 import Avatar from "@/Components/Avatar"
-import { UseInfiniteScroll } from "@/infinitePaginationHook"
+import UseInfiniteScroll from "@/infinitePaginationHook"
 import { appURL } from "@/services";
 import CommentsForm from "@/Components/CommentsForm";
 
@@ -11,6 +11,8 @@ export default function Comments({ postId }) {
     const { auth } = usePage().props
     const [comments, setComments] = useState([])
     const [nextPageUrl, setNextPageUrl] = useState('')
+
+    const scrollRef = useRef(null)
 
     const commentsRequest = async (url) => {
         const resp = await fetch(url)
@@ -34,6 +36,7 @@ export default function Comments({ postId }) {
         <>
             <UseInfiniteScroll request={commentsRequest} nextPageUrl={nextPageUrl}
                 childrenClassNames="max-h-[55vh] pb-[40px]"
+                ref={scrollRef}
             >
                 {comments.map((comment) => {
                     return <Comment key={comment.id} user={comment.user} comment={comment} auth={auth} />

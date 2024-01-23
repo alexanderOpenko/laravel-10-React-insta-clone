@@ -1,11 +1,16 @@
+import UseInfiniteScroll from "@/infinitePaginationHook"
 import { appURL } from "@/services";
 import { useState, useEffect, useRef } from "react";
 
-export default function ChatMessages({ receiver, messages: data, auth_id }) {
-    const chatContainerRef = useRef(null);
-
-    const [messages, setMessages] = useState(data)
+export default function ChatMessages({ receiver, auth_id }) {
+    const [messages, setMessages] = useState([])
     const [readedMesages, setReadedMessages] = useState(false)
+    const [currentPage, setCurrentPage] = useState(1)
+    const [nextPageUrl, setNextPageUrl] = useState('')
+    const [isLastPage, setIsLastPage] = useState('')
+
+    const initialMessagesLoaded = useRef(false);
+    const scrollRef = useRef(null)
 
     const isReceivedMessage = (message) => {
         return message.receiver_id === auth_id;
@@ -23,16 +28,39 @@ export default function ChatMessages({ receiver, messages: data, auth_id }) {
         }
 
         setMessages(prevMessages => [...prevMessages, json])
-        console.log(chatContainerRef.current.scrollHeight, 'scrollHeight');
+    }
+
+    const getChatMessages = async (url) => {
+        const resp = await fetch(url)
+        const json = await resp.json()
+
+        setNextPageUrl(json.next_page_url)
+        setCurrentPage(json.current_page)
+
+        if (json.last_page === json.current_page) {
+            setIsLastPage(true)
+        }
+
+        setMessages([...json.data.reverse(), ...messages])
     }
 
     useEffect(() => {
-        console.log('huyuk');
-        chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight 
+        if (initialMessagesLoaded.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+            initialMessagesLoaded.current = false
+        }
 
-    },[messages])
+        if (!isLastPage) {
+        scrollRef.current.scrollTop = (scrollRef.current.scrollHeight / currentPage) + scrollRef.current.scrollTop
+        }
+
+    }, [messages])
 
     useEffect(() => {
+        getChatMessages(`${appURL}/chat/messages/${receiver.id}`)
+
+        initialMessagesLoaded.current = true
+
         const sortedUserIds = [auth_id, receiver?.id].sort()
         const roomId = sortedUserIds.join('')
 
@@ -65,8 +93,14 @@ export default function ChatMessages({ receiver, messages: data, auth_id }) {
     }, [])
 
     return (
-        <div ref={chatContainerRef} className="overflow-y-auto px-4 w-full">
-            {(messages || []).map((message, index) => {
+        <UseInfiniteScroll
+            request={getChatMessages}
+            nextPageUrl={nextPageUrl}
+            childrenClassNames="px-4 w-full"
+            isReverseScroll={true}
+            ref={scrollRef}
+        >
+            {messages.map((message, index) => {
                 const isReceived = isReceivedMessage(message)
 
                 return <div key={index}>
@@ -113,6 +147,6 @@ export default function ChatMessages({ receiver, messages: data, auth_id }) {
                     </div>
                 </div>
             })}
-        </div>
+        </UseInfiniteScroll>
     );
 }

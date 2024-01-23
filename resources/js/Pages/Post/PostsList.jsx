@@ -1,7 +1,7 @@
 import { usePage } from "@inertiajs/react"
 import { useState, useEffect, useRef } from "react"
 import ShowPostModal from '../Post/Show';
-import { UseInfiniteScroll } from "@/infinitePaginationHook";
+import UseInfiniteScroll from "@/infinitePaginationHook";
 
 export default function PostsList({ posts, postsRequest, nextPageUrl, grid = 'default' }) {
     const { public_url } = usePage().props

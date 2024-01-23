@@ -92,9 +92,11 @@ Route::group(['prefix' => 'chat', 'as' => 'chat.'], function() {
     Route::get('/lastMessage/{receiverId}', [ChatController::class, 'lastMessage'])->name('lastMessage');
     Route::get('/lastChat/{receiverId}', [ChatController::class, 'getLastChat'])->name('getLastChat');
     Route::post('/{receiverId?}', [ChatController::class, 'store'])->name('store');
+    Route::get('/messages/{receiverId}', [ChatController::class, 'getChatMessages'])->name('messages');
 });
 
 Route::get('/chatList', [ChatController::class, 'getChatList'])->name('getChatList');
 });
+
  
 require __DIR__.'/auth.php';
