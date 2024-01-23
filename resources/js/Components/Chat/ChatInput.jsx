@@ -1,6 +1,6 @@
-import { router, useForm } from "@inertiajs/react";
+import { useForm } from "@inertiajs/react";
 import TextInput from "../TextInput";
-import InputError from "../InputError";
+import TransparentButton from "../TransparentButton";
 
 export default function ChatInput({ receiver, getLastChat }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -21,16 +21,19 @@ export default function ChatInput({ receiver, getLastChat }) {
     }
 
     return (
-        <div className="w-full bg-white pl-4">
-            <form onSubmit={submit}>
+        <div className="w-full bg-white pl-4 flex justify-center">
+            <form onSubmit={submit} className="flex max-w-[600px] w-full fixed bottom-0">
                 <TextInput
-                    className="h-16 w-full overflow-y-auto bg-white pt-3 font-light border-0 hover:border-0 focus:border-0 focus:ring-0 !shadow-none focus:!outline-none"
+                    className="h-16 w-full overflow-y-auto bg-white pt-3 font-light mr-3"
                     placeholder="Write a message"
                     name="message"
                     value={data.message}
                     onChange={onHandleChange}
-                ></TextInput>
+                />
 
+                <TransparentButton>
+                    <i class="fa fa-paper-plane fa-lg" aria-hidden="true"></i>
+                </TransparentButton>
             </form>
         </div>
     )

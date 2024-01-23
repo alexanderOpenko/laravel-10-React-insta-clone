@@ -25,8 +25,8 @@ console.log(scrollTop, clientHeight, scrollHeight, 'fffff');
         };
 
         const target = children ? scrollRef.current : document;
-        console.log(target, 'target');
-         target.addEventListener('scroll', onScroll);
+
+        target.addEventListener('scroll', onScroll);
         
         return () => {
             target.removeEventListener('scroll', onScroll);

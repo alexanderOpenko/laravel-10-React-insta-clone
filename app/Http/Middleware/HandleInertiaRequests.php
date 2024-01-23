@@ -45,6 +45,8 @@ class HandleInertiaRequests extends Middleware
                 'guest' => fn() => Auth::id() != $request->route('id'),
                 'following' => fn() => $this->checkForFollowing(Auth::id(), $request->route('id'))
             ],
+ 
+            'isChat' => $request->routeIs('chat.*'),
 
             'new_messeges' => ChatRepository::checkForUnreadedMessages(),
 

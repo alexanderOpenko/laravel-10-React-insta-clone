@@ -1,9 +1,9 @@
 import { appURL } from "@/services";
-import { Fragment, useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function ChatMessages({ receiver, messages: data, auth_id }) {
     const chatContainerRef = useRef(null);
-    
+
     const [messages, setMessages] = useState(data)
     const [readedMesages, setReadedMessages] = useState(false)
 
@@ -22,9 +22,15 @@ export default function ChatMessages({ receiver, messages: data, auth_id }) {
             setReadedMessages(false)
         }
 
-        setMessages(prevMessages => [...prevMessages, json]);
-        chatContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'end', inline: 'nearest' });
+        setMessages(prevMessages => [...prevMessages, json])
+        console.log(chatContainerRef.current.scrollHeight, 'scrollHeight');
     }
+
+    useEffect(() => {
+        console.log('huyuk');
+        chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight 
+
+    },[messages])
 
     useEffect(() => {
         const sortedUserIds = [auth_id, receiver?.id].sort()
@@ -59,11 +65,11 @@ export default function ChatMessages({ receiver, messages: data, auth_id }) {
     }, [])
 
     return (
-        <>
+        <div ref={chatContainerRef} className="overflow-y-auto px-4 w-full">
             {(messages || []).map((message, index) => {
                 const isReceived = isReceivedMessage(message)
 
-                return <Fragment key={index}>
+                return <div key={index}>
                     <div
                         className={`${isReceived
                             ? "receive-chat justify-start"
@@ -81,34 +87,32 @@ export default function ChatMessages({ receiver, messages: data, auth_id }) {
                                 }`}
                         >
                             <div className="flex items-center">
-                            <p className="mr-2">{message?.message}</p>
+                                <p className="mr-2">{message?.message}</p>
 
-                            {!isReceived &&
-                                (message.status ?
+                                {!isReceived &&
+                                    (message.status ?
 
-                                    <>
-                                        <i className="fa fa-check" aria-hidden="true"></i>
-                                        <i className="fa fa-check" aria-hidden="true"></i>
-                                    </> :
-                                    (!readedMesages && <i class="fa fa-check" aria-hidden="true"></i>)
-                                )
-                            }
+                                        <>
+                                            <i className="fa fa-check" aria-hidden="true"></i>
+                                            <i className="fa fa-check" aria-hidden="true"></i>
+                                        </> :
+                                        (!readedMesages && <i class="fa fa-check" aria-hidden="true"></i>)
+                                    )
+                                }
 
-                            {!isReceived &&
-                                (readedMesages && !message.status ?
-                                    <>
-                                        <i className="fa fa-check" aria-hidden="true"></i>
-                                        <i className="fa fa-check" aria-hidden="true"></i>
-                                    </> : ''
-                                )
-                            }
+                                {!isReceived &&
+                                    (readedMesages && !message.status ?
+                                        <>
+                                            <i className="fa fa-check" aria-hidden="true"></i>
+                                            <i className="fa fa-check" aria-hidden="true"></i>
+                                        </> : ''
+                                    )
+                                }
                             </div>
                         </div>
                     </div>
-                </Fragment>
+                </div>
             })}
-
-            <div ref={chatContainerRef}></div>
-        </>
+        </div>
     );
 }

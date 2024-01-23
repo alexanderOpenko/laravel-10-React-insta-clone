@@ -1,6 +1,6 @@
 import { useRef } from "react";
 
-export default function TransparentButton({ className = '', disableAutofocus = false, disabled, children, ...props }) {
+export default function TransparentButton({ className = '', disableAutofocus = true, disabled, children, ...props }) {
     const deleteButton = useRef(null)
 
     const removeFocus = () => {
@@ -11,7 +11,8 @@ export default function TransparentButton({ className = '', disableAutofocus = f
         <button
             {...props}
             className={
-                `bg-transparent font-semibold border-none ${
+                `bg-transparent font-semibold border-none hover:bg-slate-200 rounded-md px-3
+                ${
                     disabled && 'opacity-25'
                 } ` + className
             }

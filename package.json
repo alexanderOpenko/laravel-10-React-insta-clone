@@ -23,6 +23,7 @@
     "dependencies": {
         "@headlessui/react": "1.7",
         "@inertiajs/inertia-react": "^0.8.1",
+        "classnames": "^2.5.1",
         "dayjs": "^1.11.10",
         "ziggy-js": "^1.8.1"
     }

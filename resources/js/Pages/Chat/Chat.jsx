@@ -65,13 +65,11 @@ export default function Chat(props) {
                                     <ChatUserInfoHeader receiver={receiver} />
                                     <div className="messanger mt-4">
                                         <div className="flex flex-col" style={{ maxHeight: 'calc(100vh - 180px)' }}>
-                                            <div className="px-4 overflow-y-auto w-full">
-                                                <ChatMessages
-                                                    receiver={receiver}
-                                                    messages={messages}
-                                                    auth_id={auth?.user?.id}
-                                                />
-                                            </div>
+                                            <ChatMessages
+                                                receiver={receiver}
+                                                messages={messages}
+                                                auth_id={auth?.user?.id}
+                                            />
 
                                             <div>
                                                 <ChatInput receiver={receiver} getLastChat={getLastChat} />
