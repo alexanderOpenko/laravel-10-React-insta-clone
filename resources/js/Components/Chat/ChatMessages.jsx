@@ -96,7 +96,7 @@ export default function ChatMessages({ receiver, auth_id }) {
         <UseInfiniteScroll
             request={getChatMessages}
             nextPageUrl={nextPageUrl}
-            childrenClassNames="px-4 w-full"
+            childrenClassNames="pr-5 w-full"
             isReverseScroll={true}
             ref={scrollRef}
         >

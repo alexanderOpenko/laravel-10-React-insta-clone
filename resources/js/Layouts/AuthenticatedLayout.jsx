@@ -2,9 +2,18 @@ import ApplicationLogo from '@/Components/ApplicationLogo';
 import { Link } from '@inertiajs/react';
 import PrimaryButton from '@/Components/PrimaryButton';
 import BaseNav from '@/Components/BaseNav';
+import classNames from 'classnames';
+import { createContext } from 'react';
+
+export const AuthContext = createContext(null);
 
 export default function Authenticated({ user, auth, header, children }) {
+    const layoutClasses = classNames({
+        "flex": !!auth.user
+    })
+
     return (
+        <AuthContext.Provider value={auth}>
         <div className="min-h-screen">
             {!auth.user && (
                 <header className="bg-white shadow">
@@ -35,7 +44,7 @@ export default function Authenticated({ user, auth, header, children }) {
             )}
 
             <main>
-                <div className={!!auth.user && 'flex'}>
+                <div className={layoutClasses}>
                     {!!auth.user &&
                         <BaseNav />
                     }
@@ -46,5 +55,6 @@ export default function Authenticated({ user, auth, header, children }) {
                 </div>
             </main>
         </div>
+        </AuthContext.Provider >
     );
 }

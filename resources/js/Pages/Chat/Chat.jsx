@@ -4,11 +4,14 @@ import ChatSidebar from "@/Components/Chat/ChatSidebar";
 import ChatUserInfoHeader from "@/Components/Chat/ChatUserInfoHeader";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { appURL } from "@/services";
+import classNames from "classnames";
 import { useEffect, useState } from "react";
 
 export default function Chat(props) {
     const { auth, errors, recentMessages: chatsList, receiver } = props;
     const [chats, setChats] = useState([])
+    const [currentView, setCurrentView] = useState('showSidebar')
+    const [isMobileView, setIsMobileView] = useState(false)
 
     const getLastChat = async (userId = receiver.id) => {
         const resp = await fetch(`${appURL}/chat/lastChat/${userId}`)
@@ -28,6 +31,30 @@ export default function Chat(props) {
         setChats(json)
     }
 
+    const hideSidebar = () => {
+        setCurrentView('hideSidebar')
+    }
+
+    const showSidebar = () => {
+        setCurrentView('showSidebar')
+    }
+
+    useEffect(() => {
+        const windowWidth = window.innerWidth
+
+        if (windowWidth <= 768) {
+            setIsMobileView(true)
+
+            if (!receiver) {
+                showSidebar()
+            }
+
+            if (receiver) {
+                hideSidebar()
+            }
+        }
+    }, [receiver])
+
     useEffect(() => {
         setChats(chatsList)
 
@@ -46,45 +73,64 @@ export default function Chat(props) {
         }
     }, [chatsList])
 
+    const sidebarClasses = classNames({
+        "border-r border-slate-100 bg-white pt-3 overflow-y-auto h-[100vh]": true,
+        "hidden": currentView === 'hideSidebar' && isMobileView,
+        "w-full": currentView === 'showSidebar',
+        "basis-2/6": !isMobileView
+    })
+
+    const chatWindowClasses = classNames({
+        "relative p-4 w-full": true,
+        "basis-4/6": !isMobileView,
+        "hidden": currentView === 'showSidebar' && isMobileView,
+    })
+
     return (
         <AuthenticatedLayout auth={auth} errors={errors}>
-            <div className="">
-                <div className="messanger overflow-hidden p-4">
-                    <div className="flex">
-                        <div className="basis-2/6 border-r border-slate-100 bg-white pt-3">
-                            <ChatSidebar 
-                            recentMessages={chats} 
+            <div className="messanger overflow-hidden">
+                <div className="flex h-screen">
+                    <div className={sidebarClasses}>
+                        <ChatSidebar
+                            recentMessages={chats}
                             receiverId={receiver?.id}
-                            auth_id={auth.user.id} 
-                            />
-                        </div>
+                            auth_id={auth.user.id}
+                        />
+                    </div>
 
-                        <div className="basis-4/6">
-                            {receiver?.id ? (
-                                <>
+                    <div className={chatWindowClasses}>
+                        {receiver?.id ? (
+                            <>
+                                <div className="flex items-center">
+                                    {
+                                        isMobileView && <div className="mr-5 cursor-pointer" onClick={showSidebar}>
+                                            <i class="fa fa-arrow-left" aria-hidden="true"></i>
+                                        </div>
+                                    }
+
                                     <ChatUserInfoHeader receiver={receiver} />
-                                    <div className="messanger mt-4">
-                                        <div className="flex flex-col" style={{ maxHeight: 'calc(100vh - 180px)' }}>
-                                            <ChatMessages
-                                                receiver={receiver}
-                                                auth_id={auth?.user?.id}
-                                            />
+                                </div>
+                                <div className="messanger mt-4">
+                                    <div className="flex flex-col" style={{ maxHeight: 'calc(100vh - 180px)' }}>
+                                        <ChatMessages
+                                            receiver={receiver}
+                                            auth_id={auth?.user?.id}
+                                        />
 
-                                            <div>
-                                                <ChatInput receiver={receiver} getLastChat={getLastChat} />
-                                            </div>
+                                        <div>
+                                            <ChatInput receiver={receiver} getLastChat={getLastChat} />
                                         </div>
                                     </div>
-                                </>
-                            ) : (
-                                <div className="flex justify-center items-center bg-slate-100 h-screen">
-                                    <p className="font-bold text-3xl text-gray-500">
-                                        Please select a User to start
-                                        chatting...
-                                    </p>
                                 </div>
-                            )}
-                        </div>
+                            </>
+                        ) : (
+                            <div className="flex justify-center items-center bg-slate-100 h-screen">
+                                <p className="font-bold text-3xl text-gray-500">
+                                    Please select a User to start
+                                    chatting...
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

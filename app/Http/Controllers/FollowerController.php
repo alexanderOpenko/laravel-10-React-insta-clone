@@ -6,7 +6,6 @@ use App\Http\Traits\LoadFollowRelations;
 use App\Models\Follower;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class FollowerController extends Controller
 {

@@ -20,6 +20,11 @@ class User extends Authenticatable
         return $this->hasMany(Post::class);
     }
 
+    public function likes(): HasMany
+    {
+        return $this->hasMany(like::class, 'liker_id');
+    }
+
     public function postComments(): HasMany
     {
         return $this->hasMany(PostComment::class);

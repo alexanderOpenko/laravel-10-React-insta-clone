@@ -44,7 +44,7 @@ export default function Comments({ postId }) {
             </UseInfiniteScroll>
 
             <div className="absolute bottom-[14px] left-[14px] right-[15px]">
-                <CommentsForm postId={postId} auth={auth} setComments={setComments}/>
+                <CommentsForm postId={postId} auth={auth} setComments={setComments} />
             </div>
         </>
     )
@@ -83,9 +83,13 @@ export function Comment({ user, comment, auth }) {
                 <Avatar size="sm" user={user} />
 
                 <div className="px-4 py-1">
-                    <p>
-                        {user.name} {comment.comment}
-                    </p>
+                    <span className="font-bold text-sm mr-1">
+                        {user.name}
+                    </span>
+
+                    <span>
+                        {comment.comment}
+                    </span>
                 </div>
             </div>
 

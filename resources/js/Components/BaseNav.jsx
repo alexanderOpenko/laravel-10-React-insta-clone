@@ -12,7 +12,7 @@ const MenuItem = ({ children: icone, linkUrl, linkTitle }) => {
 
         {
             !isChat &&
-            <div>
+            <div className="hidden md:block">
                 {linkTitle}
             </div>
         }
@@ -32,55 +32,62 @@ export default function BaseNav() {
     }, [])
 
     const classes = classNames({
-        'w-full': !isChat,
+        "border-t px-6 w-full fixed bottom-0 bg-white md:relative md:max-w-16 md:py-8 md:border-t-0 md:border-r": true,
+        "w-full": !isChat,
     })
 
-    return <div className={`py-8 px-6 border-r max-w-16 h-dvh ${classes}`}>
+    const navClasses = classNames({
+        "w-full justify-between ml-10 flex md:flex-col md:ml-0": true
+    })
+
+    return <div className={classes}>
         <h1 className="sr-only">
             Chatter
         </h1>
 
-        <div className="flex text-2xl mb-7">
-            <div className="bg-slate-900 px-2 rounded-lg font-bold text-['28px'] text-white">
-                C
+        <div className="flex md:block">
+            <div className="flex items-center text-2xl md:mb-7">
+                <div className="bg-slate-900 px-2 rounded-lg font-bold text-['28px'] text-white">
+                    C
+                </div>
+
+                {
+                    !isChat &&
+                    <div className="font-semibold hidden md:block">
+                        hatter
+                    </div>
+                }
             </div>
 
-            {
-                !isChat &&
-                <div className="font-semibold">
-                    hatter
-                </div>
-            }
+            <nav className={navClasses}>
+                <MenuItem linkUrl={route('home')} linkTitle="Home">
+                    <i className="fa fa-home mr-3 autowidth" aria-hidden="true"></i>
+                </MenuItem>
+
+                <MenuItem linkUrl={route('home')} linkTitle="Users">
+                    <i className="fa fa-user mr-3 autowidth" aria-hidden="true"></i>
+                </MenuItem>
+
+                <MenuItem linkUrl={route('chat.index')} linkTitle="Messages">
+                    <div className="flex mr-3 relative">
+                        <i className="fa fa-inbox autowidth" aria-hidden="true"></i>
+
+                        {
+                            (newMessages && typeof window !== 'undefined' && !window.location.pathname.includes('/chat'))
+                            &&
+                            <div className="rounded-full h-[15px] w-[15px] bg-red-500 absolute top-[-6px] right-[-4px]"></div>
+                        }
+                    </div>
+                </MenuItem>
+
+                <MenuItem linkUrl={route('profile.show', auth.user.id)} linkTitle="Notifications">
+                    <i className="fa fa-bell mr-3 autowidth" aria-hidden="true"></i>
+                </MenuItem>
+
+                <MenuItem linkUrl={route('profile.show', auth.user.id)} linkTitle="Profile">
+                    <Avatar user={auth.user} size="xsm" divClassName="mr-3" />
+                </MenuItem>
+            </nav>
         </div>
-
-        <nav className="w-full h-full flex flex-col">
-            <MenuItem linkUrl={route('home')} linkTitle="Home">
-                <i className="fa fa-home mr-3 autowidth" aria-hidden="true"></i>
-            </MenuItem>
-
-            <MenuItem linkUrl={route('home')} linkTitle="Users">
-                <i className="fa fa-user mr-3 autowidth" aria-hidden="true"></i>
-            </MenuItem>
-
-            <MenuItem linkUrl={route('chat.index')} linkTitle="Messages">
-                <div className="flex mr-3 relative">
-                    <i className="fa fa-inbox autowidth" aria-hidden="true"></i>
-
-                    {
-                        (newMessages && typeof window !== 'undefined' && !window.location.pathname.includes('/chat'))
-                        &&
-                        <div className="rounded-full h-[15px] w-[15px] bg-red-500 absolute top-[-6px] right-[-4px]"></div>
-                    }
-                </div>
-            </MenuItem>
-
-            <MenuItem linkUrl={route('profile.show', auth.user.id)} linkTitle="Notifications">
-                <i className="fa fa-bell mr-3 autowidth" aria-hidden="true"></i>
-            </MenuItem>
-
-            <MenuItem linkUrl={route('profile.show', auth.user.id)} linkTitle="Profile">
-                <Avatar user={auth.user} size="xsm" divClassName="mr-3" />
-            </MenuItem>
-        </nav>
     </div>
 }

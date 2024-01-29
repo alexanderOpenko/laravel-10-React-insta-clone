@@ -3,13 +3,13 @@
 use App\Http\Controllers\AvatarController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\FollowerController;
+use App\Http\Controllers\LikeController;
 use App\Http\Controllers\PostCommentController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Models\Post;
 use App\Models\PostComment;
 use App\Models\User;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -30,20 +30,22 @@ Route::get('/', function () {
     return redirect()->route('profile.show', ['id' => 1]);
 })->name('mainUser');
 
-Route::get('/home-posts', function() {
+Route::get('/home-posts', function () {
     DB::statement("SET SESSION sql_mode=''");
 
     $user = User::find(Auth::id());
     $posts = $user->following()
-    ->join('posts', 'posts.user_id', '=', 'followers.follower_id')
-    ->orderBy('posts.id', 'desc')
-    ->paginate(3);
+        ->join('posts', 'posts.user_id', '=', 'followers.follower_id')
+        ->orderBy('posts.id', 'desc')
+        ->paginate(3);
     $postCollection = $posts->getCollection();
-    
-    foreach($postCollection as $key => $post)
-    {
+
+    foreach ($postCollection as $key => $post) {
         $postCollection[$key] = Post::find($post['id'])
-        ->load(['images', 'user.avatar']);
+            ->load(['images', 'user.avatar'])
+            ->load(['likes' => fn ($q) => $q->where('liker_id', Auth::id())])
+            ->loadCount('likes')
+            ->loadCount('postComments');
     }
 
     $posts = $posts->toArray();
@@ -54,8 +56,8 @@ Route::get('/home-posts', function() {
 
 Route::get('/post-comments/{id}', function (string $id) {
     $comments = PostComment::where('post_id', $id)
-    ->with('user.avatar')
-    ->paginate(9);
+        ->with('user.avatar')
+        ->paginate(9);
 
     return $comments;
 });
@@ -87,16 +89,21 @@ Route::get('followers/{user}', [FollowerController::class, 'followers']);
 Route::get('following/{user}', [FollowerController::class, 'following']);
 
 Route::middleware('auth')->group(function () {
-Route::group(['prefix' => 'chat', 'as' => 'chat.'], function() {
-    Route::get('/{receiverId?}', [ChatController::class, 'index'])->name('index');
-    Route::get('/lastMessage/{receiverId}', [ChatController::class, 'lastMessage'])->name('lastMessage');
-    Route::get('/lastChat/{receiverId}', [ChatController::class, 'getLastChat'])->name('getLastChat');
-    Route::post('/{receiverId?}', [ChatController::class, 'store'])->name('store');
-    Route::get('/messages/{receiverId}', [ChatController::class, 'getChatMessages'])->name('messages');
+    Route::group(['prefix' => 'chat', 'as' => 'chat.'], function () {
+        Route::get('/{receiverId?}', [ChatController::class, 'index'])->name('index');
+        Route::get('/lastMessage/{receiverId}', [ChatController::class, 'lastMessage'])->name('lastMessage');
+        Route::get('/lastChat/{receiverId}', [ChatController::class, 'getLastChat'])->name('getLastChat');
+        Route::post('/{receiverId?}', [ChatController::class, 'store'])->name('store');
+        Route::get('/messages/{receiverId}', [ChatController::class, 'getChatMessages'])->name('messages');
+    });
+
+    Route::get('/chatList', [ChatController::class, 'getChatList'])->name('getChatList');
 });
 
-Route::get('/chatList', [ChatController::class, 'getChatList'])->name('getChatList');
+Route::group(['prefix' => 'like', 'as' => 'like.'], function () {
+    Route::post('/{post}', [LikeController::class, 'store'])->name('index');
+    Route::get('/likers/{post}', [LikeController::class, 'list'])->name('list');
 });
 
- 
-require __DIR__.'/auth.php';
+
+require __DIR__ . '/auth.php';

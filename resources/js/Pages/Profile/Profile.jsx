@@ -1,14 +1,12 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Content from '@/Components/Content';
 import CreatePost from '../Post/Create';
 import { useEffect, useState } from 'react';
-import { createContext } from 'react';
 import PostsList from '../Post/PostsList';
 import ProfileInfo from './ProfileInfo';
 import PrimaryButton from '@/Components/PrimaryButton';
 
-export const AuthContext = createContext(null);
 const appURL = import.meta.env.VITE_APP_URL;
 
 export default function Profile({ auth, user }) {
@@ -39,7 +37,6 @@ export default function Profile({ auth, user }) {
     }
 
     return (
-        <AuthContext.Provider value={auth}>
             <AuthenticatedLayout
                 auth={auth}
                 user={auth.user}
@@ -52,7 +49,7 @@ export default function Profile({ auth, user }) {
 
                     {
                     auth.user?.id == user?.id && <div>
-                        <PrimaryButton onClick={openPostCreateForm} className='my-6'>
+                        <PrimaryButton onClick={openPostCreateForm} className='mb-10'>
                             Add Post 
                         </PrimaryButton>
 
@@ -71,6 +68,5 @@ export default function Profile({ auth, user }) {
                 </Content>
 
             </AuthenticatedLayout>
-        </AuthContext.Provider >
     )
 }

@@ -16,15 +16,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(100)->create();
+        User::factory(100)->create();
 
-        // $this->call(FollowSeeder::class);
+        $this->call(FollowSeeder::class);
 
-        // User::all()->each(function ($user) {
-        //     Post::factory(100)->for($user)->create()->each(function($post) {
-        //         \App\Models\PostImage::factory()->for($post)->create();
-        //     });
-        // });
+        User::all()->each(function ($user) {
+            Post::factory(100)->for($user)->create()->each(function($post) {
+                \App\Models\PostImage::factory()->for($post)->create();
+            });
+        });
 
         for ($i = 0; $i <= 100; $i++)
         {

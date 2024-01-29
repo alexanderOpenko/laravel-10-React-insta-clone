@@ -11,7 +11,6 @@ export default forwardRef(function UseInfiniteScroll ({
     let usedUrls = []
     
     useEffect(() => {
-        console.log(nextPageUrl, 'nextPageUrl');
         const onScroll = () => {
             const scrollTop = Math.round(children ? target.scrollTop : window.scrollY)
             const scrollHeight = children ? target.scrollHeight : document.body.scrollHeight
