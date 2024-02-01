@@ -4,8 +4,7 @@ import Comments from "./Comment";
 import Avatar from "@/Components/Avatar";
 import PostHeader from "./PostHeader";
 
-export default function ShowPostModal(props) {
-    const { post } = props
+export default function ShowPostModal({ post, posts, ...props }) {
     const { public_url } = usePage().props
 
     return <Modal {...props}>
@@ -42,7 +41,7 @@ export default function ShowPostModal(props) {
                     </div>
 
                     <div className="post-comments w-full">
-                        <Comments postId={post.id} />
+                        <Comments post={post} posts={posts}/>
                     </div>
                 </div>
             </div>

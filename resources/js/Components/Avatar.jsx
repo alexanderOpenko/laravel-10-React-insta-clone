@@ -4,9 +4,9 @@ export default function Avatar({ divClassName = '', imgClassName = '', size, use
     const { public_url } = usePage().props
 
     const sizeClass = {
-        lg: 'avatar-lg',
-        sm: 'avatar-sm',
-        xsm: 'avatar-xsm'
+        lg: 'w-[77px] h-[77px] lg:w-[150px] lg:h-[150px]',
+        sm: 'w-[50px] h-[50px]',
+        xsm: 'w-[25px] h-[25px]'
     }[size]
 
     const imgSrc = user.avatar ? public_url + '/' + user.avatar.avatar 

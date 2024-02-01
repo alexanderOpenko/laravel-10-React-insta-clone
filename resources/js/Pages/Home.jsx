@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import PostsList from './Post/PostsList';
+import PostsList from '../Components/Post/PostsList';
 import { appURL } from '@/services';
 import { useState, useEffect } from 'react';
 

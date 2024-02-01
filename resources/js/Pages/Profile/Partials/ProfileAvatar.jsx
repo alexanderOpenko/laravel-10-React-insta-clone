@@ -53,7 +53,7 @@ export default function ProfileAvatar({ user }) {
     }
 
     return (
-        <div>
+        <div className='user-avatar mr-10 flex items-center'>
             <div onClick={openAvatarForm}>
                <Avatar user={user} size="lg"/>
             </div>

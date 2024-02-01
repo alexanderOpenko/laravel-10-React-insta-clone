@@ -2,21 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-.avatar-lg {
-    max-width: 200px;
-    max-height: 200px;
-}
-
-.avatar-sm {
-    max-width: 50px;
-    max-height: 50px;
-}
-
-.avatar-xsm {
-    max-width: 25px;
-    max-height: 25px;
-}
-
 .autowidth {
     font-size: 20px;
     font-weight: 900;

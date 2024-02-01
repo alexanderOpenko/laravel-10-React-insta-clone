@@ -2,21 +2,16 @@ import { Link, usePage } from "@inertiajs/react";
 import ProfileAvatar from "./Partials/ProfileAvatar";
 import dayjs from 'dayjs';
 import PrimaryButton from '@/Components/PrimaryButton';
-import { strPlural } from '@/services';
 import Unfollow from './Unfollow';
 import Follow from "./Follow";
-import LoadedUsersList from "./LoadedUsersList";
-import { useState } from "react";
-import FollowersInterface from "./FollowersInterface";
+import CounterPanel from "@/Components/Profile/CounterPanel";
 
 export default function ProfileInfo({ user, auth, totalPosts }) {
     const { public_url } = usePage().props
 
-    return <div className='profile-info mb-10'>
+    return <div className='profile-info mb-5 lg:mb-10'>
         <div className='flex'>
-            <div className='user-avatar mr-10'>
-                <ProfileAvatar user={user} />
-            </div>
+            <ProfileAvatar user={user} />
 
             <div>
                 {/* name and header */}
@@ -54,17 +49,7 @@ export default function ProfileInfo({ user, auth, totalPosts }) {
                         </Link>}
                 </div>
 
-                <div className='flex space-x-6 w-full font-medium text-lg mb-4'>
-                    <div>
-                        {strPlural('post', totalPosts)}
-                    </div>
-
-                    <LoadedUsersList 
-                        heading="Followers"
-                    >
-                        <FollowersInterface user={user}/>
-                    </LoadedUsersList>
-                </div>
+                <CounterPanel user={user} totalPosts={totalPosts} styleClass="hidden md:flex"/>
 
                 {/* bio */}
                 {!!user.birthday && <div className='font-medium mb-3 flex items-center'>

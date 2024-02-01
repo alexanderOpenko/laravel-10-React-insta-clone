@@ -7,7 +7,7 @@ import UseInfiniteScroll from "@/infinitePaginationHook"
 import { appURL } from "@/services";
 import CommentsForm from "@/Components/CommentsForm";
 
-export default function Comments({ postId }) {
+export default function Comments({ post, posts }) {
     const { auth } = usePage().props
     const [comments, setComments] = useState([])
     const [nextPageUrl, setNextPageUrl] = useState('')
@@ -29,7 +29,7 @@ export default function Comments({ postId }) {
     }
 
     useEffect(() => {
-        commentsRequest(`${appURL}/post-comments/${postId}`)
+        commentsRequest(`${appURL}/post-comments/${post.id}`)
     }, [])
 
     return (
@@ -44,7 +44,7 @@ export default function Comments({ postId }) {
             </UseInfiniteScroll>
 
             <div className="absolute bottom-[14px] left-[14px] right-[15px]">
-                <CommentsForm postId={postId} auth={auth} setComments={setComments} />
+                <CommentsForm post={post} posts={posts} auth={auth} setComments={setComments} />
             </div>
         </>
     )

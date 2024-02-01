@@ -1,8 +1,9 @@
 import { useContext } from "react"
 import { LoadUsersContext } from "./LoadedUsersList"
 import { appURL, strPlural } from "@/services"
+import classNames from "classnames"
 
-export default function FollowersInterface({ user }) {
+export default function FollowersInterface({ user, isMobile = false }) {
     const { setIsOpenUsersList, usersListRequest } = useContext(LoadUsersContext)
 
     const usersReuestHandler = (path) => {
@@ -10,17 +11,33 @@ export default function FollowersInterface({ user }) {
         setIsOpenUsersList(true)
     }
 
-    return <div className="flex space-x-6">
+    const classes = classNames({
+        "flex space-x-6": !isMobile,
+        "flex w-1/2 justify-between": isMobile
+    })
+
+    const itemClasses = classNames({
+        "flex flex-col items-center": isMobile,
+        "cursor-pointer": true
+    })
+
+    return <div className={classes}>
         <div onClick={() => usersReuestHandler('followers')}
-            className="cursor-pointer"
-        >
-            {strPlural('folower', user.followers_count)}
+            className={itemClasses}
+        >   
+            <span>
+                { `${user.followers_count} ` }
+            </span>
+
+            <span className="font-normal">
+                {strPlural('folower', user.followers_count).split(' ')[1]}
+            </span>
         </div>
 
         <div onClick={() => usersReuestHandler('following')}
-            className="cursor-pointer"
+            className={itemClasses}
         >
-            {user.following_count} following
+            {user.following_count} <span className="font-normal"> following </span>
         </div>
     </div>
 }

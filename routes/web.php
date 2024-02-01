@@ -42,10 +42,11 @@ Route::get('/home-posts', function () {
 
     foreach ($postCollection as $key => $post) {
         $postCollection[$key] = Post::find($post['id'])
-            ->load(['images', 'user.avatar'])
-            ->load(['likes' => fn ($q) => $q->where('liker_id', Auth::id())])
+            ->load(['images', 'user.avatar', 'likes' => fn ($q) => $q->where('liker_id', Auth::id())])
             ->loadCount('likes')
             ->loadCount('postComments');
+
+        $postCollection[$key]['liked'] = count($postCollection[$key]['likes']) > 0;
     }
 
     $posts = $posts->toArray();

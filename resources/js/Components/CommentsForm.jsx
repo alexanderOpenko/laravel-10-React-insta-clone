@@ -2,9 +2,10 @@ import PrimaryButton from "@/Components/PrimaryButton";
 import TextInput from "@/Components/TextInput";
 import InputError from "@/Components/InputError";
 import axios from "axios"
-import { useForm, usePage } from "@inertiajs/react"
+import { useForm } from "@inertiajs/react"
+import Likes from "./Likes";
 
-export default function CommentsForm ({ postId, auth, setComments }) {
+export default function CommentsForm ({ post, posts, auth, setComments }) {
     const {
         data,
         setData,
@@ -20,7 +21,7 @@ export default function CommentsForm ({ postId, auth, setComments }) {
         e.preventDefault();
 
         const resp = await axios.post(route('posts.comments.store', {
-            post: postId,
+            post: post.id,
             comment: data.comment
         }))
 
@@ -32,6 +33,8 @@ export default function CommentsForm ({ postId, auth, setComments }) {
 
     return (
         <div className="post_comments_form mt-5">
+            <Likes post={post} posts={posts}/> 
+
             <form onSubmit={submitComment} className="flex">
                 <div className="mr-5 w-full">
                     <TextInput
