@@ -101,7 +101,7 @@ export default function Chat(props) {
                     <div className={chatWindowClasses}>
                         {receiver?.id ? (
                             <>
-                                <div className="flex items-center">
+                                <div className="fixed md:relative flex items-center">
                                     {
                                         isMobileView && <div className="mr-5 cursor-pointer" onClick={showSidebar}>
                                             <i class="fa fa-arrow-left" aria-hidden="true"></i>
@@ -110,7 +110,8 @@ export default function Chat(props) {
 
                                     <ChatUserInfoHeader receiver={receiver} />
                                 </div>
-                                <div className="messanger mt-4">
+
+                                <div className="messanger mt-16 md:mt-4">
                                     <div className="flex flex-col" style={{ maxHeight: 'calc(100vh - 180px)' }}>
                                         <ChatMessages
                                             receiver={receiver}
