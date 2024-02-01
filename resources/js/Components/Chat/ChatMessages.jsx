@@ -41,7 +41,7 @@ export default function ChatMessages({ receiver, auth_id }) {
             setIsLastPage(true)
         }
 
-        setMessages([...json.data.reverse(), ...messages])
+        setMessages(prevMessages => [...json.data.reverse(), ...prevMessages])
     }
 
     useEffect(() => {
@@ -96,7 +96,7 @@ export default function ChatMessages({ receiver, auth_id }) {
         <UseInfiniteScroll
             request={getChatMessages}
             nextPageUrl={nextPageUrl}
-            childrenClassNames="pr-5 w-full"
+            childrenClassNames="md:pr-5 w-full"
             isReverseScroll={true}
             ref={scrollRef}
         >

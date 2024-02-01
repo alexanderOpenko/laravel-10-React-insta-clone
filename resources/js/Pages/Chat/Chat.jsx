@@ -81,7 +81,7 @@ export default function Chat(props) {
     })
 
     const chatWindowClasses = classNames({
-        "relative p-4 w-full": true,
+        "relative p-4 w-full h-screen": true,
         "basis-4/6": !isMobileView,
         "hidden": currentView === 'showSidebar' && isMobileView,
     })
