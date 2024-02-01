@@ -21,7 +21,7 @@ export default function ChatInput({ receiver, getLastChat }) {
     }
 
     return (
-        <div className="bg-white p-4 absolute right-0 bottom-0 left-0">
+        <div className="bg-white p-4 fixed md:absolute right-0 bottom-0 left-0">
             <form onSubmit={submit} className="flex">
                 <TextInput
                     className="h-16 w-full overflow-y-auto bg-white pt-3 font-light mr-3"
