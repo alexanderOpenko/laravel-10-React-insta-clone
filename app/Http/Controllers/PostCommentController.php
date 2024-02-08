@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Notification;
 use App\Models\Post;
 use App\Models\PostComment;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
+use App\Events\NotificationSent as EventsNotificationSent;
 
 class PostCommentController extends Controller
 {
@@ -45,8 +45,16 @@ class PostCommentController extends Controller
         $comment = $post->postComments()->create([
             'comment' => $validated['comment'],
         ]);
-    
+
         $user->postComments()->save($comment);   
+
+        $notification = new Notification();
+        $notification->user_id = $post['user_id'];
+
+        $notification->notifiable()->associate($comment);
+        $notification->save();
+
+        EventsNotificationSent::dispatch($post['user_id'], $notification);
 
         return $comment;
     }

@@ -3,7 +3,7 @@ import TextInput from "@/Components/TextInput";
 import InputError from "@/Components/InputError";
 import axios from "axios"
 import { useForm } from "@inertiajs/react"
-import Likes from "./Likes";
+import Likes from "./Post/Likes";
 
 export default function CommentsForm ({ post, posts, auth, setComments }) {
     const {
@@ -27,6 +27,7 @@ export default function CommentsForm ({ post, posts, auth, setComments }) {
 
         const comment = resp.data
         comment.user = auth.user
+        console.log(comment, 'comment');
         const commentArr = [comment]
         setComments(prevComments => {return [...commentArr, ...prevComments]})
     }

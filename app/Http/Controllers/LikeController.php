@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\NotificationSent as EventsNotificationSent;
 use App\Http\Traits\LoadFollowRelations;
 use App\Models\Like;
+use App\Models\Notification;
 use App\Models\Post;
 use Illuminate\Http\Request;
 
@@ -13,13 +15,21 @@ class LikeController extends Controller
 
     public function store(Request $request, string $post)
     {
-        $like = Like::where('post_id', $post)->where('liker_id', $request->user()->id)->exists();
+        $like = Like::where('post_id', $post)->where('liker_id', $request->user()->id)->get();
 
-        if ($like) {
+        if (count($like)) {
             Like::where('post_id', $post)->where('liker_id', $request->user()->id)->delete();
+            Notification::where('notifiable_id', $like[0]['id'])->delete();
         } else {
             $p = Post::find($post);
-            $p->likes()->create(['liker_id' => $request->user()->id]);
+            $like = $p->likes()->create(['liker_id' => $request->user()->id]);
+
+            $notification = new Notification();
+            $notification->user_id = $p['user_id'];
+            $notification->notifiable()->associate($like);
+            $notification->save();
+
+            EventsNotificationSent::dispatch($p['user_id'], $notification);
         }
     }
 

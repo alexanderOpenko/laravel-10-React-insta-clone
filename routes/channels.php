@@ -32,3 +32,7 @@ Broadcast::channel('messagereaded.{user_id}', function (User $user) {
 Broadcast::channel('chatmessages.{user_id}', function (User $user) {
     return !is_null($user);
 });
+
+Broadcast::channel('notification.{user_id}', function (User $user) {
+    return !is_null($user);
+});

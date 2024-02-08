@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Post;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -28,7 +27,7 @@ class PostController extends Controller
                     ->where('liker_id', Auth::id());
             }])
             ->withCount('likes')
-            ->paginate(6);
+            ->paginate(9);
 
         return $posts;
     }

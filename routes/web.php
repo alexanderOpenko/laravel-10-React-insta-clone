@@ -4,6 +4,7 @@ use App\Http\Controllers\AvatarController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\FollowerController;
 use App\Http\Controllers\LikeController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PostCommentController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
@@ -104,7 +105,14 @@ Route::middleware('auth')->group(function () {
 Route::group(['prefix' => 'like', 'as' => 'like.'], function () {
     Route::post('/{post}', [LikeController::class, 'store'])->name('index');
     Route::get('/likers/{post}', [LikeController::class, 'list'])->name('list');
-});
+})->middleware(['auth', 'verified']);
+
+Route::group(['prefix' => 'notifications', 'as' => 'notifications.'], function () {
+    Route::get('/', function () {
+        return Inertia::render('Notifications/Notifications');
+    })->name('index');
+    Route::get('/list', [NotificationController::class, 'index'])->name('list');
+})->middleware(['auth', 'verified']);
 
 
 require __DIR__ . '/auth.php';

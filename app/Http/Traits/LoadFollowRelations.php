@@ -10,7 +10,8 @@ trait LoadFollowRelations
 {
     public function loadFollowRelations (Collection $collection, string $followerOrFollowing) 
     {
-        foreach ($collection as $follower) {
+        foreach ($collection as $follower) 
+        {
             $follower['user'] = User::findOrFail($follower[$followerOrFollowing])->load('avatar');
             $follower['authUserFollowed'] = false;
 
@@ -24,4 +25,3 @@ trait LoadFollowRelations
         return $collection;
     }
 }
-?>

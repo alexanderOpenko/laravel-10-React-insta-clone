@@ -4,11 +4,11 @@ import ShowPostModal from './Show';
 import UseInfiniteScroll from "@/infinitePaginationHook";
 import { strPlural } from "@/services";
 import PostHeader from "./PostHeader";
-import Likes from "@/Components/Likes";
+import Likes from "@/Components/Post/Likes";
+import classNames from "classnames";
 
 export default function PostsList({ posts, postsRequest, nextPageUrl, grid = 'default' }) {
     const [isOpenPost, setIsOpenPost] = useState(false)
-console.log(posts, 'postslist');
     const [post, setPost] = useState([])
 
     const showPost = (post) => {
@@ -51,12 +51,17 @@ console.log(posts, 'postslist');
 const Post = ({ post, posts, grid, showPost }) => {
     const { public_url } = usePage().props
 
+    const classes = classNames({
+        "cursor-pointer": true,
+        "h-full": grid !== 'home'
+    })
+
     return <div key={post.id}>
     {grid === 'home' &&
         <PostHeader post={post} classNames="px-0" />
     }
 
-    <div onClick={ () => showPost(post) } className="cursor-pointer h-full">
+    <div onClick={ () => showPost(post) } className={classes}>
         <img src={public_url + "/" + post.images[0].image_path} className="object-cover h-full" />
     </div>
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Controllers\NotificationController;
 use App\Repositories\ChatRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -47,11 +48,9 @@ class HandleInertiaRequests extends Middleware
             ],
  
             'isChat' => $request->routeIs('chat.*'),
-
             'new_messeges' => ChatRepository::checkForUnreadedMessages(),
-
+            'new_notifications' => NotificationController::checkForUnreadedNotifications(),
             'public_url' => asset('storage'),
-
             'ziggy' => fn () => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
