@@ -2,9 +2,8 @@ import { Link, usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 import Avatar from "./Avatar";
 import classNames from "classnames";
-import Modal from "./Modal";
-import NotificationsMap from "./Notifications/NotificationItem";
 import NotificationItem from "./Notifications/NotificationItem";
+import NotificationSound from "./Notifications/PlayNotififcationSound";
 
 const MenuItem = ({ children: icone, linkUrl, linkTitle }) => {
     const { isChat } = usePage().props
@@ -28,21 +27,23 @@ export default function BaseNav() {
     const [newNotification, setNewNotification] = useState(new_notifications)
     const [notifications, setNotifications] = useState([])
     const { auth } = usePage().props
+    const { play } = NotificationSound()
 
     useEffect(() => {
         Echo.private(`chatmessages.${auth.user.id}`)
             .listen('ChatMessageSent', (e) => {
                 setNewMessages(true)
+                play()
             })
 
         Echo.private(`notification.${auth.user.id}`)
             .listen('NotificationSent', (e) => {
                 setNewNotification(true)
                 setNotifications(prevNotifications => [...prevNotifications, ...e.data])
+                play()
             })
     }, [])
 
-    
     useEffect(() => {
         const processNotificationQueue = () => {
             if (notifications.length > 0) {   

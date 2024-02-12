@@ -35,7 +35,7 @@ export default function Comments({ post, posts }) {
     return (
         <>
             <UseInfiniteScroll request={commentsRequest} nextPageUrl={nextPageUrl}
-                childrenClassNames="max-h-[55vh] pb-[40px]"
+                childrenClassNames="max-h-[55vh] pb-[100px]"
                 ref={scrollRef}
             >
                 {comments.map((comment) => {
