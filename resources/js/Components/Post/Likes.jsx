@@ -5,7 +5,7 @@ import PostLikesInterface from "@/Components/Post/PostLikesInterface";
 import { useForm } from "@inertiajs/react"
 
 export default function Likes ({ post, posts }) {
-    const { post: store } = useForm()
+    const { post: store, processing } = useForm()
 
     const likeRequest = (e) => {
         e.preventDefault()
@@ -33,7 +33,7 @@ export default function Likes ({ post, posts }) {
     return <div>
         <div className="py-2 cursor-pointer">
             <form onSubmit={likeRequest}>
-                <TransparentButton>
+                <TransparentButton disabled={processing}>
                     <i className={likeBTNclassNames} aria-hidden="true"></i>
                 </TransparentButton>
             </form>

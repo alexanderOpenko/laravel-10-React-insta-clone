@@ -9,7 +9,6 @@ export default function CommentsForm ({ post, posts, auth, setComments }) {
     const {
         data,
         setData,
-        post: create,
         processing,
         reset,
         errors,
@@ -22,18 +21,19 @@ export default function CommentsForm ({ post, posts, auth, setComments }) {
 
         const resp = await axios.post(route('posts.comments.store', {
             post: post.id,
-            comment: data.comment
+            comment: data.comment,
         }))
+        reset("comment")
 
         const comment = resp.data
         comment.user = auth.user
-        console.log(comment, 'comment');
+
         const commentArr = [comment]
         setComments(prevComments => {return [...commentArr, ...prevComments]})
     }
 
     return (
-        <div className="post_comments_form mt-5">
+        <div className="post_comments_form mt-5 bg-white">
             <Likes post={post} posts={posts}/> 
 
             <form onSubmit={submitComment} className="flex">

@@ -6,6 +6,7 @@ import Avatar from "@/Components/Avatar"
 import UseInfiniteScroll from "@/infinitePaginationHook"
 import { appURL } from "@/services";
 import CommentsForm from "@/Components/CommentsForm";
+import classNames from "classnames"
 
 export default function Comments({ post, posts }) {
     const { auth } = usePage().props
@@ -35,7 +36,7 @@ export default function Comments({ post, posts }) {
     return (
         <>
             <UseInfiniteScroll request={commentsRequest} nextPageUrl={nextPageUrl}
-                childrenClassNames="max-h-[55vh] pb-[100px]"
+                childrenClassNames="max-h-[58vh] h-full mb-[100px]"
                 ref={scrollRef}
             >
                 {comments.map((comment) => {
@@ -52,6 +53,7 @@ export default function Comments({ post, posts }) {
 
 export function Comment({ user, comment, auth }) {
     const [isOpenOptions, setIsOpenOptions] = useState(false)
+    const [isDeleted, setIsDeleted] = useState(false)
     const {
         data,
         setData,
@@ -67,6 +69,8 @@ export function Comment({ user, comment, auth }) {
         e.preventDefault();
 
         destroy(route('comments.destroy', comment.id))
+        close()
+        setIsDeleted(true)
     }
 
     const open = () => {
@@ -77,8 +81,13 @@ export function Comment({ user, comment, auth }) {
         setIsOpenOptions(false);
     };
 
+    const classes = classNames({
+        "mb-4 flex justify-between": true,
+        "hidden": isDeleted
+    })
+
     return (
-        <div className="mb-4 flex justify-between">
+        <div className={classes}>
             <div className="flex">
                 <Avatar size="sm" user={user} />
 

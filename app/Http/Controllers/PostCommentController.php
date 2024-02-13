@@ -91,5 +91,6 @@ class PostCommentController extends Controller
         $this->authorize('delete', $comment);
 
         $comment->delete();
+        Notification::where('notifiable_id', $comment['id'])->delete();
     }
 }

@@ -62,7 +62,9 @@ export default function BaseNav() {
     }, [notifications]);
 
     const classes = classNames({
-        "border-t px-3 lg:px-6 fixed bottom-0 w-full md:max-w-[72px] bg-white md:relative md:py-8 md:border-t-0 md:border-r lg:max-w-16": true,
+        "border-t px-3 lg:px-6 fixed bottom-0 md:max-w-[72px] bg-white md:relative md:py-8 md:border-t-0 md:border-r lg:max-w-16 z-[1]": true,
+        "max-[769px]:w-full": isChat,
+        "w-full": !isChat
     })
 
     const navClasses = classNames({

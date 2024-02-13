@@ -26,17 +26,17 @@ export default function Notifications({ auth }) {
                 auth={auth}
                 user={auth.user}
                 header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Notifications</h2>}
-            >     
+            >
                 <div className="mx-auto w-full max-w-lg p-3 md:p-6">
                     <h1 className="text-2xl font-semibold mb-4">
                         Notifications
                     </h1>
 
-                    <UseInfiniteScroll request={notificationsRequest} nextPageUrl={nextPageUrl}/>
-
                     {notifications.map((el) => {
                         return <NotificationItem el={el} />
                     })}
+
+                    <UseInfiniteScroll request={notificationsRequest} nextPageUrl={nextPageUrl} />
                 </div>
             </AuthenticatedLayout>
         </>

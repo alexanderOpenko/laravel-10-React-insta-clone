@@ -99,6 +99,7 @@ export default function ChatMessages({ receiver, auth_id }) {
             childrenClassNames="md:pr-5 w-full"
             isReverseScroll={true}
             ref={scrollRef}
+            isLoadMoreTop={true}
         >
             {messages.map((message, index) => {
                 const isReceived = isReceivedMessage(message)
