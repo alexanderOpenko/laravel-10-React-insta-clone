@@ -11,13 +11,13 @@ export default function ShowPostModal({ post, posts, ...props }) {
         <div className="flex">
             {
                 !!post.images && <div
-                    className="w-full max-w-3xl relative pt-59 bg-black	"
+                    className="w-full max-w-3xl relative pt-59 bg-black hidden md:block"
                 >
                     <img className="w-full absolute object-contain top-0 h-full" src={public_url + "/" + post.images[0].image_path} />
                 </div>
             }
 
-            <div className="w-full max-w-md relative">
+            <div className="w-full md:max-w-md relative">
                 <PostHeader post={post} />
 
                 <div className="p-4">

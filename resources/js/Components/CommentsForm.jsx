@@ -4,14 +4,15 @@ import InputError from "@/Components/InputError";
 import axios from "axios"
 import { useForm } from "@inertiajs/react"
 import Likes from "./Post/Likes";
+import { useState } from "react";
 
-export default function CommentsForm ({ post, posts, auth, setComments }) {
+export default function CommentsForm({ post, posts, auth, setComments }) {
+    const [errors, setErrors] = useState('')
     const {
         data,
         setData,
         processing,
         reset,
-        errors,
     } = useForm({
         comment: '',
     });
@@ -19,24 +20,27 @@ export default function CommentsForm ({ post, posts, auth, setComments }) {
     const submitComment = async (e) => {
         e.preventDefault();
 
-        const resp = await axios.post(route('posts.comments.store', {
-            post: post.id,
-            comment: data.comment,
-        }))
-        reset("comment")
+        try {
+            const resp = await axios.post(route('posts.comments.store', {
+                post: post.id,
+                comment: data.comment,
+            }))
+            reset("comment")
 
-        const comment = resp.data
-        comment.user = auth.user
-
-        const commentArr = [comment]
-        setComments(prevComments => {return [...commentArr, ...prevComments]})
+            const comment = resp.data
+            comment.user = auth.user
+            const commentArr = [comment]
+            setComments(prevComments => { return [...commentArr, ...prevComments] })
+        } catch (e) {
+            setErrors(e.response.data.message);
+        }
     }
 
     return (
         <div className="post_comments_form mt-5 bg-white">
-            <Likes post={post} posts={posts}/> 
+            <Likes post={post} posts={posts} />
 
-            <form onSubmit={submitComment} className="flex">
+            <form onSubmit={submitComment} className="flex items-start">
                 <div className="mr-5 w-full">
                     <TextInput
                         type='text'
@@ -47,10 +51,10 @@ export default function CommentsForm ({ post, posts, auth, setComments }) {
                         placeholder="Add a comment"
                     />
 
-                    <InputError message={errors.comment} className="mt-2" />
+                    {errors && <InputError message={errors} className="mt-2" />}
                 </div>
 
-                <PrimaryButton disabled={processing}>
+                <PrimaryButton disabled={processing} className="!p-3">
                     Post
                 </PrimaryButton>
             </form>

@@ -25,12 +25,12 @@ export default function Home({ auth }) {
             user={auth.user}
             header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Home</h2>}
         >
-            <div className='max-w-lg mx-auto'>
+            <div className='w-full md:max-w-lg mx-auto'>
                 <PostsList 
                     posts={posts} 
                     postsRequest={postsRequest} 
                     nextPageUrl={nextPageUrl}
-                    grid="home"
+                    grid="vertical"
                 />
             </div>
         </AuthenticatedLayout>

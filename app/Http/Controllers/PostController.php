@@ -27,6 +27,7 @@ class PostController extends Controller
                     ->where('liker_id', Auth::id());
             }])
             ->withCount('likes')
+            ->withCount('postComments')
             ->paginate(9);
 
         return $posts;
