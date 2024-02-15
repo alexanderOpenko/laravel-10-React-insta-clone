@@ -23,7 +23,6 @@ export default function Likes ({ post, posts }) {
         })
     }
 
-
     const likeBTNclassNames = classNames({
         'far': !post.liked,
         'fa text-red-500': post.liked,

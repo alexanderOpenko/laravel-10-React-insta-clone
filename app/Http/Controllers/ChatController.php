@@ -31,7 +31,6 @@ class ChatController extends Controller
         $receiver = $receiverId ? User::find($receiverId)->load('avatar') : null;
         
         return Inertia::render('Chat/Chat', [
-            'recentMessages' => $this->chat->getRecentUsersWithMessage((int) $request->user()->id),
             'receiver' => $receiver,
         ]);
     }
@@ -45,7 +44,7 @@ class ChatController extends Controller
 
     public function getChatList(Request $request) 
     {
-        return $this->chat->getRecentUsersWithMessage((int) $request->user()->id);
+        return $this->chat->getRecentUsersWithMessage((int) $request->user()->id, (int) $request->query('limit'));
     }
 
     public function lastMessage(string $receiver_id) 

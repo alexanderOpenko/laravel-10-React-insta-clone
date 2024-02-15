@@ -14,7 +14,7 @@ export default function LoadedUsersList({
 }) {
     const auth = useContext(AuthContext)
     const [usersList, setUsersList] = useState([])
-    const [ isOpenUsersList, setIsOpenUsersList] = useState(false)
+    const [isOpenUsersList, setIsOpenUsersList] = useState(false)
     const [nextPageUrl, setNextPageUrl] = useState('')
 
     const scrollRef = useRef(null)

@@ -17,7 +17,7 @@ export default function ChatMessages({ receiver, auth_id }) {
     };
 
     const getLastMessage = async () => {
-        if (!receiver) {
+        if (!receiver.id) {
             return
         }
         const resp = await fetch(`${appURL}/chat/lastMessage/${receiver.id}`)
@@ -30,7 +30,7 @@ export default function ChatMessages({ receiver, auth_id }) {
         setMessages(prevMessages => [...prevMessages, json])
     }
 
-    const getChatMessages = async (url) => {
+    const getChatMessages = async (url, firstInit = false) => {
         const resp = await fetch(url)
         const json = await resp.json()
 
@@ -41,6 +41,7 @@ export default function ChatMessages({ receiver, auth_id }) {
             setIsLastPage(true)
         }
 
+        firstInit ? setMessages(json.data.reverse()) :
         setMessages(prevMessages => [...json.data.reverse(), ...prevMessages])
     }
 
@@ -57,11 +58,11 @@ export default function ChatMessages({ receiver, auth_id }) {
     }, [messages])
 
     useEffect(() => {
-        getChatMessages(`${appURL}/chat/messages/${receiver.id}`)
+        getChatMessages(`${appURL}/chat/messages/${receiver.id}`, true)
 
         initialMessagesLoaded.current = true
 
-        const sortedUserIds = [auth_id, receiver?.id].sort()
+        const sortedUserIds = [auth_id, receiver.id].sort()
         const roomId = sortedUserIds.join('')
 
         Echo.private(`messagereaded.${auth_id}`)
@@ -90,7 +91,7 @@ export default function ChatMessages({ receiver, auth_id }) {
             Echo.leave(`messenger.${roomId}`)
             Echo.leave(`messagereaded.${auth_id}`)
         }
-    }, [])
+    }, [receiver])
 
     return (
         <UseInfiniteScroll

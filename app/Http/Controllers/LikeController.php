@@ -35,7 +35,7 @@ class LikeController extends Controller
 
     public function list(Post $post) {
         $likes = $post->likes()->paginate(5);
-// return $likes;
+
         $likesCollection = $likes->getCollection();
         $likes = $likes->toArray();
 
