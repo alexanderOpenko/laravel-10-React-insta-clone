@@ -3,13 +3,13 @@ import LoadedUsersList from "@/Pages/Profile/LoadedUsersList";
 import { strPlural } from "@/services";
 import classNames from "classnames";
 
-export default function CounterPanel ({ totalPosts, user, styleClass, isMobile = false}) {
+export default function CounterPanel ({ totalPosts, user, styleClass = '', isMobile = false}) {
     const itemClasses = classNames({
         "flex flex-col items-center": isMobile,
         "cursor-pointer": true
     })
 
-    return <div className={`flex space-x-6 w-full font-semibold text-lg mb-4 ${styleClass}`}>
+    return <div className={`flex space-x-6 w-full font-semibold text-lg ${styleClass}`}>
     <div className={itemClasses}>
         <span>
             { `${totalPosts} ` }

@@ -4,7 +4,7 @@ import ChatSidebar from "@/Components/Chat/ChatSidebar";
 import ChatUserInfoHeader from "@/Components/Chat/ChatUserInfoHeader";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import classNames from "classnames";
-import { useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { appURL } from "@/services";
 
 export default function Chat({ auth, errors, receiver: companion = null }) {
@@ -14,13 +14,18 @@ export default function Chat({ auth, errors, receiver: companion = null }) {
     const [chats, setChats] = useState([])
     const [nextPageUrl, setNextPageUrl] = useState('')
 
-    const hideSidebar = () => {
-        setCurrentView('hideSidebar')
-    }
+    const setReceiverHandler = useCallback((receiver) => {
+        setReceiver(receiver)
+    }, [])
 
-    const showSidebar = () => {
+    const hideSidebar = useCallback(() => {
+        setCurrentView('hideSidebar')
+    }, [])
+
+    const showSidebar = useCallback(() => {
         setCurrentView('showSidebar')
-    }
+        setReceiverHandler(null)
+    }, [])
 
     const getChats = async (url) => {
         const resp = await fetch(url)
@@ -30,7 +35,7 @@ export default function Chat({ auth, errors, receiver: companion = null }) {
         setChats([...chats, ...json.data])
     }
 
-    const getLastChat = async (userId = receiver?.id) => {
+    const getLastChat = useCallback( async(userId) => {
         const resp = await fetch(`${appURL}/chat/lastChat/${userId}`)
         const json = await resp.json()
 
@@ -39,22 +44,21 @@ export default function Chat({ auth, errors, receiver: companion = null }) {
             return [json, ...newChats]
         }
         )
-    }
+    }, [receiver])
 
-    const getUpdatedChats = async () => {
-        console.log(chats.length,'chats.length');
+    const getUpdatedChats = useCallback( async () => {
         const resp = await fetch(`${appURL}/chatList?limit=${chats.length}`)
         const json = await resp.json()
 
         setChats(json)
-    }
+    }, [chats])
 
     useEffect(() => {
         getChats(`${appURL}/chatList`)
+        setReceiver(companion)
 
         Echo.private(`chatmessages.${auth.user.id}`)
             .listen('ChatMessageSent', (e) => {
-                console.log('chatmessages');
                 getLastChat(e.user_id)
             })
 
@@ -74,27 +78,23 @@ export default function Chat({ auth, errors, receiver: companion = null }) {
     }, [chats])
 
     useEffect(() => {
-        if (companion) {
-            setReceiver(companion)
-        }
-
         const windowWidth = window.innerWidth
 
         if (windowWidth <= 768) {
             setIsMobileView(true)
 
-            if (!companion) {
+            if (!receiver) {
                 showSidebar()
             }
 
-            if (companion) {
+            if (receiver) {
                 hideSidebar()
             }
         }
-    }, [companion])
+    }, [receiver])
 
     const sidebarClasses = classNames({
-        "border-r border-slate-100 bg-white pt-3 overflow-y-auto h-[100vh]": true,
+        "border-r border-slate-100 bg-white pt-3 h-[100vh]": true,
         "hidden": currentView === 'hideSidebar' && isMobileView,
         "w-full": currentView === 'showSidebar',
         "basis-2/6": !isMobileView
@@ -108,11 +108,11 @@ export default function Chat({ auth, errors, receiver: companion = null }) {
 
     return (
         <AuthenticatedLayout auth={auth} errors={errors}>
-            <div className="messanger overflow-hidden">
+            <div className="messanger">
                 <div className="flex h-screen">
                     <div className={sidebarClasses}>
                         <ChatSidebar
-                            setReceiver={setReceiver}
+                            setReceiverHandler={setReceiverHandler}
                             auth_id={auth.user.id}
                             nextPageUrl={nextPageUrl}
                             chats={chats}
@@ -121,7 +121,7 @@ export default function Chat({ auth, errors, receiver: companion = null }) {
                     </div>
 
                     <div className={chatWindowClasses}>
-                        {receiver?.id ? (
+                        {receiver ? (
                             <>
                                 <div className="flex items-center">
                                     {
@@ -133,11 +133,11 @@ export default function Chat({ auth, errors, receiver: companion = null }) {
                                     <ChatUserInfoHeader receiver={receiver} />
                                 </div>
 
-                                <div className="messanger mt-4">
-                                    <div className="flex flex-col" style={{ maxHeight: 'calc(100vh - 180px)' }}>
+                                <div className="messanger mt-4 h-[82%]">
+                                    <div className="flex flex-col h-full" style={{ maxHeight: 'calc(100vh - 180px)' }}>
                                         <ChatMessages
                                             receiver={receiver}
-                                            auth_id={auth?.user?.id}
+                                            auth_id={auth.user.id}
                                         />
 
                                         <div>

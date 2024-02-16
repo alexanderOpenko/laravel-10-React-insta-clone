@@ -1,73 +1,86 @@
 import UseInfiniteScroll from "@/infinitePaginationHook"
 import { appURL } from "@/services";
-import { useState, useEffect, useRef } from "react";
+import { usePage } from "@inertiajs/react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
 export default function ChatMessages({ receiver, auth_id }) {
     const [messages, setMessages] = useState([])
     const [readedMesages, setReadedMessages] = useState(false)
-    const [currentPage, setCurrentPage] = useState(1)
     const [nextPageUrl, setNextPageUrl] = useState('')
-    const [isLastPage, setIsLastPage] = useState('')
-
+    const [prevScrollHeight, setPrevScrollHeight] = useState(null)
     const initialMessagesLoaded = useRef(false);
     const scrollRef = useRef(null)
+    const [preloader, setPreloader] = useState(false)
+
+    const { public_url } = usePage().props
 
     const isReceivedMessage = (message) => {
         return message.receiver_id === auth_id;
     };
 
-    const getLastMessage = async () => {
+    const getLastMessage = useCallback(async () => {
         if (!receiver.id) {
             return
         }
         const resp = await fetch(`${appURL}/chat/lastMessage/${receiver.id}`)
         const json = await resp.json()
 
-        if (json.sender_id === auth_id) {
-            setReadedMessages(false)
-        }
+        handleReadedMessage()
 
         setMessages(prevMessages => [...prevMessages, json])
-    }
+    }, [receiver])
 
-    const getChatMessages = async (url, firstInit = false) => {
+    const handleReadedMessage = useCallback((e) => {
+        setReadedMessages(true);
+    }, []);
+
+    const getChatMessages = useCallback(async (url, firstInit = false) => {
         const resp = await fetch(url)
         const json = await resp.json()
 
         setNextPageUrl(json.next_page_url)
-        setCurrentPage(json.current_page)
 
-        if (json.last_page === json.current_page) {
-            setIsLastPage(true)
+        if (firstInit) {
+            setMessages(json.data.reverse())
+            setPreloader(false)
+
+        } else {
+            setMessages(prevMessages => [...json.data.reverse(), ...prevMessages])
+            setPrevScrollHeight(scrollRef.current.scrollHeight)
         }
-
-        firstInit ? setMessages(json.data.reverse()) :
-        setMessages(prevMessages => [...json.data.reverse(), ...prevMessages])
-    }
+    }, [receiver])
 
     useEffect(() => {
         if (initialMessagesLoaded.current) {
+            console.log('initialMessagesLoaded');
+
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight
             initialMessagesLoaded.current = false
+            return
         }
-
-        if (!isLastPage) {
-        scrollRef.current.scrollTop = (scrollRef.current.scrollHeight / currentPage) + scrollRef.current.scrollTop
-        }
-
     }, [messages])
 
     useEffect(() => {
-        getChatMessages(`${appURL}/chat/messages/${receiver.id}`, true)
+        const scrollDifference = scrollRef.current.scrollHeight - prevScrollHeight;
+        scrollRef.current.scrollTop += scrollDifference;
+    }, [prevScrollHeight])
 
-        initialMessagesLoaded.current = true
-
+    const roomId = useMemo(() => {
         const sortedUserIds = [auth_id, receiver.id].sort()
         const roomId = sortedUserIds.join('')
 
+        return roomId
+    }, [auth_id, receiver.id])
+
+    useEffect(() => {
+        setPreloader(true)
+        initialMessagesLoaded.current = true
+
+        getChatMessages(`${appURL}/chat/messages/${receiver.id}`, true)
+
         Echo.private(`messagereaded.${auth_id}`)
             .listen('MessageReaded', (e) => {
-                setReadedMessages(true)
+                handleReadedMessage()
             })
 
         Echo.join(`messenger.${roomId}`)
@@ -75,16 +88,12 @@ export default function ChatMessages({ receiver, auth_id }) {
                 getLastMessage()
             })
             .here((users) => {
-                console.log(users, 'users');
             })
             .joining((user) => {
-                console.log(user.name, 'user.name');
             })
             .leaving((user) => {
-                console.log(user.name, 'user.name');
             })
             .error((error) => {
-                console.error(error);
             });
 
         return () => {
@@ -93,62 +102,68 @@ export default function ChatMessages({ receiver, auth_id }) {
         }
     }, [receiver])
 
-    return (
-        <UseInfiniteScroll
-            request={getChatMessages}
-            nextPageUrl={nextPageUrl}
-            childrenClassNames="md:pr-5 w-full"
-            isReverseScroll={true}
-            ref={scrollRef}
-            isLoadMoreTop={true}
-        >
-            {messages.map((message, index) => {
-                const isReceived = isReceivedMessage(message)
+    return (<>
+        {preloader ?
+            <div className="h-full flex items-center justify-center">
+                <img className="w-1/2 h-1/2" src={public_url + "/" + "loader.gif"} />
+            </div> :
+            <UseInfiniteScroll
+                request={getChatMessages}
+                nextPageUrl={nextPageUrl}
+                childrenClassNames="md:pr-5 w-full"
+                isReverseScroll={true}
+                ref={scrollRef}
+                isLoadMoreTop={true}
+            >
+                {messages.map((message, index) => {
+                    const isReceived = isReceivedMessage(message)
 
-                return <div key={index}>
-                    <div
-                        className={`${isReceived
-                            ? "receive-chat justify-start"
-                            : "send-chat justify-end"
-                            } relative flex`}
-                    >
-
+                    return <div key={index}>
                         <div
-                            className={`mb-2 max-w-[80%] rounded ${isReceived
-                                ? "bg-violet-400"
-                                : "bg-violet-200"
-                                } p-2 text-sm ${isReceived
-                                    ? "text-white"
-                                    : "text-slate-500"
-                                }`}
+                            className={`${isReceived
+                                ? "receive-chat justify-start"
+                                : "send-chat justify-end"
+                                } relative flex`}
                         >
-                            <div className="flex items-center">
-                                <p className="mr-2">{message?.message}</p>
 
-                                {!isReceived &&
-                                    (message.status ?
+                            <div
+                                className={`mb-2 max-w-[80%] rounded ${isReceived
+                                    ? "bg-violet-400"
+                                    : "bg-violet-200"
+                                    } p-2 text-sm ${isReceived
+                                        ? "text-white"
+                                        : "text-slate-500"
+                                    }`}
+                            >
+                                <div className="flex items-center">
+                                    <p className="mr-2">{message?.message}</p>
 
-                                        <>
-                                            <i className="fa fa-check" aria-hidden="true"></i>
-                                            <i className="fa fa-check" aria-hidden="true"></i>
-                                        </> :
-                                        (!readedMesages && <i class="fa fa-check" aria-hidden="true"></i>)
-                                    )
-                                }
+                                    {!isReceived &&
+                                        (message.status ?
 
-                                {!isReceived &&
-                                    (readedMesages && !message.status ?
-                                        <>
-                                            <i className="fa fa-check" aria-hidden="true"></i>
-                                            <i className="fa fa-check" aria-hidden="true"></i>
-                                        </> : ''
-                                    )
-                                }
+                                            <>
+                                                <i className="fa fa-check" aria-hidden="true"></i>
+                                                <i className="fa fa-check" aria-hidden="true"></i>
+                                            </> :
+                                            (!readedMesages && <i className="fa fa-check" aria-hidden="true"></i>)
+                                        )
+                                    }
+
+                                    {!isReceived &&
+                                        (readedMesages && !message.status ?
+                                            <>
+                                                <i className="fa fa-check" aria-hidden="true"></i>
+                                                <i className="fa fa-check" aria-hidden="true"></i>
+                                            </> : ''
+                                        )
+                                    }
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            })}
-        </UseInfiniteScroll>
-    );
+                }
+                )}
+            </UseInfiniteScroll>
+        }
+    </>)
 }

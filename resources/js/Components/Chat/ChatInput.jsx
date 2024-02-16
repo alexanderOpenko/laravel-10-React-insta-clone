@@ -1,8 +1,9 @@
 import { useForm } from "@inertiajs/react";
 import TextInput from "../TextInput";
 import TransparentButton from "../TransparentButton";
+import { memo } from 'react';
 
-export default function ChatInput({ receiver, getLastChat }) {
+export default memo(function ChatInput({ receiver, getLastChat }) {
     const { data, setData, post, processing, errors, reset } = useForm({
         message: "",
     })
@@ -15,13 +16,13 @@ export default function ChatInput({ receiver, getLastChat }) {
         e.preventDefault()
 
         post(route("chat.store", receiver?.id), {
-            onSuccess: () => getLastChat()
+            onSuccess: () => getLastChat(receiver?.id)
         })
         reset("message");
     }
 
     return (
-        <div className="bg-white p-4 fixed md:absolute right-0 bottom-0 left-0 z-[2]">
+        <div className="bg-white p-4 fixed md:absolute right-0 bottom-0 left-0 z-[12]">
             <form onSubmit={submit} className="flex">
                 <TextInput
                     className="h-16 w-full overflow-y-auto bg-white pt-3 font-light mr-3"
@@ -32,9 +33,9 @@ export default function ChatInput({ receiver, getLastChat }) {
                 />
 
                 <TransparentButton>
-                    <i class="fa fa-paper-plane fa-lg" aria-hidden="true"></i>
+                    <i className="fa fa-paper-plane fa-lg" aria-hidden="true"></i>
                 </TransparentButton>
             </form>
         </div>
     )
-}
+})

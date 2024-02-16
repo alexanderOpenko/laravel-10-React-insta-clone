@@ -1,10 +1,9 @@
 import { jsx, jsxs, Fragment } from "react/jsx-runtime";
-import { forwardRef, useRef, useEffect, useState, createContext, Fragment as Fragment$1, useContext } from "react";
+import { forwardRef, useRef, useEffect, useState, useMemo, createContext, Fragment as Fragment$1, useContext } from "react";
 import { Link, useForm, Head, usePage, useRemember, router, createInertiaApp } from "@inertiajs/react";
 import classNames from "classnames";
 import { Transition, Dialog } from "@headlessui/react";
 import axios from "axios";
-import { useForm as useForm$1 } from "@inertiajs/inertia-react";
 import dayjs from "dayjs";
 import createServer from "@inertiajs/react/server";
 import ReactDOMServer from "react-dom/server";
@@ -460,7 +459,7 @@ function ChatInput({ receiver, getLastChat }) {
     });
     reset("message");
   };
-  return /* @__PURE__ */ jsx("div", { className: "bg-white p-4 absolute right-0 bottom-0 left-0", children: /* @__PURE__ */ jsxs("form", { onSubmit: submit, className: "flex", children: [
+  return /* @__PURE__ */ jsx("div", { className: "bg-white p-4 fixed md:absolute right-0 bottom-0 left-0 z-[12]", children: /* @__PURE__ */ jsxs("form", { onSubmit: submit, className: "flex", children: [
     /* @__PURE__ */ jsx(
       TextInput,
       {
@@ -471,7 +470,7 @@ function ChatInput({ receiver, getLastChat }) {
         onChange: onHandleChange
       }
     ),
-    /* @__PURE__ */ jsx(TransparentButton, { children: /* @__PURE__ */ jsx("i", { class: "fa fa-paper-plane fa-lg", "aria-hidden": "true" }) })
+    /* @__PURE__ */ jsx(TransparentButton, { children: /* @__PURE__ */ jsx("i", { className: "fa fa-paper-plane fa-lg", "aria-hidden": "true" }) })
   ] }) });
 }
 const UseInfiniteScroll = forwardRef(function UseInfiniteScroll2({
@@ -479,34 +478,38 @@ const UseInfiniteScroll = forwardRef(function UseInfiniteScroll2({
   nextPageUrl,
   children,
   childrenClassNames = "",
-  isReverseScroll = false
+  isReverseScroll = false,
+  isLoadMoreTop = false
 }, ref) {
   let usedUrls = [];
+  function makeRequest() {
+    if (nextPageUrl) {
+      request(nextPageUrl);
+      usedUrls.push(nextPageUrl);
+    }
+  }
   useEffect(() => {
     const onScroll = () => {
       const scrollTop = Math.round(children ? target.scrollTop : window.scrollY);
       const scrollHeight = children ? target.scrollHeight : document.body.scrollHeight;
       const clientHeight = children ? target.clientHeight : window.innerHeight;
-      if (!isReverseScroll && scrollTop + clientHeight >= scrollHeight - 50 && !usedUrls.includes(nextPageUrl)) {
+      if (!isReverseScroll && scrollTop + clientHeight >= scrollHeight - 100 && !usedUrls.includes(nextPageUrl)) {
         makeRequest();
       }
-      if (isReverseScroll && scrollTop <= 200 && !usedUrls.includes(nextPageUrl)) {
+      if (isReverseScroll && scrollTop <= scrollHeight / 3 && !usedUrls.includes(nextPageUrl)) {
         makeRequest();
       }
     };
-    function makeRequest() {
-      if (nextPageUrl) {
-        request(nextPageUrl);
-        usedUrls.push(nextPageUrl);
-      }
-    }
     const target = children ? ref.current : document;
     target.addEventListener("scroll", onScroll);
     return () => {
       target.removeEventListener("scroll", onScroll);
     };
   }, [nextPageUrl]);
-  return /* @__PURE__ */ jsx("div", { ref, className: childrenClassNames + " scrollableChildren overflow-y-auto", children: !!children && children });
+  return /* @__PURE__ */ jsx("div", { ref, className: childrenClassNames + " scrollableChildren overflow-y-auto", children: /* @__PURE__ */ jsxs("div", { className: isLoadMoreTop && "flex flex-col-reverse", children: [
+    /* @__PURE__ */ jsx("div", { children: !!children && children }),
+    /* @__PURE__ */ jsx("div", { className: "flex flex-col items-center p-2", children: nextPageUrl && /* @__PURE__ */ jsx(PrimaryButton, { type: "button", onClick: makeRequest, className: "mx-auto", children: "Load More" }) })
+  ] }) });
 });
 function strPlural(string, n) {
   const suffixes = /* @__PURE__ */ new Map([
@@ -517,20 +520,34 @@ function strPlural(string, n) {
   const suffix = suffixes.get(rule);
   return `${n} ${suffix}`;
 }
+function ordinalSuffix(number) {
+  if (number % 100 >= 11 && number % 100 <= 13) {
+    return number + "th";
+  }
+  switch (number % 10) {
+    case 1:
+      return number + "st";
+    case 2:
+      return number + "nd";
+    case 3:
+      return number + "rd";
+    default:
+      return number + "th";
+  }
+}
 const appURL$1 = "http://127.0.0.1:8000";
 function ChatMessages({ receiver, auth_id }) {
   const [messages, setMessages] = useState([]);
   const [readedMesages, setReadedMessages] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
   const [nextPageUrl, setNextPageUrl] = useState("");
-  const [isLastPage, setIsLastPage] = useState("");
+  const [prevScrollHeight, setPrevScrollHeight] = useState(null);
   const initialMessagesLoaded = useRef(false);
   const scrollRef = useRef(null);
   const isReceivedMessage = (message) => {
     return message.receiver_id === auth_id;
   };
   const getLastMessage = async () => {
-    if (!receiver) {
+    if (!receiver.id) {
       return;
     }
     const resp = await fetch(`${appURL$1}/chat/lastMessage/${receiver.id}`);
@@ -540,57 +557,58 @@ function ChatMessages({ receiver, auth_id }) {
     }
     setMessages((prevMessages) => [...prevMessages, json]);
   };
-  const getChatMessages = async (url) => {
+  const getChatMessages = async (url, firstInit = false) => {
     const resp = await fetch(url);
     const json = await resp.json();
     setNextPageUrl(json.next_page_url);
-    setCurrentPage(json.current_page);
-    if (json.last_page === json.current_page) {
-      setIsLastPage(true);
+    if (firstInit) {
+      setMessages(json.data.reverse());
+    } else {
+      setPrevScrollHeight(scrollRef.current.scrollHeight);
+      setMessages((prevMessages) => [...json.data.reverse(), ...prevMessages]);
     }
-    setMessages([...json.data.reverse(), ...messages]);
   };
   useEffect(() => {
     if (initialMessagesLoaded.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
       initialMessagesLoaded.current = false;
+      return;
     }
-    if (!isLastPage) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight / currentPage + scrollRef.current.scrollTop;
-    }
+    const scrollDifference = scrollRef.current.scrollHeight - prevScrollHeight;
+    scrollRef.current.scrollTop += scrollDifference;
   }, [messages]);
+  const roomId = useMemo(() => {
+    const sortedUserIds = [auth_id, receiver.id].sort();
+    const roomId2 = sortedUserIds.join("");
+    return roomId2;
+  }, [auth_id, receiver.id]);
   useEffect(() => {
-    getChatMessages(`${appURL$1}/chat/messages/${receiver.id}`);
     initialMessagesLoaded.current = true;
-    const sortedUserIds = [auth_id, receiver == null ? void 0 : receiver.id].sort();
-    const roomId = sortedUserIds.join("");
+    getChatMessages(`${appURL$1}/chat/messages/${receiver.id}`, true);
     Echo.private(`messagereaded.${auth_id}`).listen("MessageReaded", (e) => {
       setReadedMessages(true);
     });
     Echo.join(`messenger.${roomId}`).listen("MessageSent", (e) => {
       getLastMessage();
     }).here((users) => {
-      console.log(users, "users");
     }).joining((user) => {
-      console.log(user.name, "user.name");
     }).leaving((user) => {
-      console.log(user.name, "user.name");
     }).error((error) => {
-      console.error(error);
     });
     return () => {
       Echo.leave(`messenger.${roomId}`);
       Echo.leave(`messagereaded.${auth_id}`);
     };
-  }, []);
+  }, [receiver]);
   return /* @__PURE__ */ jsx(
     UseInfiniteScroll,
     {
       request: getChatMessages,
       nextPageUrl,
-      childrenClassNames: "pr-5 w-full",
+      childrenClassNames: "md:pr-5 w-full",
       isReverseScroll: true,
       ref: scrollRef,
+      isLoadMoreTop: true,
       children: messages.map((message, index) => {
         const isReceived = isReceivedMessage(message);
         return /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsx(
@@ -606,7 +624,7 @@ function ChatMessages({ receiver, auth_id }) {
                   !isReceived && (message.status ? /* @__PURE__ */ jsxs(Fragment, { children: [
                     /* @__PURE__ */ jsx("i", { className: "fa fa-check", "aria-hidden": "true" }),
                     /* @__PURE__ */ jsx("i", { className: "fa fa-check", "aria-hidden": "true" })
-                  ] }) : !readedMesages && /* @__PURE__ */ jsx("i", { class: "fa fa-check", "aria-hidden": "true" })),
+                  ] }) : !readedMesages && /* @__PURE__ */ jsx("i", { className: "fa fa-check", "aria-hidden": "true" })),
                   !isReceived && (readedMesages && !message.status ? /* @__PURE__ */ jsxs(Fragment, { children: [
                     /* @__PURE__ */ jsx("i", { className: "fa fa-check", "aria-hidden": "true" }),
                     /* @__PURE__ */ jsx("i", { className: "fa fa-check", "aria-hidden": "true" })
@@ -623,9 +641,9 @@ function ChatMessages({ receiver, auth_id }) {
 function Avatar({ divClassName = "", imgClassName = "", size, user }) {
   const { public_url } = usePage().props;
   const sizeClass = {
-    lg: "avatar-lg",
-    sm: "avatar-sm",
-    xsm: "avatar-xsm"
+    lg: "w-[77px] h-[77px] lg:w-[150px] lg:h-[150px]",
+    sm: "w-full max-w-[50px] h-[50px]",
+    xsm: "w-[25px] h-[25px]"
   }[size];
   const imgSrc = user.avatar ? public_url + "/" + user.avatar.avatar : public_url + "/avatar_placeholder.jpg";
   return /* @__PURE__ */ jsx("div", { className: `cursor-pointer flex ${sizeClass} ${divClassName}`, children: /* @__PURE__ */ jsx(
@@ -636,28 +654,40 @@ function Avatar({ divClassName = "", imgClassName = "", size, user }) {
     }
   ) });
 }
-function ChatSidebar({ recentMessages, receiverId, auth_id }) {
-  return /* @__PURE__ */ jsx("div", { className: "user-list overflow-y-auto", children: recentMessages.map((el, index) => /* @__PURE__ */ jsxs(
-    Link,
+function ChatSidebar({ auth_id, nextPageUrl, chats, getChats, setReceiver }) {
+  const scrollRef = useRef(null);
+  const setReceiverIdHandler = (receiver) => {
+    setReceiver(receiver);
+  };
+  return /* @__PURE__ */ jsx(Fragment, { children: !!chats.length && /* @__PURE__ */ jsx("div", { className: "user-list overflow-y-auto", children: /* @__PURE__ */ jsx(
+    UseInfiniteScroll,
     {
-      href: `/chat/${el.user.id}`,
-      className: "flex px-5 py-3 transition hover:cursor-pointer hover:bg-slate-100",
-      children: [
-        /* @__PURE__ */ jsx("div", { className: "pr-4", children: /* @__PURE__ */ jsx(Avatar, { user: el.user, size: "sm" }) }),
-        /* @__PURE__ */ jsxs("div", { className: "w-full", children: [
-          /* @__PURE__ */ jsxs("div", { className: "flex items-center", children: [
-            /* @__PURE__ */ jsx("h3", { className: "text-md text-violet-500", children: el.user.name }),
-            !!el.user.online && /* @__PURE__ */ jsx("div", { className: "rounded-full ml-2 bg-cyan-500 p-1 h-1/2" })
-          ] }),
-          /* @__PURE__ */ jsxs("div", { className: "flex justify-between", children: [
-            /* @__PURE__ */ jsx("p", { className: !el.message.status && auth_id !== el.message.sender_id ? "font-bold h-5 overflow-hidden text-sm" : "h-5 overflow-hidden text-sm font-light text-gray-400", children: el.message.message }),
-            !el.message.status && auth_id !== el.message.sender_id && /* @__PURE__ */ jsx("div", { className: "rounded-full bg-cyan-500 px-2 text-white", children: "new" })
-          ] })
-        ] })
-      ]
-    },
-    index
-  )) });
+      ref: scrollRef,
+      request: getChats,
+      nextPageUrl,
+      children: chats.map((el, index) => /* @__PURE__ */ jsxs(
+        "div",
+        {
+          onClick: () => setReceiverIdHandler(el.user),
+          className: "flex px-5 py-3 transition hover:cursor-pointer hover:bg-slate-100",
+          children: [
+            /* @__PURE__ */ jsx("div", { className: "pr-4", children: /* @__PURE__ */ jsx(Avatar, { user: el.user, size: "sm" }) }),
+            /* @__PURE__ */ jsxs("div", { className: "w-full", children: [
+              /* @__PURE__ */ jsxs("div", { className: "flex items-center", children: [
+                /* @__PURE__ */ jsx("h3", { className: "text-md text-violet-500", children: el.user.name }),
+                !!el.user.online && /* @__PURE__ */ jsx("div", { className: "rounded-full ml-2 bg-cyan-500 p-1 h-1/2" })
+              ] }),
+              /* @__PURE__ */ jsxs("div", { className: "flex justify-between", children: [
+                /* @__PURE__ */ jsx("p", { className: !el.message.status && auth_id !== el.message.sender_id ? "font-bold h-5 overflow-hidden text-sm" : "h-5 overflow-hidden text-sm font-light text-gray-400", children: el.message.message }),
+                !el.message.status && auth_id !== el.message.sender_id && /* @__PURE__ */ jsx("div", { className: "rounded-full bg-cyan-500 px-2 text-white", children: "new" })
+              ] })
+            ] })
+          ]
+        },
+        index
+      ))
+    }
+  ) }) });
 }
 function ChatUserInfoHeader({ receiver }) {
   return /* @__PURE__ */ jsx("div", { className: "user-info-header bg-white Wpy-3", children: /* @__PURE__ */ jsx("div", { className: "flex justify-between", children: /* @__PURE__ */ jsxs("div", { className: "flex items-center", children: [
@@ -665,47 +695,147 @@ function ChatUserInfoHeader({ receiver }) {
     /* @__PURE__ */ jsx("h3", { className: "text-md pl-4 text-gray-400", children: receiver == null ? void 0 : receiver.name })
   ] }) }) });
 }
+function CommentLikeNotification({ userName, text, imagePath = null, birhday = null }) {
+  const { public_url } = usePage().props;
+  return /* @__PURE__ */ jsxs("div", { className: "flex justify-between", children: [
+    /* @__PURE__ */ jsx("div", { className: "mr-4", children: /* @__PURE__ */ jsxs("span", { className: "line-clamp-2", children: [
+      /* @__PURE__ */ jsxs("span", { className: "font-semibold", children: [
+        " ",
+        userName,
+        " "
+      ] }),
+      /* @__PURE__ */ jsx("span", { className: "text-sm font-normal", children: text }),
+      birhday && /* @__PURE__ */ jsx("div", { children: birhday })
+    ] }) }),
+    imagePath && /* @__PURE__ */ jsx("div", { className: "h-[70px] max-w-[70px] w-full", children: /* @__PURE__ */ jsx("img", { src: public_url + "/" + imagePath, className: "object-cover h-full" }) })
+  ] });
+}
+function NotificationItem({ el }) {
+  var _a;
+  let birhday = "";
+  if (el.notifiable_type.includes("User")) {
+    const date = new Date(el.data.user.birthday);
+    const month = date.toLocaleString("en", { month: "long" });
+    console.log(date, "date");
+    const number = ordinalSuffix(date.getDate());
+    birhday = month + " " + number;
+  }
+  return /* @__PURE__ */ jsx("div", { className: "mb-2", children: el.notifiable_type.includes("Like") ? /* @__PURE__ */ jsx(
+    CommentLikeNotification,
+    {
+      userName: el.data.user.name,
+      text: "liked your post: " + el.data.post.message,
+      imagePath: el.data.post.images[0].image_path
+    }
+  ) : el.notifiable_type.includes("Comment") ? /* @__PURE__ */ jsx(
+    CommentLikeNotification,
+    {
+      userName: el.data.user.name,
+      text: "left a comment on your post: " + el.data.comment,
+      imagePath: el.data.post.images[0].image_path
+    }
+  ) : el.notifiable_type.includes("User") ? /* @__PURE__ */ jsx(
+    CommentLikeNotification,
+    {
+      userName: el.data.user.name + "'s",
+      text: "birthday is approaching on",
+      birhday,
+      imagePath: (_a = el.data.user.avatar) == null ? void 0 : _a.avatar
+    }
+  ) : "" });
+}
+function NotificationSound() {
+  const { public_url } = usePage().props;
+  const play = () => {
+    const audio = new Audio(public_url + "/multi-pop.mp3");
+    const playAudio = () => {
+      audio.play();
+    };
+    audio.addEventListener("canplaythrough", playAudio);
+    return () => {
+      audio.removeEventListener("canplaythrough", playAudio);
+    };
+  };
+  return { play };
+}
 const MenuItem = ({ children: icone, linkUrl, linkTitle }) => {
   const { isChat } = usePage().props;
-  return /* @__PURE__ */ jsxs(Link, { href: linkUrl, className: "flex items-center font-medium py-4 cursor-pointer", children: [
-    /* @__PURE__ */ jsx("div", { children: icone }),
-    !isChat && /* @__PURE__ */ jsx("div", { className: "hidden md:block", children: linkTitle })
+  return /* @__PURE__ */ jsxs(Link, { href: linkUrl, className: "flex items-center justify-center lg:justify-start font-medium py-4 cursor-pointer", children: [
+    /* @__PURE__ */ jsx("div", { className: "lg:mr-3", children: icone }),
+    !isChat && /* @__PURE__ */ jsx("div", { className: "hidden lg:block", children: linkTitle })
   ] });
 };
 function BaseNav() {
-  const { new_messeges, isChat } = usePage().props;
+  const { new_messeges, isChat, new_notifications } = usePage().props;
   const [newMessages, setNewMessages] = useState(new_messeges);
+  const [newNotification, setNewNotification] = useState(new_notifications);
+  const [notifications, setNotifications] = useState([]);
   const { auth } = usePage().props;
+  const { play } = NotificationSound();
   useEffect(() => {
     Echo.private(`chatmessages.${auth.user.id}`).listen("ChatMessageSent", (e) => {
       setNewMessages(true);
+      play();
+      console.log(1);
     });
+    Echo.private(`notification.${auth.user.id}`).listen("NotificationSent", (e) => {
+      setNewNotification(true);
+      setNotifications((prevNotifications) => [...prevNotifications, ...e.data]);
+      play();
+      console.log(2);
+    });
+    return () => {
+      Echo.leave(`chatmessages.${auth.user.id}`);
+      Echo.leave(`notification.${auth.user.id}`);
+    };
   }, []);
+  useEffect(() => {
+    const processNotificationQueue = () => {
+      if (notifications.length > 0) {
+        setNotifications((prevNotifications) => prevNotifications.slice(1));
+      }
+    };
+    const interval = setInterval(() => {
+      processNotificationQueue();
+    }, 4e3);
+    return () => {
+      clearInterval(interval);
+    };
+  }, [notifications]);
   const classes = classNames({
-    "border-t px-6 w-full fixed bottom-0 bg-white md:relative md:max-w-16 md:py-8 md:border-t-0 md:border-r": true,
+    "border-t px-3 lg:px-6 fixed bottom-0 md:max-w-[72px] bg-white md:relative md:py-8 md:border-t-0 md:border-r lg:max-w-16 z-[11]": true,
+    "max-[769px]:w-full": isChat,
     "w-full": !isChat
   });
   const navClasses = classNames({
     "w-full justify-between ml-10 flex md:flex-col md:ml-0": true
   });
-  return /* @__PURE__ */ jsxs("div", { className: classes, children: [
-    /* @__PURE__ */ jsx("h1", { className: "sr-only", children: "Chatter" }),
-    /* @__PURE__ */ jsxs("div", { className: "flex md:block", children: [
-      /* @__PURE__ */ jsxs("div", { className: "flex items-center text-2xl md:mb-7", children: [
-        /* @__PURE__ */ jsx("div", { className: "bg-slate-900 px-2 rounded-lg font-bold text-['28px'] text-white", children: "C" }),
-        !isChat && /* @__PURE__ */ jsx("div", { className: "font-semibold hidden md:block", children: "hatter" })
-      ] }),
-      /* @__PURE__ */ jsxs("nav", { className: navClasses, children: [
-        /* @__PURE__ */ jsx(MenuItem, { linkUrl: route("home"), linkTitle: "Home", children: /* @__PURE__ */ jsx("i", { className: "fa fa-home mr-3 autowidth", "aria-hidden": "true" }) }),
-        /* @__PURE__ */ jsx(MenuItem, { linkUrl: route("home"), linkTitle: "Users", children: /* @__PURE__ */ jsx("i", { className: "fa fa-user mr-3 autowidth", "aria-hidden": "true" }) }),
-        /* @__PURE__ */ jsx(MenuItem, { linkUrl: route("chat.index"), linkTitle: "Messages", children: /* @__PURE__ */ jsxs("div", { className: "flex mr-3 relative", children: [
-          /* @__PURE__ */ jsx("i", { className: "fa fa-inbox autowidth", "aria-hidden": "true" }),
-          newMessages && typeof window !== "undefined" && !window.location.pathname.includes("/chat") && /* @__PURE__ */ jsx("div", { className: "rounded-full h-[15px] w-[15px] bg-red-500 absolute top-[-6px] right-[-4px]" })
-        ] }) }),
-        /* @__PURE__ */ jsx(MenuItem, { linkUrl: route("profile.show", auth.user.id), linkTitle: "Notifications", children: /* @__PURE__ */ jsx("i", { className: "fa fa-bell mr-3 autowidth", "aria-hidden": "true" }) }),
-        /* @__PURE__ */ jsx(MenuItem, { linkUrl: route("profile.show", auth.user.id), linkTitle: "Profile", children: /* @__PURE__ */ jsx(Avatar, { user: auth.user, size: "xsm", divClassName: "mr-3" }) })
+  return /* @__PURE__ */ jsxs(Fragment, { children: [
+    /* @__PURE__ */ jsxs("div", { className: classes, children: [
+      /* @__PURE__ */ jsx("h1", { className: "sr-only", children: "Chatter" }),
+      /* @__PURE__ */ jsxs("div", { className: "flex md:block", children: [
+        /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-center lg:justify-start text-2xl md:mb-7", children: [
+          /* @__PURE__ */ jsx("div", { className: "bg-slate-900 px-2 rounded-lg font-bold text-['28px'] text-white", children: "C" }),
+          !isChat && /* @__PURE__ */ jsx("div", { className: "font-semibold hidden lg:block", children: "hatter" })
+        ] }),
+        /* @__PURE__ */ jsxs("nav", { className: navClasses, children: [
+          /* @__PURE__ */ jsx(MenuItem, { linkUrl: route("home"), linkTitle: "Home", children: /* @__PURE__ */ jsx("i", { className: "fa fa-home autowidth", "aria-hidden": "true" }) }),
+          /* @__PURE__ */ jsx(MenuItem, { linkUrl: route("home"), linkTitle: "Users", children: /* @__PURE__ */ jsx("i", { className: "fa fa-user autowidth", "aria-hidden": "true" }) }),
+          /* @__PURE__ */ jsx(MenuItem, { linkUrl: route("chat.index"), linkTitle: "Messages", children: /* @__PURE__ */ jsxs("div", { className: "flex relative", children: [
+            /* @__PURE__ */ jsx("i", { className: "fa fa-inbox autowidth", "aria-hidden": "true" }),
+            newMessages && typeof window !== "undefined" && !window.location.pathname.includes("/chat") && /* @__PURE__ */ jsx("div", { className: "rounded-full h-[15px] w-[15px] bg-red-500 absolute top-[-6px] right-[-4px]" })
+          ] }) }),
+          /* @__PURE__ */ jsx(MenuItem, { linkUrl: route("notifications.index", auth.user.id), linkTitle: "Notifications", children: /* @__PURE__ */ jsxs("div", { className: "flex relative", children: [
+            /* @__PURE__ */ jsx("i", { className: "fa fa-bell autowidth", "aria-hidden": "true" }),
+            newNotification && typeof window !== "undefined" && !window.location.pathname.includes("/notification") && /* @__PURE__ */ jsx("div", { className: "rounded-full h-[15px] w-[15px] bg-red-500 absolute top-[-6px] right-[-4px]" })
+          ] }) }),
+          /* @__PURE__ */ jsx(MenuItem, { linkUrl: route("profile.show", auth.user.id), linkTitle: "Profile", children: /* @__PURE__ */ jsx(Avatar, { user: auth.user, size: "xsm" }) })
+        ] })
       ] })
-    ] })
+    ] }),
+    /* @__PURE__ */ jsx("div", { className: "fixed right-0 bottom-0 p-4 pb-1 sm:max-w-md", children: notifications.map((el) => {
+      return /* @__PURE__ */ jsx("div", { className: "bg-slate-950 text-white p-4 pb-2 mb-3 rounded-[15px]", children: /* @__PURE__ */ jsx(NotificationItem, { el }) });
+    }) })
   ] });
 }
 const AuthContext = createContext(null);
@@ -727,13 +857,26 @@ function Authenticated({ user, auth, header, children }) {
     ] }) })
   ] }) });
 }
-function Chat(props) {
+function Chat({ auth, errors, receiver: companion = null }) {
   var _a;
-  const { auth, errors, recentMessages: chatsList, receiver } = props;
-  const [chats, setChats] = useState([]);
   const [currentView, setCurrentView] = useState("showSidebar");
+  const [receiver, setReceiver] = useState(companion);
   const [isMobileView, setIsMobileView] = useState(false);
-  const getLastChat = async (userId = receiver.id) => {
+  const [chats, setChats] = useState([]);
+  const [nextPageUrl, setNextPageUrl] = useState("");
+  const hideSidebar = () => {
+    setCurrentView("hideSidebar");
+  };
+  const showSidebar = () => {
+    setCurrentView("showSidebar");
+  };
+  const getChats = async (url) => {
+    const resp = await fetch(url);
+    const json = await resp.json();
+    setNextPageUrl(json.next_page_url);
+    setChats([...chats, ...json.data]);
+  };
+  const getLastChat = async (userId = receiver == null ? void 0 : receiver.id) => {
     const resp = await fetch(`${appURL$1}/chat/lastChat/${userId}`);
     const json = await resp.json();
     setChats(
@@ -744,16 +887,28 @@ function Chat(props) {
     );
   };
   const getUpdatedChats = async () => {
-    const resp = await fetch(`${appURL$1}/chatList`);
+    const resp = await fetch(`${appURL$1}/chatList?limit=${chats.length}`);
     const json = await resp.json();
     setChats(json);
   };
-  const hideSidebar = () => {
-    setCurrentView("hideSidebar");
-  };
-  const showSidebar = () => {
-    setCurrentView("showSidebar");
-  };
+  useEffect(() => {
+    getChats(`${appURL$1}/chatList`);
+    Echo.private(`chatmessages.${auth.user.id}`).listen("ChatMessageSent", (e) => {
+      console.log("chatmessages");
+      getLastChat(e.user_id);
+    });
+    return () => {
+      Echo.leave(`chatmessages.${auth.user.id}`);
+    };
+  }, []);
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      getUpdatedChats();
+    }, 18e4);
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [chats]);
   useEffect(() => {
     const windowWidth = window.innerWidth;
     if (windowWidth <= 768) {
@@ -761,24 +916,11 @@ function Chat(props) {
       if (!receiver) {
         showSidebar();
       }
-      if (receiver) {
+      if (companion) {
         hideSidebar();
       }
     }
   }, [receiver]);
-  useEffect(() => {
-    setChats(chatsList);
-    Echo.private(`chatmessages.${auth.user.id}`).listen("ChatMessageSent", (e) => {
-      getLastChat(e.user_id);
-    });
-    const intervalId = setInterval(() => {
-      getUpdatedChats();
-    }, 18e4);
-    return () => {
-      clearInterval(intervalId);
-      Echo.leave(`chatmessages.${auth.user.id}`);
-    };
-  }, [chatsList]);
   const sidebarClasses = classNames({
     "border-r border-slate-100 bg-white pt-3 overflow-y-auto h-[100vh]": true,
     "hidden": currentView === "hideSidebar" && isMobileView,
@@ -786,7 +928,7 @@ function Chat(props) {
     "basis-2/6": !isMobileView
   });
   const chatWindowClasses = classNames({
-    "relative p-4 w-full": true,
+    "relative p-4 w-full h-screen": true,
     "basis-4/6": !isMobileView,
     "hidden": currentView === "showSidebar" && isMobileView
   });
@@ -794,9 +936,11 @@ function Chat(props) {
     /* @__PURE__ */ jsx("div", { className: sidebarClasses, children: /* @__PURE__ */ jsx(
       ChatSidebar,
       {
-        recentMessages: chats,
-        receiverId: receiver == null ? void 0 : receiver.id,
-        auth_id: auth.user.id
+        setReceiver,
+        auth_id: auth.user.id,
+        nextPageUrl,
+        chats,
+        getChats
       }
     ) }),
     /* @__PURE__ */ jsx("div", { className: chatWindowClasses, children: (receiver == null ? void 0 : receiver.id) ? /* @__PURE__ */ jsxs(Fragment, { children: [
@@ -873,9 +1017,7 @@ function Modal({ children, show = false, maxWidth = "2xl", closeable = true, onC
               Dialog.Panel,
               {
                 className: `max-h-148 items-center bg-white rounded-lg overflow-hidden shadow-xl
-                         transform transition-all sm:w-full sm:mx-auto ${maxWidthClass}
-
-                         `,
+                         transform transition-all w-full sm:mx-auto ${maxWidthClass}`,
                 children
               }
             )
@@ -885,180 +1027,6 @@ function Modal({ children, show = false, maxWidth = "2xl", closeable = true, onC
     }
   ) });
 }
-function CommentsForm({ postId, auth, setComments }) {
-  const {
-    data,
-    setData,
-    post: create,
-    processing,
-    reset,
-    errors
-  } = useForm({
-    comment: ""
-  });
-  const submitComment = async (e) => {
-    e.preventDefault();
-    const resp = await axios.post(route("posts.comments.store", {
-      post: postId,
-      comment: data.comment
-    }));
-    const comment = resp.data;
-    comment.user = auth.user;
-    const commentArr = [comment];
-    setComments((prevComments) => {
-      return [...commentArr, ...prevComments];
-    });
-  };
-  return /* @__PURE__ */ jsx("div", { className: "post_comments_form mt-5", children: /* @__PURE__ */ jsxs("form", { onSubmit: submitComment, className: "flex", children: [
-    /* @__PURE__ */ jsxs("div", { className: "mr-5 w-full", children: [
-      /* @__PURE__ */ jsx(
-        TextInput,
-        {
-          type: "text",
-          name: "comment",
-          className: "w-full",
-          value: data.comment,
-          onChange: (e) => {
-            setData("comment", e.target.value);
-          },
-          placeholder: "Add a comment"
-        }
-      ),
-      /* @__PURE__ */ jsx(InputError, { message: errors.comment, className: "mt-2" })
-    ] }),
-    /* @__PURE__ */ jsx(PrimaryButton, { disabled: processing, children: "Post" })
-  ] }) });
-}
-function Comments({ postId }) {
-  const { auth } = usePage().props;
-  const [comments, setComments] = useState([]);
-  const [nextPageUrl, setNextPageUrl] = useState("");
-  const scrollRef = useRef(null);
-  const commentsRequest = async (url) => {
-    const resp = await fetch(url);
-    const json = await resp.json();
-    setNextPageUrl(json.next_page_url);
-    setComments((prevComments) => {
-      const uniqueComments = json.data.filter((newComment) => {
-        return !prevComments.some((prevComment) => prevComment.id === newComment.id);
-      });
-      return [...prevComments, ...uniqueComments];
-    });
-  };
-  useEffect(() => {
-    commentsRequest(`${appURL$1}/post-comments/${postId}`);
-  }, []);
-  return /* @__PURE__ */ jsxs(Fragment, { children: [
-    /* @__PURE__ */ jsx(
-      UseInfiniteScroll,
-      {
-        request: commentsRequest,
-        nextPageUrl,
-        childrenClassNames: "max-h-[55vh] pb-[40px]",
-        ref: scrollRef,
-        children: comments.map((comment) => {
-          return /* @__PURE__ */ jsx(Comment, { user: comment.user, comment, auth }, comment.id);
-        })
-      }
-    ),
-    /* @__PURE__ */ jsx("div", { className: "absolute bottom-[14px] left-[14px] right-[15px]", children: /* @__PURE__ */ jsx(CommentsForm, { postId, auth, setComments }) })
-  ] });
-}
-function Comment({ user, comment, auth }) {
-  const [isOpenOptions, setIsOpenOptions] = useState(false);
-  const {
-    data,
-    setData,
-    delete: destroy,
-    processing,
-    reset,
-    errors
-  } = useForm({
-    comment: ""
-  });
-  const deleteComment = (e) => {
-    e.preventDefault();
-    destroy(route("comments.destroy", comment.id));
-  };
-  const open = () => {
-    setIsOpenOptions(true);
-  };
-  const close = () => {
-    setIsOpenOptions(false);
-  };
-  return /* @__PURE__ */ jsxs("div", { className: "mb-4 flex justify-between", children: [
-    /* @__PURE__ */ jsxs("div", { className: "flex", children: [
-      /* @__PURE__ */ jsx(Avatar, { size: "sm", user }),
-      /* @__PURE__ */ jsxs("div", { className: "px-4 py-1", children: [
-        /* @__PURE__ */ jsx("span", { className: "font-bold text-sm mr-1", children: user.name }),
-        /* @__PURE__ */ jsx("span", { children: comment.comment })
-      ] })
-    ] }),
-    /* @__PURE__ */ jsx("div", { onClick: open, children: /* @__PURE__ */ jsxs("svg", { "aria-label": "More options", fill: "currentColor", height: "24", role: "img", viewBox: "0 0 24 24", width: "24", children: [
-      /* @__PURE__ */ jsx("title", { children: "More options" }),
-      /* @__PURE__ */ jsx("circle", { cx: "12", cy: "12", r: "1.5" }),
-      /* @__PURE__ */ jsx("circle", { cx: "6", cy: "12", r: "1.5" }),
-      /* @__PURE__ */ jsx("circle", { cx: "18", cy: "12", r: "1.5" })
-    ] }) }),
-    /* @__PURE__ */ jsxs(Modal, { show: isOpenOptions, onClose: close, maxWidth: "sm", children: [
-      user.id === auth.user.id && /* @__PURE__ */ jsx("div", { className: "delete_comment border-b border-slate-100", children: /* @__PURE__ */ jsx("form", { onSubmit: deleteComment, className: "flex justify-center", children: /* @__PURE__ */ jsx(TransparentButton, { disableAutofocus: true, className: "h-full w-full text-red-700 p-4", children: "Delete" }) }) }),
-      /* @__PURE__ */ jsx(TransparentButton, { disableAutofocus: true, className: "h-full w-full text-black-700 p-4", onClick: close, children: "Cancel" })
-    ] })
-  ] });
-}
-const __vite_glob_0_8 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  Comment,
-  default: Comments
-}, Symbol.toStringTag, { value: "Module" }));
-function PostHeader({ post, classNames: classNames2 }) {
-  return /* @__PURE__ */ jsxs("div", { className: `post-user border-b border-slate-100 border-solid p-4 flex items-center justify-between ` + classNames2, children: [
-    /* @__PURE__ */ jsx(Link, { href: route("profile.show", post.user.id), children: /* @__PURE__ */ jsxs("div", { className: "flex items-center", children: [
-      /* @__PURE__ */ jsx(Avatar, { user: post.user, size: "sm", divClassName: "mr-4" }),
-      /* @__PURE__ */ jsx("div", { className: "font-bold text-sm", children: post.user.name })
-    ] }) }),
-    /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsxs("svg", { "aria-label": "More options", fill: "currentColor", height: "24", role: "img", viewBox: "0 0 24 24", width: "24", children: [
-      /* @__PURE__ */ jsx("title", { children: "More options" }),
-      /* @__PURE__ */ jsx("circle", { cx: "12", cy: "12", r: "1.5" }),
-      /* @__PURE__ */ jsx("circle", { cx: "6", cy: "12", r: "1.5" }),
-      /* @__PURE__ */ jsx("circle", { cx: "18", cy: "12", r: "1.5" })
-    ] }) })
-  ] });
-}
-const __vite_glob_0_11 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  default: PostHeader
-}, Symbol.toStringTag, { value: "Module" }));
-function ShowPostModal(props) {
-  const { post } = props;
-  const { public_url } = usePage().props;
-  return /* @__PURE__ */ jsx(Modal, { ...props, children: /* @__PURE__ */ jsxs("div", { className: "flex", children: [
-    !!post.images && /* @__PURE__ */ jsx(
-      "div",
-      {
-        className: "w-full max-w-3xl relative pt-59 bg-black	",
-        children: /* @__PURE__ */ jsx("img", { className: "w-full absolute object-contain top-0 h-full", src: public_url + "/" + post.images[0].image_path })
-      }
-    ),
-    /* @__PURE__ */ jsxs("div", { className: "w-full max-w-md relative", children: [
-      /* @__PURE__ */ jsx(PostHeader, { post }),
-      /* @__PURE__ */ jsxs("div", { className: "p-4", children: [
-        /* @__PURE__ */ jsx("div", { className: "post-message", children: !!post.message && /* @__PURE__ */ jsxs("div", { className: "flex mb-4", children: [
-          /* @__PURE__ */ jsx(Avatar, { size: "sm", user: post.user }),
-          /* @__PURE__ */ jsxs("div", { className: "px-4 py-1", children: [
-            /* @__PURE__ */ jsx("span", { className: "font-bold text-sm mr-1", children: post.user.name }),
-            /* @__PURE__ */ jsx("span", { children: post.message })
-          ] })
-        ] }) }),
-        /* @__PURE__ */ jsx("div", { className: "post-comments w-full", children: /* @__PURE__ */ jsx(Comments, { postId: post.id }) })
-      ] })
-    ] })
-  ] }) });
-}
-const __vite_glob_0_14 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  default: ShowPostModal
-}, Symbol.toStringTag, { value: "Module" }));
 function Unfollow({ user, follower, setUsersList = null }) {
   const {
     delete: destroy,
@@ -1092,7 +1060,7 @@ function Unfollow({ user, follower, setUsersList = null }) {
     }
   ) });
 }
-const __vite_glob_0_25 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const __vite_glob_0_19 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Unfollow
 }, Symbol.toStringTag, { value: "Module" }));
@@ -1136,7 +1104,7 @@ function Follow({ user, following_id, setUsersList }) {
     /* @__PURE__ */ jsx(Modal, { show: isOpenLogin, onClose: closeLoginModal, children: /* @__PURE__ */ jsx(Login, { canResetPassword: true, canLogin: true }) })
   ] });
 }
-const __vite_glob_0_16 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const __vite_glob_0_10 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Follow
 }, Symbol.toStringTag, { value: "Module" }));
@@ -1173,12 +1141,10 @@ function LoadedUsersList({
           /* @__PURE__ */ jsx("div", { className: "border-b text-center p-3 font-medium", onClick: closeUsersListModal, children: heading }),
           usersList.map((el) => {
             var _a;
-            console.log(el, "el");
             return /* @__PURE__ */ jsxs("div", { className: "flex items-center p-4 justify-between", children: [
               /* @__PURE__ */ jsxs("div", { className: "flex items-center", children: [
                 /* @__PURE__ */ jsx(Avatar, { size: "sm", user: el.user, divClassName: "mr-4" }),
-                el.user.name,
-                el.user.id
+                el.user.name
               ] }),
               auth.user.id !== el.user.id && /* @__PURE__ */ jsx(Fragment, { children: el.authUserFollowed ? /* @__PURE__ */ jsx(
                 Unfollow,
@@ -1202,67 +1168,224 @@ function LoadedUsersList({
     ) })
   ] });
 }
-const __vite_glob_0_18 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const __vite_glob_0_12 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   LoadUsersContext,
   default: LoadedUsersList
 }, Symbol.toStringTag, { value: "Module" }));
-function PostLikesInterface({ postLickesCount, post }) {
+function PostLikesInterface({ postLikesCount, post }) {
   const { setIsOpenUsersList, usersListRequest } = useContext(LoadUsersContext);
   const usersReuestHandler = () => {
     usersListRequest(`${appURL$1}/like/likers/${post.id}`);
     setIsOpenUsersList(true);
   };
-  return /* @__PURE__ */ jsx("div", { onClick: () => usersReuestHandler(), children: strPlural("like", postLickesCount) });
+  return /* @__PURE__ */ jsx("div", { onClick: () => usersReuestHandler(), className: "cursor-pointer", children: strPlural("like", postLikesCount) });
 }
-const __vite_glob_0_12 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  default: PostLikesInterface
-}, Symbol.toStringTag, { value: "Module" }));
-function Likes({ post }) {
-  const { post: store } = useForm$1();
+function Likes({ post, posts }) {
+  const { post: store, processing } = useForm();
   const likeRequest = (e) => {
-    console.log(e);
     e.preventDefault();
     store(route("like.index", post.id), {
       preserveScroll: true,
       onSuccess: () => {
-        setIsLiked((prevIsLiked) => !prevIsLiked);
-        if (!isLiked) {
-          setPostLickesCount(postLickesCount + 1);
+        if (!post.liked) {
+          posts[posts.indexOf(post)].liked = true;
+          posts[posts.indexOf(post)].likes_count = post.likes_count + 1;
         } else {
-          setPostLickesCount(postLickesCount - 1);
+          posts[posts.indexOf(post)].liked = false;
+          posts[posts.indexOf(post)].likes_count = post.likes_count - 1;
         }
       }
     });
   };
-  const [isLiked, setIsLiked] = useState(false);
-  const [postLickesCount, setPostLickesCount] = useState(0);
-  useEffect(() => {
-    var _a;
-    if ((_a = post.likes) == null ? void 0 : _a.length) {
-      setIsLiked(true);
-    }
-    if (post.likes_count) {
-      setPostLickesCount(post.likes_count);
-    }
-  }, []);
   const likeBTNclassNames = classNames({
-    "far": !isLiked,
-    "fa text-red-500": isLiked,
+    "far": !post.liked,
+    "fa text-red-500": post.liked,
     "fa-heart text-[23px]": true
   });
-  return /* @__PURE__ */ jsxs("div", { children: [
-    /* @__PURE__ */ jsx("div", { className: "py-2 cursor-pointer", children: /* @__PURE__ */ jsx("form", { onSubmit: likeRequest, children: /* @__PURE__ */ jsx(TransparentButton, { children: /* @__PURE__ */ jsx("i", { className: likeBTNclassNames, "aria-hidden": "true" }) }) }) }),
-    !!postLickesCount && /* @__PURE__ */ jsx(LoadedUsersList, { heading: "Likes", children: /* @__PURE__ */ jsx(PostLikesInterface, { postLickesCount, post }) })
+  return /* @__PURE__ */ jsxs("div", { className: "z-10", children: [
+    /* @__PURE__ */ jsx("div", { className: "py-2 cursor-pointer", children: /* @__PURE__ */ jsx("form", { onSubmit: likeRequest, children: /* @__PURE__ */ jsx(TransparentButton, { disabled: processing, children: /* @__PURE__ */ jsx("i", { className: likeBTNclassNames, "aria-hidden": "true" }) }) }) }),
+    !!post.likes_count && /* @__PURE__ */ jsx(LoadedUsersList, { heading: "Likes", children: /* @__PURE__ */ jsx(PostLikesInterface, { postLikesCount: post.likes_count, post }) })
   ] });
 }
-const __vite_glob_0_10 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  default: Likes
-}, Symbol.toStringTag, { value: "Module" }));
+function CommentsForm({ post, posts, auth, setComments }) {
+  const [errors, setErrors] = useState("");
+  const {
+    data,
+    setData,
+    processing,
+    reset
+  } = useForm({
+    comment: ""
+  });
+  const submitComment = async (e) => {
+    e.preventDefault();
+    try {
+      const resp = await axios.post(route("posts.comments.store", {
+        post: post.id,
+        comment: data.comment
+      }));
+      reset("comment");
+      const comment = resp.data;
+      comment.user = auth.user;
+      const commentArr = [comment];
+      setComments((prevComments) => {
+        return [...commentArr, ...prevComments];
+      });
+    } catch (e2) {
+      setErrors(e2.response.data.message);
+    }
+  };
+  return /* @__PURE__ */ jsxs("div", { className: "post_comments_form mt-5 bg-white", children: [
+    /* @__PURE__ */ jsx(Likes, { post, posts }),
+    /* @__PURE__ */ jsxs("form", { onSubmit: submitComment, className: "flex items-start", children: [
+      /* @__PURE__ */ jsxs("div", { className: "mr-5 w-full", children: [
+        /* @__PURE__ */ jsx(
+          TextInput,
+          {
+            type: "text",
+            name: "comment",
+            className: "w-full",
+            value: data.comment,
+            onChange: (e) => {
+              setData("comment", e.target.value);
+            },
+            placeholder: "Add a comment"
+          }
+        ),
+        errors && /* @__PURE__ */ jsx(InputError, { message: errors, className: "mt-2" })
+      ] }),
+      /* @__PURE__ */ jsx(PrimaryButton, { disabled: processing, className: "!p-3", children: "Post" })
+    ] })
+  ] });
+}
+function Comments({ post, posts }) {
+  const { auth } = usePage().props;
+  const [comments, setComments] = useState([]);
+  const [nextPageUrl, setNextPageUrl] = useState("");
+  const scrollRef = useRef(null);
+  const commentsRequest = async (url) => {
+    const resp = await fetch(url);
+    const json = await resp.json();
+    setNextPageUrl(json.next_page_url);
+    setComments((prevComments) => {
+      const uniqueComments = json.data.filter((newComment) => {
+        return !prevComments.some((prevComment) => prevComment.id === newComment.id);
+      });
+      return [...prevComments, ...uniqueComments];
+    });
+  };
+  useEffect(() => {
+    commentsRequest(`${appURL$1}/post-comments/${post.id}`);
+  }, []);
+  return /* @__PURE__ */ jsxs(Fragment, { children: [
+    /* @__PURE__ */ jsx(
+      UseInfiniteScroll,
+      {
+        request: commentsRequest,
+        nextPageUrl,
+        childrenClassNames: "max-h-[400px] h-full mb-[100px]",
+        ref: scrollRef,
+        children: comments.map((comment) => {
+          return /* @__PURE__ */ jsx(Comment, { user: comment.user, comment, auth }, comment.id);
+        })
+      }
+    ),
+    /* @__PURE__ */ jsx("div", { className: "absolute bottom-[14px] left-[14px] right-[15px]", children: /* @__PURE__ */ jsx(CommentsForm, { post, posts, auth, setComments }) })
+  ] });
+}
+function Comment({ user, comment, auth }) {
+  const [isOpenOptions, setIsOpenOptions] = useState(false);
+  const [isDeleted, setIsDeleted] = useState(false);
+  const {
+    data,
+    setData,
+    delete: destroy,
+    processing,
+    reset,
+    errors
+  } = useForm({
+    comment: ""
+  });
+  const deleteComment = (e) => {
+    e.preventDefault();
+    destroy(route("comments.destroy", comment.id));
+    close();
+    setIsDeleted(true);
+  };
+  const open = () => {
+    setIsOpenOptions(true);
+  };
+  const close = () => {
+    setIsOpenOptions(false);
+  };
+  const classes = classNames({
+    "mb-4 flex justify-between": true,
+    "hidden": isDeleted
+  });
+  return /* @__PURE__ */ jsxs("div", { className: classes, children: [
+    /* @__PURE__ */ jsxs("div", { className: "flex", children: [
+      /* @__PURE__ */ jsx(Avatar, { size: "sm", user }),
+      /* @__PURE__ */ jsxs("div", { className: "px-4 py-1", children: [
+        /* @__PURE__ */ jsx("span", { className: "font-bold text-sm mr-1", children: user.name }),
+        /* @__PURE__ */ jsx("span", { children: comment.comment })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsx("div", { onClick: open, children: /* @__PURE__ */ jsxs("svg", { "aria-label": "More options", fill: "currentColor", height: "24", role: "img", viewBox: "0 0 24 24", width: "24", children: [
+      /* @__PURE__ */ jsx("title", { children: "More options" }),
+      /* @__PURE__ */ jsx("circle", { cx: "12", cy: "12", r: "1.5" }),
+      /* @__PURE__ */ jsx("circle", { cx: "6", cy: "12", r: "1.5" }),
+      /* @__PURE__ */ jsx("circle", { cx: "18", cy: "12", r: "1.5" })
+    ] }) }),
+    /* @__PURE__ */ jsxs(Modal, { show: isOpenOptions, onClose: close, maxWidth: "sm", children: [
+      user.id === auth.user.id && /* @__PURE__ */ jsx("div", { className: "delete_comment border-b border-slate-100", children: /* @__PURE__ */ jsx("form", { onSubmit: deleteComment, className: "flex justify-center", children: /* @__PURE__ */ jsx(TransparentButton, { disableAutofocus: true, className: "h-full w-full text-red-700 p-4", children: "Delete" }) }) }),
+      /* @__PURE__ */ jsx(TransparentButton, { disableAutofocus: true, className: "h-full w-full text-black-700 p-4", onClick: close, children: "Cancel" })
+    ] })
+  ] });
+}
+function PostHeader({ post, classNames: classNames2 }) {
+  return /* @__PURE__ */ jsxs("div", { className: `post-user border-b border-slate-100 border-solid p-4 flex items-center justify-between ` + classNames2, children: [
+    /* @__PURE__ */ jsx(Link, { href: route("profile.show", post.user.id), children: /* @__PURE__ */ jsxs("div", { className: "flex items-center", children: [
+      /* @__PURE__ */ jsx(Avatar, { user: post.user, size: "sm", divClassName: "mr-4" }),
+      /* @__PURE__ */ jsx("div", { className: "font-bold text-sm", children: post.user.name })
+    ] }) }),
+    /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsxs("svg", { "aria-label": "More options", fill: "currentColor", height: "24", role: "img", viewBox: "0 0 24 24", width: "24", children: [
+      /* @__PURE__ */ jsx("title", { children: "More options" }),
+      /* @__PURE__ */ jsx("circle", { cx: "12", cy: "12", r: "1.5" }),
+      /* @__PURE__ */ jsx("circle", { cx: "6", cy: "12", r: "1.5" }),
+      /* @__PURE__ */ jsx("circle", { cx: "18", cy: "12", r: "1.5" })
+    ] }) })
+  ] });
+}
+function ShowPostModal({ post, posts, ...props }) {
+  const { public_url } = usePage().props;
+  return /* @__PURE__ */ jsx(Modal, { ...props, children: /* @__PURE__ */ jsxs("div", { className: "flex", children: [
+    !!post.images && /* @__PURE__ */ jsx(
+      "div",
+      {
+        className: "w-full max-w-3xl relative pt-59 bg-black hidden md:block",
+        children: /* @__PURE__ */ jsx("img", { className: "w-full absolute object-contain top-0 h-full", src: public_url + "/" + post.images[0].image_path })
+      }
+    ),
+    /* @__PURE__ */ jsxs("div", { className: "w-full md:max-w-md relative", children: [
+      /* @__PURE__ */ jsx(PostHeader, { post }),
+      /* @__PURE__ */ jsxs("div", { className: "p-4", children: [
+        /* @__PURE__ */ jsx("div", { className: "post-message", children: !!post.message && /* @__PURE__ */ jsxs("div", { className: "flex mb-4", children: [
+          /* @__PURE__ */ jsx(Avatar, { size: "sm", user: post.user }),
+          /* @__PURE__ */ jsxs("div", { className: "px-4 py-1", children: [
+            /* @__PURE__ */ jsx("span", { className: "font-bold text-sm mr-1", children: post.user.name }),
+            /* @__PURE__ */ jsx("span", { children: post.message })
+          ] })
+        ] }) }),
+        /* @__PURE__ */ jsx("div", { className: "post-comments w-full", children: /* @__PURE__ */ jsx(Comments, { post, posts }) })
+      ] })
+    ] })
+  ] }) });
+}
 function PostsList({ posts, postsRequest, nextPageUrl, grid = "default" }) {
   const [isOpenPost, setIsOpenPost] = useState(false);
+  const [gridValue, setGridValue] = useState(grid);
+  const [postToSctoll, setPostToScroll] = useState(null);
   const [post, setPost] = useState([]);
   const showPost = (post2) => {
     setPost(post2);
@@ -1271,34 +1394,71 @@ function PostsList({ posts, postsRequest, nextPageUrl, grid = "default" }) {
   const closePost = () => {
     setIsOpenPost(false);
   };
+  const postMobileClickHandler = (postId) => {
+    setGridValue("vertical");
+    setPostToScroll(postId);
+  };
   const gridClasses = {
-    "default": "gap-x-2 gap-y-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
-    "home": "gap-y-4 grid grid-cols-1"
-  }[grid];
-  return /* @__PURE__ */ jsxs("div", { className: "user-posts " + gridClasses, children: [
-    isOpenPost ? /* @__PURE__ */ jsx(
-      ShowPostModal,
-      {
-        post,
-        show: isOpenPost,
-        onClose: closePost,
-        maxWidth: "6xl"
-      }
-    ) : null,
-    posts.map((post2) => {
-      return /* @__PURE__ */ jsx(Post, { post: post2, grid, showPost });
-    }),
+    "default": "gap-x-[1px] md:gap-x-1 gap-y-[1px] md:gap-y-1 grid grid-cols-3",
+    "vertical": "gap-y-4 grid grid-cols-1"
+  }[gridValue];
+  return /* @__PURE__ */ jsxs(Fragment, { children: [
+    /* @__PURE__ */ jsxs("div", { className: "user-posts " + gridClasses, children: [
+      isOpenPost ? /* @__PURE__ */ jsx(
+        ShowPostModal,
+        {
+          post,
+          posts,
+          show: isOpenPost,
+          onClose: closePost,
+          maxWidth: "6xl"
+        }
+      ) : null,
+      posts.map((post2) => {
+        return /* @__PURE__ */ jsx("div", { className: "relative", children: /* @__PURE__ */ jsx(
+          Post,
+          {
+            post: post2,
+            posts,
+            grid: gridValue,
+            showPost,
+            postMobileClickHandler,
+            postToSctoll
+          }
+        ) }, post2.id);
+      })
+    ] }),
     /* @__PURE__ */ jsx(UseInfiniteScroll, { request: postsRequest, nextPageUrl })
   ] });
 }
-const Post = ({ post, grid, showPost }) => {
+const Post = ({ post, posts, grid, showPost, postMobileClickHandler, postToSctoll }) => {
   const { public_url } = usePage().props;
-  return /* @__PURE__ */ jsxs("div", { className: grid !== "home" && "cursor-pointer", children: [
-    grid === "home" && /* @__PURE__ */ jsx(PostHeader, { post, classNames: "px-0" }),
-    /* @__PURE__ */ jsx("div", { onClick: () => showPost(post), className: "cursor-pointer", children: /* @__PURE__ */ jsx("img", { src: public_url + "/" + post.images[0].image_path, className: "object-cover h-full" }) }),
-    grid === "home" && /* @__PURE__ */ jsxs(Fragment, { children: [
+  const postRef = useRef(null);
+  const classes = classNames({
+    "h-full": grid !== "vertical"
+  });
+  const mobileClickHandler = (postId) => {
+    postMobileClickHandler(postId);
+  };
+  useEffect(() => {
+    if (grid === "vertical" && postToSctoll === post.id) {
+      postRef.current.scrollIntoView();
+    }
+  }, [postToSctoll]);
+  return /* @__PURE__ */ jsxs("div", { ref: postRef, children: [
+    grid === "default" && /* @__PURE__ */ jsx(
+      "div",
+      {
+        className: "absolute top-0 right-0 bottom-0 left-0 md:hidden cursor-pointer",
+        onClick: () => mobileClickHandler(post.id)
+      }
+    ),
+    grid === "vertical" && /* @__PURE__ */ jsx(PostHeader, { post }),
+    /* @__PURE__ */ jsx("div", { className: "absolute top-0 right-0 bottom-0 left-0 hidden md:block cursor-pointer", onClick: () => showPost(post) }),
+    /* @__PURE__ */ jsx("div", { className: classes, children: /* @__PURE__ */ jsx("img", { src: public_url + "/" + post.images[0].image_path, className: "object-cover h-full" }) }),
+    grid === "vertical" && /* @__PURE__ */ jsx(Fragment, { children: /* @__PURE__ */ jsxs("div", { className: "px-3 md:px-0", children: [
       /* @__PURE__ */ jsxs("div", { className: "flex leading-none mt-1 mb-2", children: [
-        /* @__PURE__ */ jsx(Likes, { post }),
+        /* @__PURE__ */ jsx(Likes, { post, posts }),
         /* @__PURE__ */ jsx("div", { className: "p-2 cursor-pointer", onClick: () => showPost(post), children: /* @__PURE__ */ jsx("i", { className: "far fa-comment text-[23px]", style: { "transform": "rotateY(180deg)" }, "aria-hidden": "true" }) })
       ] }),
       /* @__PURE__ */ jsxs("div", { className: "leading-none", children: [
@@ -1317,13 +1477,9 @@ const Post = ({ post, grid, showPost }) => {
           ]
         }
       )
-    ] })
-  ] }, post.id);
+    ] }) })
+  ] });
 };
-const __vite_glob_0_13 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  default: PostsList
-}, Symbol.toStringTag, { value: "Module" }));
 function Home({ auth }) {
   const [nextPageUrl, setNextPageUrl] = useState("");
   const [posts, setPosts] = useState([]);
@@ -1342,13 +1498,13 @@ function Home({ auth }) {
       auth,
       user: auth.user,
       header: /* @__PURE__ */ jsx("h2", { className: "font-semibold text-xl text-gray-800 leading-tight", children: "Home" }),
-      children: /* @__PURE__ */ jsx("div", { className: "max-w-lg mx-auto", children: /* @__PURE__ */ jsx(
+      children: /* @__PURE__ */ jsx("div", { className: "w-full md:max-w-lg mx-auto", children: /* @__PURE__ */ jsx(
         PostsList,
         {
           posts,
           postsRequest,
           nextPageUrl,
-          grid: "home"
+          grid: "vertical"
         }
       ) })
     }
@@ -1358,42 +1514,48 @@ const __vite_glob_0_7 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.def
   __proto__: null,
   default: Home
 }, Symbol.toStringTag, { value: "Module" }));
-function PreviewImageOnUploading({ setData, inputName, errors, buttonLabel = "Add image" }) {
-  const addImageInput = useRef(null);
-  const [previewImage, setPreviewImage] = useState("");
-  const handleImageChange = (e) => {
-    const imgage = URL.createObjectURL(e.target.files[0]);
-    setData(inputName, e.target.files[0]);
-    setPreviewImage(imgage);
+function Notifications({ auth }) {
+  const [notifications, setNotifications] = useState([]);
+  const [nextPageUrl, setNextPageUrl] = useState("");
+  const notificationsRequest = async (url) => {
+    const resp = await fetch(url);
+    const json = await resp.json();
+    setNextPageUrl(json.next_page_url);
+    setNotifications([...notifications, ...json.data]);
   };
-  const handleAddingPostImage = () => {
-    addImageInput.current.click();
-  };
-  const handleDeletingPostImage = () => {
-    setData(inputName, "");
-    setPreviewImage("");
-  };
-  return /* @__PURE__ */ jsxs(Fragment, { children: [
-    previewImage && /* @__PURE__ */ jsx("div", { className: "mb-6", children: /* @__PURE__ */ jsx("img", { src: previewImage, className: "max-h-[500px] w-full object-contain" }) }),
-    /* @__PURE__ */ jsxs("div", { className: "mb-6", children: [
-      /* @__PURE__ */ jsx(InputLabel, { htmlFor: "image-path", value: "Message", className: "sr-only" }),
-      !previewImage && /* @__PURE__ */ jsx(PrimaryButton, { type: "button", onClick: handleAddingPostImage, children: buttonLabel }),
-      previewImage && /* @__PURE__ */ jsx(PrimaryButton, { type: "button", onClick: handleDeletingPostImage, children: "Delete image" }),
-      /* @__PURE__ */ jsx(
-        TextInput,
-        {
-          id: "image_path",
-          type: "file",
-          hidden: true,
-          name: inputName,
-          onChange: (e) => handleImageChange(e),
-          placeholder: "Image",
-          ref: addImageInput
-        }
-      ),
-      !previewImage && /* @__PURE__ */ jsx(InputError, { message: errors.images, className: "mt-2" })
-    ] })
-  ] });
+  useEffect(() => {
+    notificationsRequest(`${appURL$1}/notifications/list`);
+  }, []);
+  return /* @__PURE__ */ jsx(Fragment, { children: /* @__PURE__ */ jsx(
+    Authenticated,
+    {
+      auth,
+      user: auth.user,
+      header: /* @__PURE__ */ jsx("h2", { className: "font-semibold text-xl text-gray-800 leading-tight", children: "Notifications" }),
+      children: /* @__PURE__ */ jsxs("div", { className: "mx-auto w-full max-w-lg p-3 md:p-6", children: [
+        /* @__PURE__ */ jsx("h1", { className: "text-2xl font-semibold mb-4", children: "Notifications" }),
+        notifications.map((el) => {
+          return /* @__PURE__ */ jsx(NotificationItem, { el });
+        }),
+        /* @__PURE__ */ jsx(UseInfiniteScroll, { request: notificationsRequest, nextPageUrl })
+      ] })
+    }
+  ) });
+}
+const __vite_glob_0_8 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: Notifications
+}, Symbol.toStringTag, { value: "Module" }));
+function DangerButton({ className = "", disabled, children, ...props }) {
+  return /* @__PURE__ */ jsx(
+    "button",
+    {
+      ...props,
+      className: `inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500 active:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150 ${disabled && "opacity-25"} ` + className,
+      disabled,
+      children
+    }
+  );
 }
 function SecondaryButton({ type = "button", className = "", disabled, children, ...props }) {
   return /* @__PURE__ */ jsx(
@@ -1402,95 +1564,6 @@ function SecondaryButton({ type = "button", className = "", disabled, children, 
       ...props,
       type,
       className: `inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150 ${disabled && "opacity-25"} ` + className,
-      disabled,
-      children
-    }
-  );
-}
-function TextArea({ type = "text", className = "", isFocused = false, ...props }) {
-  const input = useRef(null);
-  useEffect(() => {
-    if (isFocused) {
-      input.current.focus();
-    }
-  }, []);
-  return /* @__PURE__ */ jsx(
-    "textarea",
-    {
-      ...props,
-      type,
-      className: "border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm " + className,
-      ref: input
-    }
-  );
-}
-function CreatePost(props) {
-  const [formState, setFormState] = useRemember({
-    message: null
-  });
-  const {
-    data,
-    setData,
-    post,
-    processing,
-    reset,
-    errors
-  } = useForm({
-    message: null,
-    images: null
-  });
-  const submit = (e) => {
-    e.preventDefault();
-    post(route("users.posts.store", props.user.id), {
-      onSuccess: () => {
-        router.visit("/profile/1");
-      }
-    });
-  };
-  return /* @__PURE__ */ jsx(Modal, { ...props, children: /* @__PURE__ */ jsxs("form", { onSubmit: submit, className: "p-5", children: [
-    /* @__PURE__ */ jsxs("div", { className: "mb-6", children: [
-      /* @__PURE__ */ jsx(InputLabel, { htmlFor: "message", value: "Message", className: "sr-only" }),
-      /* @__PURE__ */ jsx(
-        TextArea,
-        {
-          id: "message",
-          type: "text",
-          value: data.message || formState.message,
-          name: "message",
-          onChange: (e) => {
-            setData("message", e.target.value);
-            setFormState({ "message": e.target.value });
-          },
-          className: "w-full",
-          placeholder: "message"
-        }
-      ),
-      /* @__PURE__ */ jsx(InputError, { message: errors.message, className: "mt-2" })
-    ] }),
-    /* @__PURE__ */ jsx(
-      PreviewImageOnUploading,
-      {
-        setData,
-        inputName: "images",
-        errors
-      }
-    ),
-    /* @__PURE__ */ jsxs("div", { className: "flex", children: [
-      /* @__PURE__ */ jsx(PrimaryButton, { className: "mr-3", disabled: processing, children: "Create Post" }),
-      /* @__PURE__ */ jsx(SecondaryButton, { onClick: props.onClose, children: "Cancel" })
-    ] })
-  ] }) });
-}
-const __vite_glob_0_9 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  default: CreatePost
-}, Symbol.toStringTag, { value: "Module" }));
-function DangerButton({ className = "", disabled, children, ...props }) {
-  return /* @__PURE__ */ jsx(
-    "button",
-    {
-      ...props,
-      className: `inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500 active:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150 ${disabled && "opacity-25"} ` + className,
       disabled,
       children
     }
@@ -1559,7 +1632,7 @@ function DeleteUserForm({ className = "" }) {
     ] }) })
   ] });
 }
-const __vite_glob_0_19 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const __vite_glob_0_13 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: DeleteUserForm
 }, Symbol.toStringTag, { value: "Module" }));
@@ -1658,7 +1731,7 @@ function UpdatePasswordForm({ className = "" }) {
     ] })
   ] });
 }
-const __vite_glob_0_21 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const __vite_glob_0_15 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: UpdatePasswordForm
 }, Symbol.toStringTag, { value: "Module" }));
@@ -1743,7 +1816,7 @@ function UpdateProfileInformation({ mustVerifyEmail, status, className = "" }) {
     ] })
   ] });
 }
-const __vite_glob_0_22 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const __vite_glob_0_16 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: UpdateProfileInformation
 }, Symbol.toStringTag, { value: "Module" }));
@@ -1772,42 +1845,91 @@ function Edit({ auth, mustVerifyEmail, status }) {
     }
   );
 }
-const __vite_glob_0_15 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const __vite_glob_0_9 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Edit
 }, Symbol.toStringTag, { value: "Module" }));
-function FollowersInterface({ user }) {
+function FollowersInterface({ user, isMobile = false }) {
   const { setIsOpenUsersList, usersListRequest } = useContext(LoadUsersContext);
   const usersReuestHandler = (path) => {
     usersListRequest(`${appURL$1}/${path}/${user.id}`);
     setIsOpenUsersList(true);
   };
-  return /* @__PURE__ */ jsxs("div", { className: "flex space-x-6", children: [
-    /* @__PURE__ */ jsx(
+  const classes = classNames({
+    "flex space-x-6": !isMobile,
+    "flex w-1/2 justify-between": isMobile
+  });
+  const itemClasses = classNames({
+    "flex flex-col items-center": isMobile,
+    "cursor-pointer": true
+  });
+  return /* @__PURE__ */ jsxs("div", { className: classes, children: [
+    /* @__PURE__ */ jsxs(
       "div",
       {
         onClick: () => usersReuestHandler("followers"),
-        className: "cursor-pointer",
-        children: strPlural("folower", user.followers_count)
+        className: itemClasses,
+        children: [
+          /* @__PURE__ */ jsx("span", { children: `${user.followers_count} ` }),
+          /* @__PURE__ */ jsx("span", { className: "font-normal", children: strPlural("folower", user.followers_count).split(" ")[1] })
+        ]
       }
     ),
     /* @__PURE__ */ jsxs(
       "div",
       {
         onClick: () => usersReuestHandler("following"),
-        className: "cursor-pointer",
+        className: itemClasses,
         children: [
           user.following_count,
-          " following"
+          " ",
+          /* @__PURE__ */ jsx("span", { className: "font-normal", children: " following " })
         ]
       }
     )
   ] });
 }
-const __vite_glob_0_17 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const __vite_glob_0_11 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: FollowersInterface
 }, Symbol.toStringTag, { value: "Module" }));
+function PreviewImageOnUploading({ setData, inputName, errors, buttonLabel = "Add image" }) {
+  const addImageInput = useRef(null);
+  const [previewImage, setPreviewImage] = useState("");
+  const handleImageChange = (e) => {
+    const imgage = URL.createObjectURL(e.target.files[0]);
+    setData(inputName, e.target.files[0]);
+    setPreviewImage(imgage);
+  };
+  const handleAddingPostImage = () => {
+    addImageInput.current.click();
+  };
+  const handleDeletingPostImage = () => {
+    setData(inputName, "");
+    setPreviewImage("");
+  };
+  return /* @__PURE__ */ jsxs(Fragment, { children: [
+    previewImage && /* @__PURE__ */ jsx("div", { className: "mb-6", children: /* @__PURE__ */ jsx("img", { src: previewImage, className: "max-h-[500px] w-full object-contain" }) }),
+    /* @__PURE__ */ jsxs("div", { className: "mb-6", children: [
+      /* @__PURE__ */ jsx(InputLabel, { htmlFor: "image-path", value: "Message", className: "sr-only" }),
+      !previewImage && /* @__PURE__ */ jsx(PrimaryButton, { type: "button", onClick: handleAddingPostImage, children: buttonLabel }),
+      previewImage && /* @__PURE__ */ jsx(PrimaryButton, { type: "button", onClick: handleDeletingPostImage, children: "Delete image" }),
+      /* @__PURE__ */ jsx(
+        TextInput,
+        {
+          id: "image_path",
+          type: "file",
+          hidden: true,
+          name: inputName,
+          onChange: (e) => handleImageChange(e),
+          placeholder: "Image",
+          ref: addImageInput
+        }
+      ),
+      !previewImage && /* @__PURE__ */ jsx(InputError, { message: errors.images, className: "mt-2" })
+    ] })
+  ] });
+}
 function ProfileAvatar({ user }) {
   const [open, setOpen] = useState(false);
   const openAvatarForm = () => {
@@ -1845,11 +1967,11 @@ function ProfileAvatar({ user }) {
       }
     });
   };
-  return /* @__PURE__ */ jsxs("div", { children: [
+  return /* @__PURE__ */ jsxs("div", { className: "user-avatar mr-10 flex items-center", children: [
     /* @__PURE__ */ jsx("div", { onClick: openAvatarForm, children: /* @__PURE__ */ jsx(Avatar, { user, size: "lg" }) }),
-    /* @__PURE__ */ jsxs(Modal, { show: open, onClose: closeAvatarForm, children: [
-      user.avatar && /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsx("form", { onSubmit: deleteSubmit, children: /* @__PURE__ */ jsx(PrimaryButton, { children: "Delete profile image" }) }) }),
-      /* @__PURE__ */ jsxs("form", { onSubmit: avatarSubmit, className: "space-y-6 p-5", children: [
+    /* @__PURE__ */ jsx(Modal, { show: open, onClose: closeAvatarForm, children: /* @__PURE__ */ jsxs("div", { className: "p-5", children: [
+      user.avatar && /* @__PURE__ */ jsx("div", { className: "mb-6", children: /* @__PURE__ */ jsx("form", { onSubmit: deleteSubmit, children: /* @__PURE__ */ jsx(PrimaryButton, { children: "Delete profile image" }) }) }),
+      /* @__PURE__ */ jsxs("form", { onSubmit: avatarSubmit, className: "space-y-6", children: [
         /* @__PURE__ */ jsx(
           PreviewImageOnUploading,
           {
@@ -1864,21 +1986,114 @@ function ProfileAvatar({ user }) {
           /* @__PURE__ */ jsx(SecondaryButton, { onClick: closeAvatarForm, children: "Cancel" })
         ] })
       ] })
-    ] })
+    ] }) })
   ] });
 }
-const __vite_glob_0_20 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const __vite_glob_0_14 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: ProfileAvatar
 }, Symbol.toStringTag, { value: "Module" }));
 function Content({ children }) {
-  return /* @__PURE__ */ jsx("div", { className: "py-12", children: /* @__PURE__ */ jsx("div", { className: "max-w-5xl mx-auto sm:px-6 lg:px-8", children }) });
+  return /* @__PURE__ */ jsx("div", { className: "py-3 md:py-6 lg:py-8", children: /* @__PURE__ */ jsx("div", { className: "max-w-5xl mx-auto px-0 md:px-5 lg:px-6", children }) });
+}
+function TextArea({ type = "text", className = "", isFocused = false, ...props }) {
+  const input = useRef(null);
+  useEffect(() => {
+    if (isFocused) {
+      input.current.focus();
+    }
+  }, []);
+  return /* @__PURE__ */ jsx(
+    "textarea",
+    {
+      ...props,
+      type,
+      className: "border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm " + className,
+      ref: input
+    }
+  );
+}
+function CreatePost(props) {
+  const [formState, setFormState] = useRemember({
+    message: null
+  });
+  const {
+    data,
+    setData,
+    post,
+    processing,
+    reset,
+    errors
+  } = useForm({
+    message: null,
+    images: null
+  });
+  const submit = (e) => {
+    e.preventDefault();
+    post(route("users.posts.store", props.user.id), {
+      onSuccess: () => {
+        router.visit("/profile/1");
+      }
+    });
+  };
+  return /* @__PURE__ */ jsx(Modal, { ...props, children: /* @__PURE__ */ jsxs("form", { onSubmit: submit, className: "p-5", children: [
+    /* @__PURE__ */ jsxs("div", { className: "mb-6", children: [
+      /* @__PURE__ */ jsx(InputLabel, { htmlFor: "message", value: "Message", className: "sr-only" }),
+      /* @__PURE__ */ jsx(
+        TextArea,
+        {
+          id: "message",
+          type: "text",
+          value: data.message || formState.message,
+          name: "message",
+          onChange: (e) => {
+            setData("message", e.target.value);
+            setFormState({ "message": e.target.value });
+          },
+          className: "w-full",
+          placeholder: "message"
+        }
+      ),
+      /* @__PURE__ */ jsx(InputError, { message: errors.message, className: "mt-2" })
+    ] }),
+    /* @__PURE__ */ jsx(
+      PreviewImageOnUploading,
+      {
+        setData,
+        inputName: "images",
+        errors
+      }
+    ),
+    /* @__PURE__ */ jsxs("div", { className: "flex", children: [
+      /* @__PURE__ */ jsx(PrimaryButton, { className: "mr-3", disabled: processing, children: "Create Post" }),
+      /* @__PURE__ */ jsx(SecondaryButton, { onClick: props.onClose, children: "Cancel" })
+    ] })
+  ] }) });
+}
+function CounterPanel({ totalPosts, user, styleClass, isMobile = false }) {
+  const itemClasses = classNames({
+    "flex flex-col items-center": isMobile,
+    "cursor-pointer": true
+  });
+  return /* @__PURE__ */ jsxs("div", { className: `flex space-x-6 w-full font-semibold text-lg mb-4 ${styleClass}`, children: [
+    /* @__PURE__ */ jsxs("div", { className: itemClasses, children: [
+      /* @__PURE__ */ jsx("span", { children: `${totalPosts} ` }),
+      /* @__PURE__ */ jsx("span", { className: "font-normal", children: strPlural("post", totalPosts).split(" ")[1] })
+    ] }),
+    /* @__PURE__ */ jsx(
+      LoadedUsersList,
+      {
+        heading: "Followers",
+        children: /* @__PURE__ */ jsx(FollowersInterface, { user, isMobile })
+      }
+    )
+  ] });
 }
 function ProfileInfo({ user, auth, totalPosts }) {
   var _a;
   const { public_url } = usePage().props;
-  return /* @__PURE__ */ jsx("div", { className: "profile-info mb-10", children: /* @__PURE__ */ jsxs("div", { className: "flex", children: [
-    /* @__PURE__ */ jsx("div", { className: "user-avatar mr-10", children: /* @__PURE__ */ jsx(ProfileAvatar, { user }) }),
+  return /* @__PURE__ */ jsx("div", { className: "profile-info mb-5 lg:mb-10", children: /* @__PURE__ */ jsxs("div", { className: "flex", children: [
+    /* @__PURE__ */ jsx(ProfileAvatar, { user }),
     /* @__PURE__ */ jsxs("div", { children: [
       /* @__PURE__ */ jsxs("div", { className: "flex space-x-4 justify-between mb-4", children: [
         !!user.name && /* @__PURE__ */ jsx("h1", { className: "font-medium text-xl", children: user.name }),
@@ -1903,16 +2118,7 @@ function ProfileInfo({ user, auth, totalPosts }) {
           /* @__PURE__ */ jsx("path", { d: "M14.232 3.656a1.269 1.269 0 0 1-.796-.66L12.93 2h-1.86l-.505.996a1.269 1.269 0 0 1-.796.66m-.001 16.688a1.269 1.269 0 0 1 .796.66l.505.996h1.862l.505-.996a1.269 1.269 0 0 1 .796-.66M3.656 9.768a1.269 1.269 0 0 1-.66.796L2 11.07v1.862l.996.505a1.269 1.269 0 0 1 .66.796m16.688-.001a1.269 1.269 0 0 1 .66-.796L22 12.93v-1.86l-.996-.505a1.269 1.269 0 0 1-.66-.796M7.678 4.522a1.269 1.269 0 0 1-1.03.096l-1.06-.348L4.27 5.587l.348 1.062a1.269 1.269 0 0 1-.096 1.03m11.8 11.799a1.269 1.269 0 0 1 1.03-.096l1.06.348 1.318-1.317-.348-1.062a1.269 1.269 0 0 1 .096-1.03m-14.956.001a1.269 1.269 0 0 1 .096 1.03l-.348 1.06 1.317 1.318 1.062-.348a1.269 1.269 0 0 1 1.03.096m11.799-11.8a1.269 1.269 0 0 1-.096-1.03l.348-1.06-1.317-1.318-1.062.348a1.269 1.269 0 0 1-1.03-.096", fill: "none", stroke: "currentColor", strokeLinejoin: "round", strokeWidth: "2" })
         ] }) })
       ] }),
-      /* @__PURE__ */ jsxs("div", { className: "flex space-x-6 w-full font-medium text-lg mb-4", children: [
-        /* @__PURE__ */ jsx("div", { children: strPlural("post", totalPosts) }),
-        /* @__PURE__ */ jsx(
-          LoadedUsersList,
-          {
-            heading: "Followers",
-            children: /* @__PURE__ */ jsx(FollowersInterface, { user })
-          }
-        )
-      ] }),
+      /* @__PURE__ */ jsx(CounterPanel, { user, totalPosts, styleClass: "hidden md:flex" }),
       !!user.birthday && /* @__PURE__ */ jsxs("div", { className: "font-medium mb-3 flex items-center", children: [
         /* @__PURE__ */ jsx("div", { className: "max-w-[42px] mr-3", children: /* @__PURE__ */ jsx("img", { src: public_url + "/calendar.png" }) }),
         /* @__PURE__ */ jsx("div", { children: dayjs(user.birthday).format("MMM D YYYY") })
@@ -1921,7 +2127,7 @@ function ProfileInfo({ user, auth, totalPosts }) {
     ] })
   ] }) });
 }
-const __vite_glob_0_24 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const __vite_glob_0_18 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: ProfileInfo
 }, Symbol.toStringTag, { value: "Module" }));
@@ -1957,11 +2163,22 @@ function Profile({ auth, user }) {
       children: [
         /* @__PURE__ */ jsx(Head, { title: "Profile" }),
         /* @__PURE__ */ jsxs(Content, { children: [
-          /* @__PURE__ */ jsx(ProfileInfo, { totalPosts, user, auth }),
-          ((_a = auth.user) == null ? void 0 : _a.id) == (user == null ? void 0 : user.id) && /* @__PURE__ */ jsxs("div", { children: [
-            /* @__PURE__ */ jsx(PrimaryButton, { onClick: openPostCreateForm, className: "mb-10", children: "Add Post" }),
-            showPostCreateForm ? /* @__PURE__ */ jsx(CreatePost, { user, show: showPostCreateForm, onClose: closePostCreateForm }) : null
+          /* @__PURE__ */ jsxs("div", { className: "px-3 lg:p-0", children: [
+            /* @__PURE__ */ jsx(ProfileInfo, { totalPosts, user, auth }),
+            ((_a = auth.user) == null ? void 0 : _a.id) == (user == null ? void 0 : user.id) && /* @__PURE__ */ jsxs("div", { children: [
+              /* @__PURE__ */ jsx(PrimaryButton, { onClick: openPostCreateForm, className: "mb-5 lg:mb-10", children: "Add Post" }),
+              showPostCreateForm ? /* @__PURE__ */ jsx(CreatePost, { user, show: showPostCreateForm, onClose: closePostCreateForm }) : null
+            ] })
           ] }),
+          /* @__PURE__ */ jsx(
+            CounterPanel,
+            {
+              user,
+              totalPosts,
+              styleClass: "border-y border-slate-300 !mb-0 py-3 flex md:hidden justify-around",
+              isMobile: true
+            }
+          ),
           !!posts && /* @__PURE__ */ jsx(
             PostsList,
             {
@@ -1975,7 +2192,7 @@ function Profile({ auth, user }) {
     }
   );
 }
-const __vite_glob_0_23 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const __vite_glob_0_17 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Profile
 }, Symbol.toStringTag, { value: "Module" }));
@@ -2349,7 +2566,7 @@ function Welcome({ auth, laravelVersion, phpVersion }) {
             ` })
   ] });
 }
-const __vite_glob_0_26 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const __vite_glob_0_20 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Welcome
 }, Symbol.toStringTag, { value: "Module" }));
@@ -2362,7 +2579,7 @@ createServer(
     page,
     render: ReactDOMServer.renderToString,
     resolve: (name) => {
-      const pages = /* @__PURE__ */ Object.assign({ "./Pages/Auth/ConfirmPassword.jsx": __vite_glob_0_0, "./Pages/Auth/ForgotPassword.jsx": __vite_glob_0_1, "./Pages/Auth/Login.jsx": __vite_glob_0_2, "./Pages/Auth/Register.jsx": __vite_glob_0_3, "./Pages/Auth/ResetPassword.jsx": __vite_glob_0_4, "./Pages/Auth/VerifyEmail.jsx": __vite_glob_0_5, "./Pages/Chat/Chat.jsx": __vite_glob_0_6, "./Pages/Home.jsx": __vite_glob_0_7, "./Pages/Post/Comment.jsx": __vite_glob_0_8, "./Pages/Post/Create.jsx": __vite_glob_0_9, "./Pages/Post/Like.jsx": __vite_glob_0_10, "./Pages/Post/PostHeader.jsx": __vite_glob_0_11, "./Pages/Post/PostLikesInterface.jsx": __vite_glob_0_12, "./Pages/Post/PostsList.jsx": __vite_glob_0_13, "./Pages/Post/Show.jsx": __vite_glob_0_14, "./Pages/Profile/Edit.jsx": __vite_glob_0_15, "./Pages/Profile/Follow.jsx": __vite_glob_0_16, "./Pages/Profile/FollowersInterface.jsx": __vite_glob_0_17, "./Pages/Profile/LoadedUsersList.jsx": __vite_glob_0_18, "./Pages/Profile/Partials/DeleteUserForm.jsx": __vite_glob_0_19, "./Pages/Profile/Partials/ProfileAvatar.jsx": __vite_glob_0_20, "./Pages/Profile/Partials/UpdatePasswordForm.jsx": __vite_glob_0_21, "./Pages/Profile/Partials/UpdateProfileInformationForm.jsx": __vite_glob_0_22, "./Pages/Profile/Profile.jsx": __vite_glob_0_23, "./Pages/Profile/ProfileInfo.jsx": __vite_glob_0_24, "./Pages/Profile/Unfollow.jsx": __vite_glob_0_25, "./Pages/Welcome.jsx": __vite_glob_0_26 });
+      const pages = /* @__PURE__ */ Object.assign({ "./Pages/Auth/ConfirmPassword.jsx": __vite_glob_0_0, "./Pages/Auth/ForgotPassword.jsx": __vite_glob_0_1, "./Pages/Auth/Login.jsx": __vite_glob_0_2, "./Pages/Auth/Register.jsx": __vite_glob_0_3, "./Pages/Auth/ResetPassword.jsx": __vite_glob_0_4, "./Pages/Auth/VerifyEmail.jsx": __vite_glob_0_5, "./Pages/Chat/Chat.jsx": __vite_glob_0_6, "./Pages/Home.jsx": __vite_glob_0_7, "./Pages/Notifications/Notifications.jsx": __vite_glob_0_8, "./Pages/Profile/Edit.jsx": __vite_glob_0_9, "./Pages/Profile/Follow.jsx": __vite_glob_0_10, "./Pages/Profile/FollowersInterface.jsx": __vite_glob_0_11, "./Pages/Profile/LoadedUsersList.jsx": __vite_glob_0_12, "./Pages/Profile/Partials/DeleteUserForm.jsx": __vite_glob_0_13, "./Pages/Profile/Partials/ProfileAvatar.jsx": __vite_glob_0_14, "./Pages/Profile/Partials/UpdatePasswordForm.jsx": __vite_glob_0_15, "./Pages/Profile/Partials/UpdateProfileInformationForm.jsx": __vite_glob_0_16, "./Pages/Profile/Profile.jsx": __vite_glob_0_17, "./Pages/Profile/ProfileInfo.jsx": __vite_glob_0_18, "./Pages/Profile/Unfollow.jsx": __vite_glob_0_19, "./Pages/Welcome.jsx": __vite_glob_0_20 });
       return pages[`./Pages/${name}.jsx`];
     },
     setup: ({ App, props }) => {

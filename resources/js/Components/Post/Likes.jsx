@@ -29,7 +29,7 @@ export default function Likes ({ post, posts }) {
         'fa-heart text-[23px]': true,
     })
 
-    return <div>
+    return <div className="z-10">
         <div className="py-2 cursor-pointer">
             <form onSubmit={likeRequest}>
                 <TransparentButton disabled={processing}>

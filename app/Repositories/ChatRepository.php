@@ -47,7 +47,7 @@ class ChatRepository
             ->orderBy('max_message_id', 'desc');
 
         if ($limit === 0) {
-            $paginateMessages = $query->paginate(9);
+            $paginateMessages = $query->paginate(11);
             $paginateCollection = $paginateMessages->getCollection();
 
             $paginateMessages = $paginateMessages->toArray();

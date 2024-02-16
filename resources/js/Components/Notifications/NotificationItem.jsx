@@ -8,7 +8,8 @@ export default function NotificationItem({ el }) {
         const date = new Date(el.data.user.birthday)
 
         const month = date.toLocaleString('en', { month: 'long' })
-        const number = ordinalSuffix(date.getDay())
+        console.log(date, 'date');
+        const number =  ordinalSuffix(date.getDate())
         birhday = month + " " + number
     }
 

@@ -34,6 +34,7 @@ export default function BaseNav() {
             .listen('ChatMessageSent', (e) => {
                 setNewMessages(true)
                 play()
+                console.log(1)
             })
 
         Echo.private(`notification.${auth.user.id}`)
@@ -41,13 +42,19 @@ export default function BaseNav() {
                 setNewNotification(true)
                 setNotifications(prevNotifications => [...prevNotifications, ...e.data])
                 play()
+                console.log(2)
             })
+
+        return () => {
+            Echo.leave(`chatmessages.${auth.user.id}`)
+            Echo.leave(`notification.${auth.user.id}`)
+        }
     }, [])
 
     useEffect(() => {
         const processNotificationQueue = () => {
-            if (notifications.length > 0) {   
-    
+            if (notifications.length > 0) {
+
                 setNotifications(prevNotifications => prevNotifications.slice(1))
             }
         };
@@ -62,7 +69,7 @@ export default function BaseNav() {
     }, [notifications]);
 
     const classes = classNames({
-        "border-t px-3 lg:px-6 fixed bottom-0 md:max-w-[72px] bg-white md:relative md:py-8 md:border-t-0 md:border-r lg:max-w-16 z-[1]": true,
+        "border-t px-3 lg:px-6 fixed bottom-0 md:max-w-[72px] bg-white md:relative md:py-8 md:border-t-0 md:border-r lg:max-w-16 z-[11]": true,
         "max-[769px]:w-full": isChat,
         "w-full": !isChat
     })

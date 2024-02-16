@@ -1,6 +1,7 @@
 // useInfiniteScroll.js
-import { useRef, useEffect, forwardRef } from "react";
+import { useEffect, forwardRef, memo } from "react";
 import PrimaryButton from "./Components/PrimaryButton";
+import classNames from "classnames";
 
 export default forwardRef(function UseInfiniteScroll({
     request,
@@ -25,11 +26,11 @@ export default forwardRef(function UseInfiniteScroll({
             const scrollHeight = children ? target.scrollHeight : document.body.scrollHeight
             const clientHeight = children ? target.clientHeight : window.innerHeight
 
-            if (!isReverseScroll && scrollTop + clientHeight >= scrollHeight - 50 && !usedUrls.includes(nextPageUrl)) {
+            if (!isReverseScroll && scrollTop + clientHeight >= scrollHeight - 150 && !usedUrls.includes(nextPageUrl)) {
                 makeRequest()
             }
 
-            if (isReverseScroll && scrollTop <= 200 && !usedUrls.includes(nextPageUrl)) {
+            if (isReverseScroll && scrollTop <= (scrollHeight / 3) && !usedUrls.includes(nextPageUrl)) {
                 makeRequest()
             }
         }
@@ -42,17 +43,22 @@ export default forwardRef(function UseInfiniteScroll({
         }
     }, [nextPageUrl])
 
+    const classes = classNames({
+        "flex flex-col-reverse": isLoadMoreTop,
+        "pb-[80px]": !children
+    })
+
     return (
-        <div ref={ref} className={childrenClassNames + " scrollableChildren overflow-y-auto"}>
-            <div className={isLoadMoreTop && "flex flex-col-reverse"}>
+        <div ref={ref} className={childrenClassNames + "h-full scrollableChildren overflow-y-auto"}>
+            <div className={classes}>
                 <div>
                     {!!children && children}
                 </div>
 
                 <div className="flex flex-col items-center p-2">
-                    {nextPageUrl && <PrimaryButton type="button" onClick={makeRequest} className="mx-auto">
+                    {nextPageUrl ? <PrimaryButton type="button" onClick={makeRequest} className="mx-auto">
                         Load More
-                    </PrimaryButton>}
+                    </PrimaryButton> : <div className="py-[17px]"></div>}
                 </div>
             </div>
         </div>

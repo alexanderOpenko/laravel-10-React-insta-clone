@@ -12,7 +12,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->command('app:birthday-reminder')->dailyAt('12:00')->timezone('Europe/Kyiv');
+        $schedule->command('app:birthday-reminder')->dailyAt('13:39')->timezone('Europe/Kyiv');
     }
 
     /**

@@ -11,7 +11,7 @@ export default function PostLikesInterface({ postLikesCount, post }) {
         setIsOpenUsersList(true)
     }
 
-    return <div onClick={() => usersReuestHandler()}>
+    return <div onClick={() => usersReuestHandler()} className="cursor-pointer">
         {strPlural('like', postLikesCount)}
     </div>
 }

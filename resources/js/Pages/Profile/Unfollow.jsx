@@ -1,7 +1,7 @@
 import { useForm } from "@inertiajs/react"
 import PrimaryButton from '@/Components/PrimaryButton';
 
-export default function Unfollow({ user, follower, setUsersList = null }) {
+export default function Unfollow({ user, follower, setUsersList = null, fullWidth = '' }) {
     const {
         delete: destroy,
         processing
@@ -27,9 +27,9 @@ export default function Unfollow({ user, follower, setUsersList = null }) {
         })
     }
 
-    return <form onSubmit={submit}>
+    return <form onSubmit={submit} className={fullWidth}>
         <PrimaryButton onClick={submit}
-            className='bg-slate-400 hover:bg-slate-400'>
+            className={"bg-slate-400 hover:bg-slate-400 " + fullWidth}>
             Following
         </PrimaryButton>
     </form>

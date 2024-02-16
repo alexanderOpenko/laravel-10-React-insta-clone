@@ -1,7 +1,6 @@
 import Avatar from "../Avatar";
 
 export default function ChatUserInfoHeader({ receiver }) {
-    console.log(receiver, 'receiver');
     return (
         <div className="user-info-header bg-white Wpy-3">
             <div className="flex justify-between">

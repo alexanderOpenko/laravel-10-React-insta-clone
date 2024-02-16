@@ -1,17 +1,14 @@
 import Avatar from "../Avatar";
-import { useRef } from "react";
+import { useRef, memo } from "react";
 import UseInfiniteScroll from "@/infinitePaginationHook"
 
-export default function ChatSidebar({ auth_id, nextPageUrl, chats, getChats, setReceiver }) {
+export default memo(function ChatSidebar({ auth_id, nextPageUrl, chats, getChats, setReceiverHandler }) {
+    console.log('chatSidebar');
     const scrollRef = useRef(null)
-
-    const setReceiverIdHandler = (receiver) => {
-        setReceiver(receiver)
-    }
 
     return (
         <>
-            {!!chats.length && <div className="user-list overflow-y-auto">
+            {!!chats.length && 
                 <UseInfiniteScroll
                     ref={scrollRef}
                     request={getChats}
@@ -19,7 +16,7 @@ export default function ChatSidebar({ auth_id, nextPageUrl, chats, getChats, set
                 >
                     {chats.map((el, index) => (
                         <div
-                            onClick={() => setReceiverIdHandler(el.user)}
+                            onClick={() => setReceiverHandler(el.user)}
                             key={index}
                             className="flex px-5 py-3 transition hover:cursor-pointer hover:bg-slate-100"
                         >
@@ -55,8 +52,7 @@ export default function ChatSidebar({ auth_id, nextPageUrl, chats, getChats, set
                         </div>
                     ))}
                 </UseInfiniteScroll>
-            </div>
             }
         </>
     )
-}
+})

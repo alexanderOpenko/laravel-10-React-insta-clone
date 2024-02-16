@@ -46,13 +46,11 @@ export default function LoadedUsersList({
                     </div>
 
                     {usersList.map((el) => {
-                        console.log(el, 'el');
                         return <div className="flex items-center p-4 justify-between">
                             <div className="flex items-center">
                                 <Avatar size='sm' user={el.user} divClassName="mr-4" />
 
                                 {el.user.name}
-                                {el.user.id}
                             </div>
 
                             {auth.user.id !== el.user.id && <>{

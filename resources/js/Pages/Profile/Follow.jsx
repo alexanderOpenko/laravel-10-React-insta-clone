@@ -4,7 +4,7 @@ import Login from "../Auth/Login";
 import Modal from "@/Components/Modal";
 import { useState } from "react";
 
-export default function Follow({ user, following_id, setUsersList }) {
+export default function Follow({ user, following_id, setUsersList, fullWidth = '' }) {
     const [isOpenLogin, setIsOpenLogin] = useState(false)
     const {
         post,
@@ -46,9 +46,9 @@ export default function Follow({ user, following_id, setUsersList }) {
     }
 
     return (
-        <div>
-            <form onSubmit={followSubmit}>
-                <PrimaryButton className='bg-blue-600'>
+        <>
+            <form onSubmit={followSubmit} className={fullWidth}>
+                <PrimaryButton className={"bg-blue-600 " + fullWidth}>
                     Follow
                 </PrimaryButton>
             </form>
@@ -56,6 +56,6 @@ export default function Follow({ user, following_id, setUsersList }) {
             <Modal show={isOpenLogin} onClose={closeLoginModal}>
                 <Login canResetPassword={true} canLogin={true}/>
             </Modal>
-        </div>
+        </>
     )
 }

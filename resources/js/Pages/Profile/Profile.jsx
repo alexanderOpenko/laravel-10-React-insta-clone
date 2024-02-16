@@ -63,7 +63,7 @@ export default function Profile({ auth, user }) {
                 <CounterPanel
                     user={user}
                     totalPosts={totalPosts}
-                    styleClass="border-y border-slate-300 !mb-0 py-3 flex md:hidden justify-around"
+                    styleClass="border-y border-slate-300 py-3 flex md:hidden justify-around"
                     isMobile={true}
                 />
 
