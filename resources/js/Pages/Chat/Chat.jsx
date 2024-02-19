@@ -4,19 +4,58 @@ import ChatSidebar from "@/Components/Chat/ChatSidebar";
 import ChatUserInfoHeader from "@/Components/Chat/ChatUserInfoHeader";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import classNames from "classnames";
-import { memo, useCallback, useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { appURL } from "@/services";
 
 export default function Chat({ auth, errors, receiver: companion = null }) {
     const [currentView, setCurrentView] = useState('showSidebar')
-    const [receiver, setReceiver] = useState(null)
+    const [receiver, setReceiver] = useState({})
     const [isMobileView, setIsMobileView] = useState(false)
     const [chats, setChats] = useState([])
     const [nextPageUrl, setNextPageUrl] = useState('')
+    const [preloader, setPreloader] = useState(false)
+    const [readedMesages, setReadedMessages] = useState(false)
 
-    const setReceiverHandler = useCallback((receiver) => {
-        setReceiver(receiver)
-    }, [])
+    const [nextPageMessagesUrl, setNextPageMessagesUrl] = useState('')
+    const [messages, setMessages] = useState([])
+
+    const [prevScrollHeight, setPrevScrollHeight] = useState(null)
+    const initialMessagesLoaded = useRef(false);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const scrollRef = useRef(null)
+
+    const [savedMessages, setSavedMessages] = useState([])
+
+    const setReceiverHandler = (messagesReceiver) => {
+        if (receiver === messagesReceiver) {
+            return
+        }
+
+        if (!isLoading) {
+            setIsLoading(true)
+            setReceiver(messagesReceiver)
+        }
+    }
+
+    useEffect(() => {
+        setIsLoading(false)
+        setPreloader(false)
+
+        if (initialMessagesLoaded.current) {
+            setTimeout(() => {
+                scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+                initialMessagesLoaded.current = false
+            }, 50)
+        }
+    }, [messages])
+
+    useEffect(() => {
+        if (prevScrollHeight) {
+            const scrollDifference = scrollRef.current.scrollHeight - prevScrollHeight
+            scrollRef.current.scrollTop += scrollDifference
+        }
+    }, [prevScrollHeight])
 
     const hideSidebar = useCallback(() => {
         setCurrentView('hideSidebar')
@@ -35,7 +74,7 @@ export default function Chat({ auth, errors, receiver: companion = null }) {
         setChats([...chats, ...json.data])
     }
 
-    const getLastChat = useCallback( async(userId) => {
+    const getLastChat = useCallback(async (userId) => {
         const resp = await fetch(`${appURL}/chat/lastChat/${userId}`)
         const json = await resp.json()
 
@@ -46,16 +85,56 @@ export default function Chat({ auth, errors, receiver: companion = null }) {
         )
     }, [receiver])
 
-    const getUpdatedChats = useCallback( async () => {
+    const getUpdatedChats = useCallback(async () => {
         const resp = await fetch(`${appURL}/chatList?limit=${chats.length}`)
         const json = await resp.json()
 
         setChats(json)
     }, [chats])
 
+    const getChatMessages = async (url, firstInit = false) => {
+        const resp = await fetch(url)
+        const json = await resp.json()
+        const recId = receiver.id
+
+        setNextPageMessagesUrl(json.next_page_url)
+
+        const reversedMessages = json.data.reverse()
+
+        if (firstInit) {
+            setMessages(reversedMessages)
+            saveMessagesOfReceiver(reversedMessages, recId, json.next_page_url)
+            // setPreloader(false)
+        } else {
+            setMessages(prevMessages => [...reversedMessages, ...prevMessages])
+            saveMessagesOfReceiver([...reversedMessages, ...messages], recId, json.next_page_url)
+
+            setPrevScrollHeight(scrollRef.current.scrollHeight)
+        }
+    }
+
+    function saveMessagesOfReceiver(messages, recId, nextPageUrl) {
+        if (!recId) {
+            return
+        }
+
+        const index = savedMessages.indexOf(savedMessages.find(el => el.id === recId))
+
+        if (index !== -1) {
+            savedMessages[index].messages = messages
+            savedMessages[index].nextPageUrl = nextPageUrl
+        } else {
+            savedMessages.push({ id: recId, messages: messages, nextPageUrl: nextPageUrl })
+        }
+        setSavedMessages(savedMessages)
+    }
+
     useEffect(() => {
         getChats(`${appURL}/chatList`)
-        setReceiver(companion)
+
+        if (companion) {
+            setReceiver(companion)
+        }
 
         Echo.private(`chatmessages.${auth.user.id}`)
             .listen('ChatMessageSent', (e) => {
@@ -70,12 +149,30 @@ export default function Chat({ auth, errors, receiver: companion = null }) {
     useEffect(() => {
         const intervalId = setInterval(() => {
             getUpdatedChats()
-        }, 5000);
+        }, 180000);
 
         return () => {
             clearInterval(intervalId)
         }
     }, [chats])
+
+    useEffect(() => {
+        if (receiver?.id) {
+            initialMessagesLoaded.current = true
+
+            const savedReceivermessages = savedMessages.find(el => el.id === receiver.id)
+
+            if (savedReceivermessages) {
+                setMessages(savedReceivermessages.messages)
+                setNextPageMessagesUrl(savedReceivermessages.nextPageUrl)
+            } else {
+                setPreloader(true)
+
+                setTimeout(() => getChatMessages(`${appURL}/chat/messages/${receiver.id}`, true), 100)
+            }
+
+        }
+    }, [receiver])
 
     useEffect(() => {
         const windowWidth = window.innerWidth
@@ -91,6 +188,22 @@ export default function Chat({ auth, errors, receiver: companion = null }) {
                 hideSidebar()
             }
         }
+    }, [receiver])
+
+    const handleReadedMessage = useCallback((e) => {
+        setReadedMessages(true);
+    }, [])
+
+    const getLastMessage = useCallback(async () => {
+        if (!receiver.id) {
+            return
+        }
+        const resp = await fetch(`${appURL}/chat/lastMessage/${receiver.id}`)
+        const json = await resp.json()
+
+        handleReadedMessage()
+
+        setMessages(prevMessages => [...prevMessages, json])
     }, [receiver])
 
     const sidebarClasses = classNames({
@@ -121,7 +234,7 @@ export default function Chat({ auth, errors, receiver: companion = null }) {
                     </div>
 
                     <div className={chatWindowClasses}>
-                        {receiver ? (
+                        {receiver.id ? (
                             <>
                                 <div className="flex items-center">
                                     {
@@ -133,11 +246,19 @@ export default function Chat({ auth, errors, receiver: companion = null }) {
                                     <ChatUserInfoHeader receiver={receiver} />
                                 </div>
 
-                                <div className="messanger mt-4 h-[82%]">
-                                    <div className="flex flex-col h-full" style={{ maxHeight: 'calc(100vh - 180px)' }}>
+                                <div className="messanger mt-4 h-[93%]">
+                                    <div className="flex flex-col h-full relative" style={{ maxHeight: 'calc(100vh - 82px)' }}>
                                         <ChatMessages
+                                            readedMesages={readedMesages}
+                                            handleReadedMessage={handleReadedMessage}
+                                            preloader={preloader}
+                                            getChatMessages={getChatMessages}
+                                            messages={messages}
                                             receiver={receiver}
                                             auth_id={auth.user.id}
+                                            nextPageUrl={nextPageMessagesUrl}
+                                            getLastMessage={getLastMessage}
+                                            ref={scrollRef}
                                         />
 
                                         <div>

@@ -1,69 +1,14 @@
 import UseInfiniteScroll from "@/infinitePaginationHook"
 import { appURL } from "@/services";
 import { usePage } from "@inertiajs/react";
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useMemo, forwardRef } from "react";
 
-export default function ChatMessages({ receiver, auth_id }) {
-    const [messages, setMessages] = useState([])
-    const [readedMesages, setReadedMessages] = useState(false)
-    const [nextPageUrl, setNextPageUrl] = useState('')
-    const [prevScrollHeight, setPrevScrollHeight] = useState(null)
-    const initialMessagesLoaded = useRef(false);
-    const scrollRef = useRef(null)
-    const [preloader, setPreloader] = useState(false)
-
+export default forwardRef(function ChatMessages({ readedMesages, handleReadedMessage, receiver, auth_id, nextPageUrl, messages, getChatMessages, getLastMessage, preloader }, ref) {    
     const { public_url } = usePage().props
 
     const isReceivedMessage = (message) => {
         return message.receiver_id === auth_id;
-    };
-
-    const getLastMessage = useCallback(async () => {
-        if (!receiver.id) {
-            return
-        }
-        const resp = await fetch(`${appURL}/chat/lastMessage/${receiver.id}`)
-        const json = await resp.json()
-
-        handleReadedMessage()
-
-        setMessages(prevMessages => [...prevMessages, json])
-    }, [receiver])
-
-    const handleReadedMessage = useCallback((e) => {
-        setReadedMessages(true);
-    }, []);
-
-    const getChatMessages = useCallback(async (url, firstInit = false) => {
-        const resp = await fetch(url)
-        const json = await resp.json()
-
-        setNextPageUrl(json.next_page_url)
-
-        if (firstInit) {
-            setMessages(json.data.reverse())
-            setPreloader(false)
-
-        } else {
-            setMessages(prevMessages => [...json.data.reverse(), ...prevMessages])
-            setPrevScrollHeight(scrollRef.current.scrollHeight)
-        }
-    }, [receiver])
-
-    useEffect(() => {
-        if (initialMessagesLoaded.current) {
-            console.log('initialMessagesLoaded');
-
-            scrollRef.current.scrollTop = scrollRef.current.scrollHeight
-            initialMessagesLoaded.current = false
-            return
-        }
-    }, [messages])
-
-    useEffect(() => {
-        const scrollDifference = scrollRef.current.scrollHeight - prevScrollHeight;
-        scrollRef.current.scrollTop += scrollDifference;
-    }, [prevScrollHeight])
+    }
 
     const roomId = useMemo(() => {
         const sortedUserIds = [auth_id, receiver.id].sort()
@@ -73,11 +18,6 @@ export default function ChatMessages({ receiver, auth_id }) {
     }, [auth_id, receiver.id])
 
     useEffect(() => {
-        setPreloader(true)
-        initialMessagesLoaded.current = true
-
-        getChatMessages(`${appURL}/chat/messages/${receiver.id}`, true)
-
         Echo.private(`messagereaded.${auth_id}`)
             .listen('MessageReaded', (e) => {
                 handleReadedMessage()
@@ -103,16 +43,17 @@ export default function ChatMessages({ receiver, auth_id }) {
     }, [receiver])
 
     return (<>
-        {preloader ?
-            <div className="h-full flex items-center justify-center">
+        {preloader &&
+            <div className="absolute bg-white z-[1] top-0 right-0 bottom-0 left-0 flex items-center justify-center">
                 <img className="w-1/2 h-1/2" src={public_url + "/" + "loader.gif"} />
-            </div> :
+            </div> 
+        }
             <UseInfiniteScroll
                 request={getChatMessages}
                 nextPageUrl={nextPageUrl}
-                childrenClassNames="md:pr-5 w-full"
+                childrenClassNames="md:pr-5 w-full mb-[95px] "
                 isReverseScroll={true}
-                ref={scrollRef}
+                ref={ref}
                 isLoadMoreTop={true}
             >
                 {messages.map((message, index) => {
@@ -164,6 +105,5 @@ export default function ChatMessages({ receiver, auth_id }) {
                 }
                 )}
             </UseInfiniteScroll>
-        }
     </>)
-}
+})

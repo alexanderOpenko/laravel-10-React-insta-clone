@@ -1,5 +1,5 @@
 // useInfiniteScroll.js
-import { useEffect, forwardRef, memo } from "react";
+import { useEffect, forwardRef } from "react";
 import PrimaryButton from "./Components/PrimaryButton";
 import classNames from "classnames";
 

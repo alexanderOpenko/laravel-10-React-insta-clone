@@ -1,9 +1,9 @@
 import Avatar from "../Avatar";
 import { useRef, memo } from "react";
 import UseInfiniteScroll from "@/infinitePaginationHook"
+import TransparentButton from "../TransparentButton";
 
 export default memo(function ChatSidebar({ auth_id, nextPageUrl, chats, getChats, setReceiverHandler }) {
-    console.log('chatSidebar');
     const scrollRef = useRef(null)
 
     return (
@@ -15,7 +15,8 @@ export default memo(function ChatSidebar({ auth_id, nextPageUrl, chats, getChats
                     nextPageUrl={nextPageUrl}
                 >
                     {chats.map((el, index) => (
-                        <div
+                        <TransparentButton
+                            type="button"
                             onClick={() => setReceiverHandler(el.user)}
                             key={index}
                             className="flex px-5 py-3 transition hover:cursor-pointer hover:bg-slate-100"
@@ -49,7 +50,7 @@ export default memo(function ChatSidebar({ auth_id, nextPageUrl, chats, getChats
                                     </div>}
                                 </div>
                             </div>
-                        </div>
+                        </TransparentButton>
                     ))}
                 </UseInfiniteScroll>
             }
