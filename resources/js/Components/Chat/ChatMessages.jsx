@@ -1,11 +1,9 @@
 import UseInfiniteScroll from "@/infinitePaginationHook"
-import { appURL } from "@/services";
 import { usePage } from "@inertiajs/react";
-import { useState, useEffect, useMemo, forwardRef } from "react";
+import { useEffect, useMemo, forwardRef } from "react";
 
-export default forwardRef(function ChatMessages({ readedMesages, handleReadedMessage, receiver, auth_id, nextPageUrl, messages, getChatMessages, getLastMessage, preloader }, ref) {    
+export default forwardRef(function ChatMessages({ receiver, auth_id, nextPageUrl, messages, setMessages, setSavedMessages, getChatMessages, getLastMessage, preloader }, ref) {    
     const { public_url } = usePage().props
-
     const isReceivedMessage = (message) => {
         return message.receiver_id === auth_id;
     }
@@ -20,7 +18,25 @@ export default forwardRef(function ChatMessages({ readedMesages, handleReadedMes
     useEffect(() => {
         Echo.private(`messagereaded.${auth_id}`)
             .listen('MessageReaded', (e) => {
-                handleReadedMessage()
+                setMessages(prevMessages => {
+                    return prevMessages.map(el =>  {
+                         el.status = 1
+                         return el
+                    })
+                })
+
+                setSavedMessages(prevMessages => {
+                    return prevMessages.map(el =>  {
+                        if (el.id === receiver.id) {
+                            el.messages = el.messages.map(m => {
+                                 m.status = 1
+                                 return m
+                            })
+                        }
+                         
+                         return el
+                    })
+                })
             })
 
         Echo.join(`messenger.${roomId}`)
@@ -56,10 +72,10 @@ export default forwardRef(function ChatMessages({ readedMesages, handleReadedMes
                 ref={ref}
                 isLoadMoreTop={true}
             >
-                {messages.map((message, index) => {
+                {messages.map((message) => {
                     const isReceived = isReceivedMessage(message)
 
-                    return <div key={index}>
+                    return <div key={message.id}>
                         <div
                             className={`${isReceived
                                 ? "receive-chat justify-start"
@@ -79,23 +95,14 @@ export default forwardRef(function ChatMessages({ readedMesages, handleReadedMes
                                 <div className="flex items-center">
                                     <p className="mr-2">{message?.message}</p>
 
-                                    {!isReceived &&
-                                        (message.status ?
+                                    {
+                                        !isReceived && (message.status ?
 
                                             <>
                                                 <i className="fa fa-check" aria-hidden="true"></i>
                                                 <i className="fa fa-check" aria-hidden="true"></i>
                                             </> :
-                                            (!readedMesages && <i className="fa fa-check" aria-hidden="true"></i>)
-                                        )
-                                    }
-
-                                    {!isReceived &&
-                                        (readedMesages && !message.status ?
-                                            <>
-                                                <i className="fa fa-check" aria-hidden="true"></i>
-                                                <i className="fa fa-check" aria-hidden="true"></i>
-                                            </> : ''
+                                             <i className="fa fa-check" aria-hidden="true"></i>
                                         )
                                     }
                                 </div>

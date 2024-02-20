@@ -20,6 +20,17 @@ export default forwardRef(function UseInfiniteScroll({
         }
     }
 
+    function loadMoreHandler () {
+        if (isReverseScroll) {
+            const target = children ? ref.current : document
+            const scrollHeight = children ? target.scrollHeight : document.body.scrollHeight
+
+            target.scrollTop = 50
+        }
+
+        makeRequest()
+    }
+
     useEffect(() => {
         const onScroll = () => {
             const scrollTop = Math.round(children ? target.scrollTop : window.scrollY)
@@ -29,7 +40,8 @@ export default forwardRef(function UseInfiniteScroll({
             if (!isReverseScroll && scrollTop + clientHeight >= scrollHeight - 150 && !usedUrls.includes(nextPageUrl)) {
                 makeRequest()
             }
-
+console.log(scrollTop, ' top');
+console.log(scrollHeight/3, ' height');
             if (isReverseScroll && scrollTop <= (scrollHeight / 3) && !usedUrls.includes(nextPageUrl)) {
                 makeRequest()
             }
@@ -56,7 +68,7 @@ export default forwardRef(function UseInfiniteScroll({
                 </div>
 
                 <div className="flex flex-col items-center p-2">
-                    {nextPageUrl ? <PrimaryButton type="button" onClick={makeRequest} className="mx-auto">
+                    {nextPageUrl ? <PrimaryButton type="button" onClick={loadMoreHandler} className="mx-auto">
                         Load More
                     </PrimaryButton> : <div className="py-[17px]"></div>}
                 </div>

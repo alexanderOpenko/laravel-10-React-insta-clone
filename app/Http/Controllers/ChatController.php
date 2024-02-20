@@ -42,6 +42,10 @@ class ChatController extends Controller
         return $messages;
     }
 
+    public function dispatchReadedMessagesOnReceiverChange (int $sender_id) {
+        $this->chat->updateChatMessegesStatus(Auth::id(), $sender_id);
+    }
+
     public function getChatList(Request $request) 
     {
         return $this->chat->getRecentUsersWithMessage((int) $request->user()->id, (int) $request->query('limit'));
@@ -57,6 +61,7 @@ class ChatController extends Controller
 
         if ($lastMessage['sender_id'] != $sender_id) {
             $lastMessage->update(['status' => 1]);
+
             MessageReaded::dispatch($lastMessage['sender_id']);
         }
         

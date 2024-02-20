@@ -7,7 +7,8 @@ import classNames from "classnames";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { appURL } from "@/services";
 
-export default function Chat({ auth, errors, receiver: companion = null }) {
+export default function Chat({ auth, errors, receiver: companion = {} }) {
+    console.log(companion, 'companion');
     const [currentView, setCurrentView] = useState('showSidebar')
     const [receiver, setReceiver] = useState({})
     const [isMobileView, setIsMobileView] = useState(false)
@@ -19,7 +20,6 @@ export default function Chat({ auth, errors, receiver: companion = null }) {
     const [nextPageMessagesUrl, setNextPageMessagesUrl] = useState('')
     const [messages, setMessages] = useState([])
 
-    const [prevScrollHeight, setPrevScrollHeight] = useState(null)
     const initialMessagesLoaded = useRef(false);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -38,32 +38,13 @@ export default function Chat({ auth, errors, receiver: companion = null }) {
         }
     }
 
-    useEffect(() => {
-        setIsLoading(false)
-        setPreloader(false)
-
-        if (initialMessagesLoaded.current) {
-            setTimeout(() => {
-                scrollRef.current.scrollTop = scrollRef.current.scrollHeight
-                initialMessagesLoaded.current = false
-            }, 50)
-        }
-    }, [messages])
-
-    useEffect(() => {
-        if (prevScrollHeight) {
-            const scrollDifference = scrollRef.current.scrollHeight - prevScrollHeight
-            scrollRef.current.scrollTop += scrollDifference
-        }
-    }, [prevScrollHeight])
-
     const hideSidebar = useCallback(() => {
         setCurrentView('hideSidebar')
     }, [])
 
     const showSidebar = useCallback(() => {
         setCurrentView('showSidebar')
-        setReceiverHandler(null)
+        setReceiver(null)
     }, [])
 
     const getChats = async (url) => {
@@ -81,8 +62,22 @@ export default function Chat({ auth, errors, receiver: companion = null }) {
         setChats(prevChats => {
             const newChats = prevChats.filter(chat => json.user.id !== chat.user.id)
             return [json, ...newChats]
+        })
+
+        if (savedMessages.length) {
+            setSavedMessages(prevSavedMeassages => {
+                return prevSavedMeassages.map(el => {
+                    if (el.id === json.message.sender_id) {
+                        if (!el.messages.some(el => el.id === json.message.id)) {
+
+                        el.messages.push(json.message)
+                        }
+                    }
+                    return el
+                }
+                )
+            })
         }
-        )
     }, [receiver])
 
     const getUpdatedChats = useCallback(async () => {
@@ -102,18 +97,17 @@ export default function Chat({ auth, errors, receiver: companion = null }) {
         const reversedMessages = json.data.reverse()
 
         if (firstInit) {
-            setMessages(reversedMessages)
-            saveMessagesOfReceiver(reversedMessages, recId, json.next_page_url)
+            setMessages([...reversedMessages])
+            saveMessagesOfReceiver([...reversedMessages], recId, json.next_page_url)
             // setPreloader(false)
         } else {
             setMessages(prevMessages => [...reversedMessages, ...prevMessages])
-            saveMessagesOfReceiver([...reversedMessages, ...messages], recId, json.next_page_url)
-
-            setPrevScrollHeight(scrollRef.current.scrollHeight)
+            const savedMessagesOfReceiver = savedMessages.find(el => el.id === recId)
+            saveMessagesOfReceiver([...reversedMessages, ...savedMessagesOfReceiver.messages], recId, json.next_page_url)
         }
     }
 
-    function saveMessagesOfReceiver(messages, recId, nextPageUrl) {
+    function saveMessagesOfReceiver(messagesReceiver, recId, nextPageUrl = null) {
         if (!recId) {
             return
         }
@@ -121,13 +115,49 @@ export default function Chat({ auth, errors, receiver: companion = null }) {
         const index = savedMessages.indexOf(savedMessages.find(el => el.id === recId))
 
         if (index !== -1) {
-            savedMessages[index].messages = messages
+            savedMessages[index].messages = messagesReceiver
             savedMessages[index].nextPageUrl = nextPageUrl
         } else {
-            savedMessages.push({ id: recId, messages: messages, nextPageUrl: nextPageUrl })
+            savedMessages.push({ id: recId, messages: messagesReceiver, nextPageUrl: nextPageUrl })
         }
+
         setSavedMessages(savedMessages)
     }
+
+    const scrollDown = () => {
+        setTimeout(() => {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+            initialMessagesLoaded.current = false
+        }, 150)
+    }
+
+    useEffect(() => {
+        if (isLoading) {
+            setIsLoading(false)
+        }
+
+        if (preloader) {
+            setPreloader(false)
+        }
+
+        if (initialMessagesLoaded.current) {
+            scrollDown()
+        }
+    }, [messages])
+
+    useEffect(() => {
+        const windowWidth = window.innerWidth
+
+        if (windowWidth <= 768) {
+            setIsMobileView(true)
+
+            if (!companion?.id) {
+                showSidebar()
+            } else {
+                hideSidebar()
+            }
+        }
+    }, [])
 
     useEffect(() => {
         getChats(`${appURL}/chatList`)
@@ -156,6 +186,10 @@ export default function Chat({ auth, errors, receiver: companion = null }) {
         }
     }, [chats])
 
+    const setMassegesAsReadedRequest = async (senderId) => {
+        await fetch(`${appURL}/chat/setReaded/${senderId}`)
+    }
+
     useEffect(() => {
         if (receiver?.id) {
             initialMessagesLoaded.current = true
@@ -164,6 +198,11 @@ export default function Chat({ auth, errors, receiver: companion = null }) {
 
             if (savedReceivermessages) {
                 setMessages(savedReceivermessages.messages)
+
+                if (savedReceivermessages.messages.find((el) => el.status === 0)) {
+                    setMassegesAsReadedRequest(receiver.id)
+                }
+
                 setNextPageMessagesUrl(savedReceivermessages.nextPageUrl)
             } else {
                 setPreloader(true)
@@ -174,25 +213,9 @@ export default function Chat({ auth, errors, receiver: companion = null }) {
         }
     }, [receiver])
 
-    useEffect(() => {
-        const windowWidth = window.innerWidth
-
-        if (windowWidth <= 768) {
-            setIsMobileView(true)
-
-            if (!receiver) {
-                showSidebar()
-            }
-
-            if (receiver) {
-                hideSidebar()
-            }
-        }
-    }, [receiver])
-
-    const handleReadedMessage = useCallback((e) => {
+    const handleReadedMessage = () => {
         setReadedMessages(true);
-    }, [])
+    }
 
     const getLastMessage = useCallback(async () => {
         if (!receiver.id) {
@@ -201,11 +224,23 @@ export default function Chat({ auth, errors, receiver: companion = null }) {
         const resp = await fetch(`${appURL}/chat/lastMessage/${receiver.id}`)
         const json = await resp.json()
 
-        handleReadedMessage()
+        setMessages(prevMessages => [...prevMessages, JSON.parse(JSON.stringify(json))])
 
-        setMessages(prevMessages => [...prevMessages, json])
+        setSavedMessages(prevSavedMessages => {
+            return prevSavedMessages.map(el => {
+                if (el.id === receiver.id) {
+                    if (!el.messages.some(el => el.id === json.id)) {
+                        el.messages.push(JSON.parse(JSON.stringify(json)))
+                    }
+                }
+                return el
+            }
+            )
+        })
+
+        scrollDown()
     }, [receiver])
-
+   
     const sidebarClasses = classNames({
         "border-r border-slate-100 bg-white pt-3 h-[100vh]": true,
         "hidden": currentView === 'hideSidebar' && isMobileView,
@@ -234,7 +269,7 @@ export default function Chat({ auth, errors, receiver: companion = null }) {
                     </div>
 
                     <div className={chatWindowClasses}>
-                        {receiver.id ? (
+                        {receiver?.id ? (
                             <>
                                 <div className="flex items-center">
                                     {
@@ -250,6 +285,8 @@ export default function Chat({ auth, errors, receiver: companion = null }) {
                                     <div className="flex flex-col h-full relative" style={{ maxHeight: 'calc(100vh - 82px)' }}>
                                         <ChatMessages
                                             readedMesages={readedMesages}
+                                            setMessages={setMessages}
+                                            setSavedMessages={setSavedMessages}
                                             handleReadedMessage={handleReadedMessage}
                                             preloader={preloader}
                                             getChatMessages={getChatMessages}

@@ -97,6 +97,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/lastChat/{receiverId}', [ChatController::class, 'getLastChat'])->name('getLastChat');
         Route::post('/{receiverId?}', [ChatController::class, 'store'])->name('store');
         Route::get('/messages/{receiverId}', [ChatController::class, 'getChatMessages'])->name('messages');
+        Route::get('/setReaded/{senderId}', [ChatController::class, 'dispatchReadedMessagesOnReceiverChange'])->name('read');
     });
 
     Route::get('/chatList', [ChatController::class, 'getChatList'])->name('getChatList');

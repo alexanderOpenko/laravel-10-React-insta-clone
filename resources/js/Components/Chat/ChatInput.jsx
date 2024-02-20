@@ -32,7 +32,7 @@ export default memo(function ChatInput({ receiver, getLastChat }) {
                     onChange={onHandleChange}
                 />
 
-                <TransparentButton>
+                <TransparentButton disabled={processing}>
                     <i className="fa fa-paper-plane fa-lg" aria-hidden="true"></i>
                 </TransparentButton>
             </form>
