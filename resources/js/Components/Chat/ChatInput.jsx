@@ -22,10 +22,10 @@ export default memo(function ChatInput({ receiver, getLastChat }) {
     }
 
     return (
-        <div className="bg-white p-4 fixed md:absolute right-0 bottom-0 left-0 z-[12]">
+        <div className="py-2 px-[10px] md:px-0 bg-transparent fixed md:absolute right-0 bottom-0 left-0 z-[12]">
             <form onSubmit={submit} className="flex">
                 <TextInput
-                    className="h-16 w-full overflow-y-auto bg-white pt-3 font-light mr-3"
+                    className="h-16 w-full overflow-y-auto bg-white pt-3 mr-3"
                     placeholder="Write a message"
                     name="message"
                     value={data.message}

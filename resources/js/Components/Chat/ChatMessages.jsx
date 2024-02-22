@@ -1,9 +1,12 @@
 import UseInfiniteScroll from "@/infinitePaginationHook"
+import { hoursAndMinutes } from "@/services";
 import { usePage } from "@inertiajs/react";
+import classNames from "classnames";
 import { useEffect, useMemo, forwardRef } from "react";
 
-export default forwardRef(function ChatMessages({ receiver, auth_id, nextPageUrl, messages, setMessages, setSavedMessages, getChatMessages, getLastMessage, preloader }, ref) {    
+export default forwardRef(function ChatMessages({ receiver, auth_id, nextPageUrl, messages, setMessages, setSavedMessages, getChatMessages, getLastMessage, preloader }, ref) {
     const { public_url } = usePage().props
+    console.log(messages, 'messages');
     const isReceivedMessage = (message) => {
         return message.receiver_id === auth_id;
     }
@@ -19,22 +22,22 @@ export default forwardRef(function ChatMessages({ receiver, auth_id, nextPageUrl
         Echo.private(`messagereaded.${auth_id}`)
             .listen('MessageReaded', (e) => {
                 setMessages(prevMessages => {
-                    return prevMessages.map(el =>  {
-                         el.status = 1
-                         return el
+                    return prevMessages.map(el => {
+                        el.status = 1
+                        return el
                     })
                 })
 
                 setSavedMessages(prevMessages => {
-                    return prevMessages.map(el =>  {
+                    return prevMessages.map(el => {
                         if (el.id === receiver.id) {
                             el.messages = el.messages.map(m => {
-                                 m.status = 1
-                                 return m
+                                m.status = 1
+                                return m
                             })
                         }
-                         
-                         return el
+
+                        return el
                     })
                 })
             })
@@ -59,58 +62,73 @@ export default forwardRef(function ChatMessages({ receiver, auth_id, nextPageUrl
     }, [receiver])
 
     return (<>
-        {preloader &&
-            <div className="absolute bg-white z-[1] top-0 right-0 bottom-0 left-0 flex items-center justify-center">
-                <img className="w-1/2 h-1/2" src={public_url + "/" + "loader.gif"} />
-            </div> 
-        }
-            <UseInfiniteScroll
-                request={getChatMessages}
-                nextPageUrl={nextPageUrl}
-                childrenClassNames="md:pr-5 w-full mb-[95px] "
-                isReverseScroll={true}
-                ref={ref}
-                isLoadMoreTop={true}
-            >
-                {messages.map((message) => {
-                    const isReceived = isReceivedMessage(message)
+        {preloader ?
+            <div className="bg-transparent z-[2] w-full h-full flex items-center justify-center">
+                <img className="w-1/2 h-1/2" src={public_url + "/" + "loader.png"} />
+            </div>
+        :
+        <UseInfiniteScroll
+            request={getChatMessages}
+            nextPageUrl={nextPageUrl}
+            childrenClassNames="w-full mb-[75px]"
+            bodyClasses=" max-w-xl mx-auto"
+            isReverseScroll={true}
+            ref={ref}
+            isLoadMoreTop={true}
+        >
+            {messages.map((message) => {
+                const time = hoursAndMinutes(message.created_at)
+                const isReceived = isReceivedMessage(message)
 
-                    return <div key={message.id}>
-                        <div
-                            className={`${isReceived
-                                ? "receive-chat justify-start"
-                                : "send-chat justify-end"
-                                } relative flex`}
-                        >
+                const messageGridClasses = classNames({
+                    "relative flex": true,
+                    "receive-chat justify-start": isReceived,
+                    "send-chat justify-end": !isReceived
+                })
 
-                            <div
-                                className={`mb-2 max-w-[80%] rounded ${isReceived
-                                    ? "bg-violet-400"
-                                    : "bg-violet-200"
-                                    } p-2 text-sm ${isReceived
-                                        ? "text-white"
-                                        : "text-slate-500"
-                                    }`}
-                            >
-                                <div className="flex items-center">
-                                    <p className="mr-2">{message?.message}</p>
+                const messageClasses = classNames({
+                    "mb-2 max-w-[80%] rounded flex pl-[8px] pr-[6px] py-[5px] font-roboto" : true, 
+                    "bg-white": isReceived,
+                    "bg-[#eeffde]": !isReceived
+                })
 
-                                    {
-                                        !isReceived && (message.status ?
+                const timeColor = classNames({
+                    "mr-[2px] leading-[0.65]": true,
+                    "text-[#4fae4e]": !isReceived,
+                    "text-zinc-400": isReceived
+                })
 
-                                            <>
-                                                <i className="fa fa-check" aria-hidden="true"></i>
-                                                <i className="fa fa-check" aria-hidden="true"></i>
-                                            </> :
-                                             <i className="fa fa-check" aria-hidden="true"></i>
-                                        )
-                                    }
+                return <div key={message.id}>
+                    <div className={messageGridClasses}>
+                        <div className={messageClasses}>
+                            <div className="mr-[11px] leading-[1.3] text-zinc-700 font-[450]">
+                                {message?.message}
+                            </div>
+
+                            <div className="flex items-end text-xs leading-[1]">
+                                <div className={timeColor}>
+                                    {time}
                                 </div>
+
+                                {
+                                    !isReceived && <div className="text-[#eeffde]"> 
+                                        {message.status ?
+                                        <div className="whitespace-nowrap">
+                                            <i className="fa fa-check fa-lg check-icon relative w-[14px]" aria-hidden="true"></i>
+                                            <i className="fa fa-check ml-[-9px] fa-lg check-icon" aria-hidden="true"></i>
+                                        </div> :
+
+                                        <div>
+                                            <i className="fa fa-check fa-lg check-icon w-[14px]" aria-hidden="true"></i>
+                                        </div>}                                    
+                                    </div>
+                                }
                             </div>
                         </div>
                     </div>
-                }
-                )}
-            </UseInfiniteScroll>
+                </div>
+            }
+            )}
+        </UseInfiniteScroll>}
     </>)
 })

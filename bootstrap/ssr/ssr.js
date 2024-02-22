@@ -1,5 +1,5 @@
 import { jsx, jsxs, Fragment } from "react/jsx-runtime";
-import { forwardRef, useRef, useEffect, useState, useMemo, createContext, Fragment as Fragment$1, useContext } from "react";
+import { forwardRef, useRef, useEffect, memo, useMemo, useState, createContext, useCallback, Fragment as Fragment$1, useContext } from "react";
 import { Link, useForm, Head, usePage, useRemember, router, createInertiaApp } from "@inertiajs/react";
 import classNames from "classnames";
 import { Transition, Dialog } from "@headlessui/react";
@@ -28,7 +28,7 @@ function PrimaryButton({ className = "", disabled, children, ...props }) {
     "button",
     {
       ...props,
-      className: `inline-flex cursor-pointer items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 ${disabled && "opacity-25"} ` + className,
+      className: `inline-flex justify-center	 cursor-pointer items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 ${disabled && "opacity-25"} ` + className,
       disabled,
       children
     }
@@ -445,7 +445,7 @@ function TransparentButton({ className = "", disableAutofocus = true, disabled, 
     }
   );
 }
-function ChatInput({ receiver, getLastChat }) {
+const ChatInput = memo(function ChatInput2({ receiver, getLastChat }) {
   const { data, setData, post, processing, errors, reset } = useForm({
     message: ""
   });
@@ -455,31 +455,32 @@ function ChatInput({ receiver, getLastChat }) {
   const submit = (e) => {
     e.preventDefault();
     post(route("chat.store", receiver == null ? void 0 : receiver.id), {
-      onSuccess: () => getLastChat()
+      onSuccess: () => getLastChat(receiver == null ? void 0 : receiver.id)
     });
     reset("message");
   };
-  return /* @__PURE__ */ jsx("div", { className: "bg-white p-4 fixed md:absolute right-0 bottom-0 left-0 z-[12]", children: /* @__PURE__ */ jsxs("form", { onSubmit: submit, className: "flex", children: [
+  return /* @__PURE__ */ jsx("div", { className: "py-2 px-[10px] md:px-0 bg-yellow-50 fixed md:absolute right-0 bottom-0 left-0 z-[12]", children: /* @__PURE__ */ jsxs("form", { onSubmit: submit, className: "flex", children: [
     /* @__PURE__ */ jsx(
       TextInput,
       {
-        className: "h-16 w-full overflow-y-auto bg-white pt-3 font-light mr-3",
+        className: "h-16 w-full overflow-y-auto bg-white pt-3 mr-3",
         placeholder: "Write a message",
         name: "message",
         value: data.message,
         onChange: onHandleChange
       }
     ),
-    /* @__PURE__ */ jsx(TransparentButton, { children: /* @__PURE__ */ jsx("i", { className: "fa fa-paper-plane fa-lg", "aria-hidden": "true" }) })
+    /* @__PURE__ */ jsx(TransparentButton, { disabled: processing, children: /* @__PURE__ */ jsx("i", { className: "fa fa-paper-plane fa-lg", "aria-hidden": "true" }) })
   ] }) });
-}
+});
 const UseInfiniteScroll = forwardRef(function UseInfiniteScroll2({
   request,
   nextPageUrl,
   children,
   childrenClassNames = "",
   isReverseScroll = false,
-  isLoadMoreTop = false
+  isLoadMoreTop = false,
+  bodyClasses
 }, ref) {
   let usedUrls = [];
   function makeRequest() {
@@ -488,12 +489,19 @@ const UseInfiniteScroll = forwardRef(function UseInfiniteScroll2({
       usedUrls.push(nextPageUrl);
     }
   }
+  function loadMoreHandler() {
+    if (isReverseScroll) {
+      const target = children ? ref.current : document;
+      target.scrollTop = 50;
+    }
+    makeRequest();
+  }
   useEffect(() => {
     const onScroll = () => {
       const scrollTop = Math.round(children ? target.scrollTop : window.scrollY);
       const scrollHeight = children ? target.scrollHeight : document.body.scrollHeight;
       const clientHeight = children ? target.clientHeight : window.innerHeight;
-      if (!isReverseScroll && scrollTop + clientHeight >= scrollHeight - 100 && !usedUrls.includes(nextPageUrl)) {
+      if (!isReverseScroll && scrollTop + clientHeight >= scrollHeight - 150 && !usedUrls.includes(nextPageUrl)) {
         makeRequest();
       }
       if (isReverseScroll && scrollTop <= scrollHeight / 3 && !usedUrls.includes(nextPageUrl)) {
@@ -506,9 +514,13 @@ const UseInfiniteScroll = forwardRef(function UseInfiniteScroll2({
       target.removeEventListener("scroll", onScroll);
     };
   }, [nextPageUrl]);
-  return /* @__PURE__ */ jsx("div", { ref, className: childrenClassNames + " scrollableChildren overflow-y-auto", children: /* @__PURE__ */ jsxs("div", { className: isLoadMoreTop && "flex flex-col-reverse", children: [
+  const classes = classNames({
+    "flex flex-col-reverse": isLoadMoreTop,
+    "pb-[80px]": !children
+  });
+  return /* @__PURE__ */ jsx("div", { ref, className: childrenClassNames + " h-full scrollableChildren overflow-y-auto", children: /* @__PURE__ */ jsxs("div", { className: classes + bodyClasses, children: [
     /* @__PURE__ */ jsx("div", { children: !!children && children }),
-    /* @__PURE__ */ jsx("div", { className: "flex flex-col items-center p-2", children: nextPageUrl && /* @__PURE__ */ jsx(PrimaryButton, { type: "button", onClick: makeRequest, className: "mx-auto", children: "Load More" }) })
+    /* @__PURE__ */ jsx("div", { className: "flex flex-col items-center p-2", children: nextPageUrl ? /* @__PURE__ */ jsx(PrimaryButton, { type: "button", onClick: loadMoreHandler, className: "mx-auto", children: "Load More" }) : /* @__PURE__ */ jsx("div", { className: "py-[17px]" }) })
   ] }) });
 });
 function strPlural(string, n) {
@@ -535,58 +547,44 @@ function ordinalSuffix(number) {
       return number + "th";
   }
 }
+function hoursAndMinutes(dateString) {
+  const date = new Date(dateString);
+  const hours = date.getUTCHours();
+  const minutes = date.getUTCMinutes();
+  const formattedTime = `${hours}:${minutes < 10 ? "0" : ""}${minutes}`;
+  return formattedTime;
+}
 const appURL$1 = "http://127.0.0.1:8000";
-function ChatMessages({ receiver, auth_id }) {
-  const [messages, setMessages] = useState([]);
-  const [readedMesages, setReadedMessages] = useState(false);
-  const [nextPageUrl, setNextPageUrl] = useState("");
-  const [prevScrollHeight, setPrevScrollHeight] = useState(null);
-  const initialMessagesLoaded = useRef(false);
-  const scrollRef = useRef(null);
+const ChatMessages = forwardRef(function ChatMessages2({ receiver, auth_id, nextPageUrl, messages, setMessages, setSavedMessages, getChatMessages, getLastMessage, preloader }, ref) {
+  const { public_url } = usePage().props;
+  console.log(messages, "messages");
   const isReceivedMessage = (message) => {
     return message.receiver_id === auth_id;
   };
-  const getLastMessage = async () => {
-    if (!receiver.id) {
-      return;
-    }
-    const resp = await fetch(`${appURL$1}/chat/lastMessage/${receiver.id}`);
-    const json = await resp.json();
-    if (json.sender_id === auth_id) {
-      setReadedMessages(false);
-    }
-    setMessages((prevMessages) => [...prevMessages, json]);
-  };
-  const getChatMessages = async (url, firstInit = false) => {
-    const resp = await fetch(url);
-    const json = await resp.json();
-    setNextPageUrl(json.next_page_url);
-    if (firstInit) {
-      setMessages(json.data.reverse());
-    } else {
-      setPrevScrollHeight(scrollRef.current.scrollHeight);
-      setMessages((prevMessages) => [...json.data.reverse(), ...prevMessages]);
-    }
-  };
-  useEffect(() => {
-    if (initialMessagesLoaded.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-      initialMessagesLoaded.current = false;
-      return;
-    }
-    const scrollDifference = scrollRef.current.scrollHeight - prevScrollHeight;
-    scrollRef.current.scrollTop += scrollDifference;
-  }, [messages]);
   const roomId = useMemo(() => {
     const sortedUserIds = [auth_id, receiver.id].sort();
     const roomId2 = sortedUserIds.join("");
     return roomId2;
   }, [auth_id, receiver.id]);
   useEffect(() => {
-    initialMessagesLoaded.current = true;
-    getChatMessages(`${appURL$1}/chat/messages/${receiver.id}`, true);
     Echo.private(`messagereaded.${auth_id}`).listen("MessageReaded", (e) => {
-      setReadedMessages(true);
+      setMessages((prevMessages) => {
+        return prevMessages.map((el) => {
+          el.status = 1;
+          return el;
+        });
+      });
+      setSavedMessages((prevMessages) => {
+        return prevMessages.map((el) => {
+          if (el.id === receiver.id) {
+            el.messages = el.messages.map((m) => {
+              m.status = 1;
+              return m;
+            });
+          }
+          return el;
+        });
+      });
     });
     Echo.join(`messenger.${roomId}`).listen("MessageSent", (e) => {
       getLastMessage();
@@ -600,44 +598,45 @@ function ChatMessages({ receiver, auth_id }) {
       Echo.leave(`messagereaded.${auth_id}`);
     };
   }, [receiver]);
-  return /* @__PURE__ */ jsx(
+  return /* @__PURE__ */ jsx(Fragment, { children: preloader ? /* @__PURE__ */ jsx("div", { className: "bg-transparent z-[2] w-full h-full flex items-center justify-center", children: /* @__PURE__ */ jsx("img", { className: "w-1/2 h-1/2", src: public_url + "/loader.png" }) }) : /* @__PURE__ */ jsx(
     UseInfiniteScroll,
     {
       request: getChatMessages,
       nextPageUrl,
-      childrenClassNames: "md:pr-5 w-full",
+      childrenClassNames: "w-full mb-[75px]",
+      bodyClasses: " max-w-xl mx-auto",
       isReverseScroll: true,
-      ref: scrollRef,
+      ref,
       isLoadMoreTop: true,
-      children: messages.map((message, index) => {
-        const isReceived = isReceivedMessage(message);
-        return /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsx(
-          "div",
-          {
-            className: `${isReceived ? "receive-chat justify-start" : "send-chat justify-end"} relative flex`,
-            children: /* @__PURE__ */ jsx(
-              "div",
-              {
-                className: `mb-2 max-w-[80%] rounded ${isReceived ? "bg-violet-400" : "bg-violet-200"} p-2 text-sm ${isReceived ? "text-white" : "text-slate-500"}`,
-                children: /* @__PURE__ */ jsxs("div", { className: "flex items-center", children: [
-                  /* @__PURE__ */ jsx("p", { className: "mr-2", children: message == null ? void 0 : message.message }),
-                  !isReceived && (message.status ? /* @__PURE__ */ jsxs(Fragment, { children: [
-                    /* @__PURE__ */ jsx("i", { className: "fa fa-check", "aria-hidden": "true" }),
-                    /* @__PURE__ */ jsx("i", { className: "fa fa-check", "aria-hidden": "true" })
-                  ] }) : !readedMesages && /* @__PURE__ */ jsx("i", { className: "fa fa-check", "aria-hidden": "true" })),
-                  !isReceived && (readedMesages && !message.status ? /* @__PURE__ */ jsxs(Fragment, { children: [
-                    /* @__PURE__ */ jsx("i", { className: "fa fa-check", "aria-hidden": "true" }),
-                    /* @__PURE__ */ jsx("i", { className: "fa fa-check", "aria-hidden": "true" })
-                  ] }) : "")
-                ] })
-              }
-            )
-          }
-        ) }, index);
-      })
+      children: messages.map(
+        (message) => {
+          const time = hoursAndMinutes(message.created_at);
+          const isReceived = isReceivedMessage(message);
+          const messageGridClasses = classNames({
+            "relative flex": true,
+            "receive-chat justify-start": isReceived,
+            "send-chat justify-end": !isReceived
+          });
+          const messageClasses = classNames({
+            "mb-2 max-w-[80%] rounded flex px-[8px] py-[5px] font-roboto": true,
+            "bg-white": isReceived,
+            "bg-violet-200": !isReceived
+          });
+          return /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsx("div", { className: messageGridClasses, children: /* @__PURE__ */ jsxs("div", { className: messageClasses, children: [
+            /* @__PURE__ */ jsx("div", { className: "mr-2 leading-[1.3] text-zinc-700 font-[450]", children: message == null ? void 0 : message.message }),
+            /* @__PURE__ */ jsxs("div", { className: "flex items-end text-xs leading-[1]", children: [
+              /* @__PURE__ */ jsx("div", { className: "mr-[2px]", children: time }),
+              !isReceived && (message.status ? /* @__PURE__ */ jsxs("div", { className: "leading-[0] flex", children: [
+                /* @__PURE__ */ jsx("i", { className: "fa fa-check", "aria-hidden": "true" }),
+                /* @__PURE__ */ jsx("i", { className: "fa fa-check", "aria-hidden": "true" })
+              ] }) : /* @__PURE__ */ jsx("div", { className: "leading-[0]", children: /* @__PURE__ */ jsx("i", { className: "fa fa-check", "aria-hidden": "true" }) }))
+            ] })
+          ] }) }) }, message.id);
+        }
+      )
     }
-  );
-}
+  ) });
+});
 function Avatar({ divClassName = "", imgClassName = "", size, user }) {
   const { public_url } = usePage().props;
   const sizeClass = {
@@ -654,43 +653,47 @@ function Avatar({ divClassName = "", imgClassName = "", size, user }) {
     }
   ) });
 }
-function ChatSidebar({ auth_id, nextPageUrl, chats, getChats, setReceiver }) {
+const ChatSidebar = memo(function ChatSidebar2({ auth_id, nextPageUrl, chats, getChats, setReceiverHandler }) {
   const scrollRef = useRef(null);
-  const setReceiverIdHandler = (receiver) => {
-    setReceiver(receiver);
-  };
-  return /* @__PURE__ */ jsx(Fragment, { children: !!chats.length && /* @__PURE__ */ jsx("div", { className: "user-list overflow-y-auto", children: /* @__PURE__ */ jsx(
+  return /* @__PURE__ */ jsx(Fragment, { children: !!chats.length && /* @__PURE__ */ jsx(
     UseInfiniteScroll,
     {
       ref: scrollRef,
       request: getChats,
       nextPageUrl,
-      children: chats.map((el, index) => /* @__PURE__ */ jsxs(
-        "div",
-        {
-          onClick: () => setReceiverIdHandler(el.user),
-          className: "flex px-5 py-3 transition hover:cursor-pointer hover:bg-slate-100",
-          children: [
-            /* @__PURE__ */ jsx("div", { className: "pr-4", children: /* @__PURE__ */ jsx(Avatar, { user: el.user, size: "sm" }) }),
-            /* @__PURE__ */ jsxs("div", { className: "w-full", children: [
-              /* @__PURE__ */ jsxs("div", { className: "flex items-center", children: [
-                /* @__PURE__ */ jsx("h3", { className: "text-md text-violet-500", children: el.user.name }),
-                !!el.user.online && /* @__PURE__ */ jsx("div", { className: "rounded-full ml-2 bg-cyan-500 p-1 h-1/2" })
-              ] }),
-              /* @__PURE__ */ jsxs("div", { className: "flex justify-between", children: [
-                /* @__PURE__ */ jsx("p", { className: !el.message.status && auth_id !== el.message.sender_id ? "font-bold h-5 overflow-hidden text-sm" : "h-5 overflow-hidden text-sm font-light text-gray-400", children: el.message.message }),
-                !el.message.status && auth_id !== el.message.sender_id && /* @__PURE__ */ jsx("div", { className: "rounded-full bg-cyan-500 px-2 text-white", children: "new" })
+      children: chats.map((el, index) => {
+        const messageClasses = classNames({
+          "h-5 overflow-hidden text-base font-normal text-zinc-500": true,
+          "font-bold text-gray-700": !el.message.status && auth_id !== el.message.sender_id
+        });
+        return /* @__PURE__ */ jsxs(
+          TransparentButton,
+          {
+            type: "button",
+            onClick: () => setReceiverHandler(el.user),
+            className: "flex px-5 py-3 transition hover:cursor-pointer hover:bg-slate-100",
+            children: [
+              /* @__PURE__ */ jsx("div", { className: "pr-4", children: /* @__PURE__ */ jsx(Avatar, { user: el.user, size: "sm" }) }),
+              /* @__PURE__ */ jsxs("div", { className: "w-full", children: [
+                /* @__PURE__ */ jsxs("div", { className: "flex items-center", children: [
+                  /* @__PURE__ */ jsx("h3", { className: "text-md text-violet-500", children: el.user.name }),
+                  !!el.user.online && /* @__PURE__ */ jsx("div", { className: "rounded-full ml-2 bg-cyan-500 p-1 h-1/2" })
+                ] }),
+                /* @__PURE__ */ jsxs("div", { className: "flex justify-between", children: [
+                  /* @__PURE__ */ jsx("div", { className: messageClasses, children: el.message.message }),
+                  !el.message.status && auth_id !== el.message.sender_id && /* @__PURE__ */ jsx("div", { className: "rounded-full bg-cyan-500 px-2 text-white", children: "new" })
+                ] })
               ] })
-            ] })
-          ]
-        },
-        index
-      ))
+            ]
+          },
+          index
+        );
+      })
     }
-  ) }) });
-}
+  ) });
+});
 function ChatUserInfoHeader({ receiver }) {
-  return /* @__PURE__ */ jsx("div", { className: "user-info-header bg-white Wpy-3", children: /* @__PURE__ */ jsx("div", { className: "flex justify-between", children: /* @__PURE__ */ jsxs("div", { className: "flex items-center", children: [
+  return /* @__PURE__ */ jsx("div", { className: "user-info-header Wpy-3", children: /* @__PURE__ */ jsx("div", { className: "flex justify-between", children: /* @__PURE__ */ jsxs("div", { className: "flex items-center", children: [
     /* @__PURE__ */ jsx(Avatar, { user: receiver, size: "sm" }),
     /* @__PURE__ */ jsx("h3", { className: "text-md pl-4 text-gray-400", children: receiver == null ? void 0 : receiver.name })
   ] }) }) });
@@ -760,8 +763,13 @@ function NotificationSound() {
 }
 const MenuItem = ({ children: icone, linkUrl, linkTitle }) => {
   const { isChat } = usePage().props;
+  const iconClasses = classNames({
+    "flex justify-center": true,
+    "w-full": isChat,
+    "lg:mr-3": !isChat
+  });
   return /* @__PURE__ */ jsxs(Link, { href: linkUrl, className: "flex items-center justify-center lg:justify-start font-medium py-4 cursor-pointer", children: [
-    /* @__PURE__ */ jsx("div", { className: "lg:mr-3", children: icone }),
+    /* @__PURE__ */ jsx("div", { className: iconClasses, children: icone }),
     !isChat && /* @__PURE__ */ jsx("div", { className: "hidden lg:block", children: linkTitle })
   ] });
 };
@@ -804,7 +812,7 @@ function BaseNav() {
   }, [notifications]);
   const classes = classNames({
     "border-t px-3 lg:px-6 fixed bottom-0 md:max-w-[72px] bg-white md:relative md:py-8 md:border-t-0 md:border-r lg:max-w-16 z-[11]": true,
-    "max-[769px]:w-full": isChat,
+    "max-[769px]:w-full lg:!px-3": isChat,
     "w-full": !isChat
   });
   const navClasses = classNames({
@@ -857,44 +865,138 @@ function Authenticated({ user, auth, header, children }) {
     ] }) })
   ] }) });
 }
-function Chat({ auth, errors, receiver: companion = null }) {
-  var _a;
+function Chat({ auth, errors, receiver: companion = {} }) {
   const [currentView, setCurrentView] = useState("showSidebar");
-  const [receiver, setReceiver] = useState(companion);
+  const [receiver, setReceiver] = useState({});
   const [isMobileView, setIsMobileView] = useState(false);
   const [chats, setChats] = useState([]);
   const [nextPageUrl, setNextPageUrl] = useState("");
-  const hideSidebar = () => {
+  const [preloader, setPreloader] = useState(false);
+  const [readedMesages, setReadedMessages] = useState(false);
+  const [nextPageMessagesUrl, setNextPageMessagesUrl] = useState("");
+  const [messages, setMessages] = useState([]);
+  const initialMessagesLoaded = useRef(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const scrollRef = useRef(null);
+  const [savedMessages, setSavedMessages] = useState([]);
+  const setReceiverHandler = (messagesReceiver) => {
+    if (receiver === messagesReceiver) {
+      return;
+    }
+    if (!isLoading) {
+      setIsLoading(true);
+      setReceiver(messagesReceiver);
+    }
+  };
+  const hideSidebar = useCallback(() => {
     setCurrentView("hideSidebar");
-  };
-  const showSidebar = () => {
+  }, []);
+  const showSidebar = useCallback(() => {
     setCurrentView("showSidebar");
-  };
+    setReceiver(null);
+    setIsLoading(false);
+  }, []);
   const getChats = async (url) => {
     const resp = await fetch(url);
     const json = await resp.json();
     setNextPageUrl(json.next_page_url);
     setChats([...chats, ...json.data]);
   };
-  const getLastChat = async (userId = receiver == null ? void 0 : receiver.id) => {
+  const getLastChat = useCallback(async (userId) => {
     const resp = await fetch(`${appURL$1}/chat/lastChat/${userId}`);
     const json = await resp.json();
-    setChats(
-      (prevChats) => {
-        const newChats = prevChats.filter((chat) => json.user.id !== chat.user.id);
-        return [json, ...newChats];
-      }
-    );
-  };
-  const getUpdatedChats = async () => {
+    setChats((prevChats) => {
+      const newChats = prevChats.filter((chat) => json.user.id !== chat.user.id);
+      return [json, ...newChats];
+    });
+    if (savedMessages.length) {
+      setSavedMessages((prevSavedMeassages) => {
+        return prevSavedMeassages.map(
+          (el) => {
+            if (el.id === json.message.sender_id) {
+              if (!el.messages.some((el2) => el2.id === json.message.id)) {
+                el.messages.push(json.message);
+              }
+            }
+            return el;
+          }
+        );
+      });
+    }
+  }, [receiver]);
+  const getUpdatedChats = useCallback(async () => {
     const resp = await fetch(`${appURL$1}/chatList?limit=${chats.length}`);
     const json = await resp.json();
     setChats(json);
+  }, [chats]);
+  const getChatMessages = async (url, firstInit = false) => {
+    const resp = await fetch(url);
+    const json = await resp.json();
+    const recId = receiver.id;
+    setNextPageMessagesUrl(json.next_page_url);
+    const reversedMessages = json.data.reverse();
+    if (firstInit) {
+      setMessages([...reversedMessages]);
+      saveMessagesOfReceiver([...reversedMessages], recId, json.next_page_url);
+    } else {
+      setMessages((prevMessages) => [...reversedMessages, ...prevMessages]);
+      const savedMessagesOfReceiver = savedMessages.find((el) => el.id === recId);
+      saveMessagesOfReceiver([...reversedMessages, ...savedMessagesOfReceiver.messages], recId, json.next_page_url);
+    }
+  };
+  function saveMessagesOfReceiver(messagesReceiver, recId, nextPageUrl2 = null) {
+    if (!recId) {
+      return;
+    }
+    const index = savedMessages.indexOf(savedMessages.find((el) => el.id === recId));
+    if (index !== -1) {
+      savedMessages[index].messages = messagesReceiver;
+      savedMessages[index].nextPageUrl = nextPageUrl2;
+    } else {
+      savedMessages.push({ id: recId, messages: messagesReceiver, nextPageUrl: nextPageUrl2 });
+    }
+    setSavedMessages(savedMessages);
+  }
+  const scrollDown = () => {
+    setTimeout(() => {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      initialMessagesLoaded.current = false;
+    }, 0);
   };
   useEffect(() => {
+    if (isLoading) {
+      setIsLoading(false);
+    }
+    if (preloader) {
+      setPreloader(false);
+    }
+    if (initialMessagesLoaded.current) {
+      scrollDown();
+    }
+  }, [messages]);
+  useEffect(() => {
+    const windowWidth = window.innerWidth;
+    if (windowWidth <= 1024 && !isMobileView) {
+      setIsMobileView(true);
+      if (!(receiver == null ? void 0 : receiver.id)) {
+        showSidebar();
+      } else {
+        hideSidebar();
+      }
+    } else if (isMobileView) {
+      if (!(receiver == null ? void 0 : receiver.id)) {
+        showSidebar();
+      } else {
+        hideSidebar();
+      }
+    }
+  }, [receiver]);
+  useEffect(() => {
     getChats(`${appURL$1}/chatList`);
+    if (companion) {
+      setReceiver(companion);
+    }
     Echo.private(`chatmessages.${auth.user.id}`).listen("ChatMessageSent", (e) => {
-      console.log("chatmessages");
       getLastChat(e.user_id);
     });
     return () => {
@@ -909,34 +1011,64 @@ function Chat({ auth, errors, receiver: companion = null }) {
       clearInterval(intervalId);
     };
   }, [chats]);
+  const setMassegesAsReadedRequest = async (senderId) => {
+    await fetch(`${appURL$1}/chat/setReaded/${senderId}`);
+  };
   useEffect(() => {
-    const windowWidth = window.innerWidth;
-    if (windowWidth <= 768) {
-      setIsMobileView(true);
-      if (!receiver) {
-        showSidebar();
-      }
-      if (companion) {
-        hideSidebar();
+    if (receiver == null ? void 0 : receiver.id) {
+      initialMessagesLoaded.current = true;
+      const savedReceivermessages = savedMessages.find((el) => el.id === receiver.id);
+      if (savedReceivermessages) {
+        setMessages(savedReceivermessages.messages);
+        if (savedReceivermessages.messages.find((el) => el.status === 0)) {
+          setMassegesAsReadedRequest(receiver.id);
+        }
+        setNextPageMessagesUrl(savedReceivermessages.nextPageUrl);
+      } else {
+        setPreloader(true);
+        setTimeout(() => getChatMessages(`${appURL$1}/chat/messages/${receiver.id}`, true), 100);
       }
     }
   }, [receiver]);
+  const handleReadedMessage = () => {
+    setReadedMessages(true);
+  };
+  const getLastMessage = useCallback(async () => {
+    if (!receiver.id) {
+      return;
+    }
+    const resp = await fetch(`${appURL$1}/chat/lastMessage/${receiver.id}`);
+    const json = await resp.json();
+    setMessages((prevMessages) => [...prevMessages, JSON.parse(JSON.stringify(json))]);
+    setSavedMessages((prevSavedMessages) => {
+      return prevSavedMessages.map(
+        (el) => {
+          if (el.id === receiver.id) {
+            if (!el.messages.some((el2) => el2.id === json.id)) {
+              el.messages.push(JSON.parse(JSON.stringify(json)));
+            }
+          }
+          return el;
+        }
+      );
+    });
+    scrollDown();
+  }, [receiver]);
   const sidebarClasses = classNames({
-    "border-r border-slate-100 bg-white pt-3 overflow-y-auto h-[100vh]": true,
+    "border-r border-slate-100 bg-white pt-3 h-[100vh] whitespace-nowrap": true,
     "hidden": currentView === "hideSidebar" && isMobileView,
     "w-full": currentView === "showSidebar",
-    "basis-2/6": !isMobileView
+    "basis-[25%]": !isMobileView
   });
   const chatWindowClasses = classNames({
-    "relative p-4 w-full h-screen": true,
-    "basis-4/6": !isMobileView,
+    "relative py-4 pl-[10px] pr-[5px] w-full h-screen bg-gradient-to-t from-yellow-50 from-10% via-emerald-500 via-50% to-yellow-50 to-120%": true,
     "hidden": currentView === "showSidebar" && isMobileView
   });
-  return /* @__PURE__ */ jsx(Authenticated, { auth, errors, children: /* @__PURE__ */ jsx("div", { className: "messanger overflow-hidden", children: /* @__PURE__ */ jsxs("div", { className: "flex h-screen", children: [
+  return /* @__PURE__ */ jsx(Authenticated, { auth, errors, children: /* @__PURE__ */ jsx("div", { className: "messanger", children: /* @__PURE__ */ jsxs("div", { className: "flex h-screen", children: [
     /* @__PURE__ */ jsx("div", { className: sidebarClasses, children: /* @__PURE__ */ jsx(
       ChatSidebar,
       {
-        setReceiver,
+        setReceiverHandler,
         auth_id: auth.user.id,
         nextPageUrl,
         chats,
@@ -948,15 +1080,25 @@ function Chat({ auth, errors, receiver: companion = null }) {
         isMobileView && /* @__PURE__ */ jsx("div", { className: "mr-5 cursor-pointer", onClick: showSidebar, children: /* @__PURE__ */ jsx("i", { class: "fa fa-arrow-left", "aria-hidden": "true" }) }),
         /* @__PURE__ */ jsx(ChatUserInfoHeader, { receiver })
       ] }),
-      /* @__PURE__ */ jsx("div", { className: "messanger mt-4", children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col", style: { maxHeight: "calc(100vh - 180px)" }, children: [
+      /* @__PURE__ */ jsx("div", { className: "messanger mt-4 h-[93%]", children: /* @__PURE__ */ jsxs("div", { className: "flex chat-messages flex-col h-full relative", style: { maxHeight: "calc(100vh - 82px)" }, children: [
         /* @__PURE__ */ jsx(
           ChatMessages,
           {
+            readedMesages,
+            setMessages,
+            setSavedMessages,
+            handleReadedMessage,
+            preloader,
+            getChatMessages,
+            messages,
             receiver,
-            auth_id: (_a = auth == null ? void 0 : auth.user) == null ? void 0 : _a.id
+            auth_id: auth.user.id,
+            nextPageUrl: nextPageMessagesUrl,
+            getLastMessage,
+            ref: scrollRef
           }
         ),
-        /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsx(ChatInput, { receiver, getLastChat }) })
+        /* @__PURE__ */ jsx("div", { className: "max-w-xl w-full mx-auto md:relative", children: /* @__PURE__ */ jsx(ChatInput, { receiver, getLastChat }) })
       ] }) })
     ] }) : /* @__PURE__ */ jsx("div", { className: "flex justify-center items-center bg-slate-100 h-screen", children: /* @__PURE__ */ jsx("p", { className: "font-bold text-3xl text-gray-500", children: "Please select a User to start chatting..." }) }) })
   ] }) }) });
@@ -1027,7 +1169,7 @@ function Modal({ children, show = false, maxWidth = "2xl", closeable = true, onC
     }
   ) });
 }
-function Unfollow({ user, follower, setUsersList = null }) {
+function Unfollow({ user, follower, setUsersList = null, fullWidth = "" }) {
   const {
     delete: destroy,
     processing
@@ -1051,11 +1193,11 @@ function Unfollow({ user, follower, setUsersList = null }) {
       }
     });
   };
-  return /* @__PURE__ */ jsx("form", { onSubmit: submit, children: /* @__PURE__ */ jsx(
+  return /* @__PURE__ */ jsx("form", { onSubmit: submit, className: fullWidth, children: /* @__PURE__ */ jsx(
     PrimaryButton,
     {
       onClick: submit,
-      className: "bg-slate-400 hover:bg-slate-400",
+      className: "bg-slate-400 hover:bg-slate-400 " + fullWidth,
       children: "Following"
     }
   ) });
@@ -1064,7 +1206,7 @@ const __vite_glob_0_19 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.de
   __proto__: null,
   default: Unfollow
 }, Symbol.toStringTag, { value: "Module" }));
-function Follow({ user, following_id, setUsersList }) {
+function Follow({ user, following_id, setUsersList, fullWidth = "" }) {
   const [isOpenLogin, setIsOpenLogin] = useState(false);
   const {
     post,
@@ -1099,8 +1241,8 @@ function Follow({ user, following_id, setUsersList }) {
       }
     });
   };
-  return /* @__PURE__ */ jsxs("div", { children: [
-    /* @__PURE__ */ jsx("form", { onSubmit: followSubmit, children: /* @__PURE__ */ jsx(PrimaryButton, { className: "bg-blue-600", children: "Follow" }) }),
+  return /* @__PURE__ */ jsxs(Fragment, { children: [
+    /* @__PURE__ */ jsx("form", { onSubmit: followSubmit, className: fullWidth, children: /* @__PURE__ */ jsx(PrimaryButton, { className: "bg-blue-600 " + fullWidth, children: "Follow" }) }),
     /* @__PURE__ */ jsx(Modal, { show: isOpenLogin, onClose: closeLoginModal, children: /* @__PURE__ */ jsx(Login, { canResetPassword: true, canLogin: true }) })
   ] });
 }
@@ -1967,7 +2109,7 @@ function ProfileAvatar({ user }) {
       }
     });
   };
-  return /* @__PURE__ */ jsxs("div", { className: "user-avatar mr-10 flex items-center", children: [
+  return /* @__PURE__ */ jsxs("div", { className: "user-avatar mr-5 md:mr-10 flex items-center", children: [
     /* @__PURE__ */ jsx("div", { onClick: openAvatarForm, children: /* @__PURE__ */ jsx(Avatar, { user, size: "lg" }) }),
     /* @__PURE__ */ jsx(Modal, { show: open, onClose: closeAvatarForm, children: /* @__PURE__ */ jsxs("div", { className: "p-5", children: [
       user.avatar && /* @__PURE__ */ jsx("div", { className: "mb-6", children: /* @__PURE__ */ jsx("form", { onSubmit: deleteSubmit, children: /* @__PURE__ */ jsx(PrimaryButton, { children: "Delete profile image" }) }) }),
@@ -2070,12 +2212,12 @@ function CreatePost(props) {
     ] })
   ] }) });
 }
-function CounterPanel({ totalPosts, user, styleClass, isMobile = false }) {
+function CounterPanel({ totalPosts, user, styleClass = "", isMobile = false }) {
   const itemClasses = classNames({
     "flex flex-col items-center": isMobile,
     "cursor-pointer": true
   });
-  return /* @__PURE__ */ jsxs("div", { className: `flex space-x-6 w-full font-semibold text-lg mb-4 ${styleClass}`, children: [
+  return /* @__PURE__ */ jsxs("div", { className: `flex space-x-6 w-full font-semibold text-lg ${styleClass}`, children: [
     /* @__PURE__ */ jsxs("div", { className: itemClasses, children: [
       /* @__PURE__ */ jsx("span", { children: `${totalPosts} ` }),
       /* @__PURE__ */ jsx("span", { className: "font-normal", children: strPlural("post", totalPosts).split(" ")[1] })
@@ -2092,14 +2234,26 @@ function CounterPanel({ totalPosts, user, styleClass, isMobile = false }) {
 function ProfileInfo({ user, auth, totalPosts }) {
   var _a;
   const { public_url } = usePage().props;
+  const nameClasses = classNames({
+    "font-medium text-xl order-1 md:col-span-1 flex items-center justify-between": true,
+    "!col-span-2": !auth.guest
+  });
   return /* @__PURE__ */ jsx("div", { className: "profile-info mb-5 lg:mb-10", children: /* @__PURE__ */ jsxs("div", { className: "flex", children: [
     /* @__PURE__ */ jsx(ProfileAvatar, { user }),
-    /* @__PURE__ */ jsxs("div", { children: [
-      /* @__PURE__ */ jsxs("div", { className: "flex space-x-4 justify-between mb-4", children: [
-        !!user.name && /* @__PURE__ */ jsx("h1", { className: "font-medium text-xl", children: user.name }),
+    /* @__PURE__ */ jsx("div", { className: "w-full md:w-auto", children: /* @__PURE__ */ jsxs("div", { className: "mt-4 md:mt-0 grid grid-cols-2", children: [
+      /* @__PURE__ */ jsxs("div", { className: nameClasses, children: [
+        /* @__PURE__ */ jsx("h1", { children: user.name }),
+        !auth.guest && /* @__PURE__ */ jsx(Link, { href: route("profile.edit"), children: /* @__PURE__ */ jsxs("svg", { "aria-label": "Options", className: "x1lliihq x1n2onr6 x5n08af", fill: "currentColor", height: "24", role: "img", viewBox: "0 0 24 24", width: "24", children: [
+          /* @__PURE__ */ jsx("title", { children: "Options" }),
+          /* @__PURE__ */ jsx("circle", { cx: "12", cy: "12", fill: "none", r: "8.635", stroke: "currentColor", strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2" }),
+          /* @__PURE__ */ jsx("path", { d: "M14.232 3.656a1.269 1.269 0 0 1-.796-.66L12.93 2h-1.86l-.505.996a1.269 1.269 0 0 1-.796.66m-.001 16.688a1.269 1.269 0 0 1 .796.66l.505.996h1.862l.505-.996a1.269 1.269 0 0 1 .796-.66M3.656 9.768a1.269 1.269 0 0 1-.66.796L2 11.07v1.862l.996.505a1.269 1.269 0 0 1 .66.796m16.688-.001a1.269 1.269 0 0 1 .66-.796L22 12.93v-1.86l-.996-.505a1.269 1.269 0 0 1-.66-.796M7.678 4.522a1.269 1.269 0 0 1-1.03.096l-1.06-.348L4.27 5.587l.348 1.062a1.269 1.269 0 0 1-.096 1.03m11.8 11.799a1.269 1.269 0 0 1 1.03-.096l1.06.348 1.318-1.317-.348-1.062a1.269 1.269 0 0 1 .096-1.03m-14.956.001a1.269 1.269 0 0 1 .096 1.03l-.348 1.06 1.317 1.318 1.062-.348a1.269 1.269 0 0 1 1.03.096m11.799-11.8a1.269 1.269 0 0 1-.096-1.03l.348-1.06-1.317-1.318-1.062.348a1.269 1.269 0 0 1-1.03-.096", fill: "none", stroke: "currentColor", strokeLinejoin: "round", strokeWidth: "2" })
+        ] }) })
+      ] }),
+      /* @__PURE__ */ jsxs("div", { className: "flex order-3 md:order-2 mt-4 md:mt-0 col-span-2 md:col-span-1", children: [
         auth.guest && auth.following && /* @__PURE__ */ jsx(
           Unfollow,
           {
+            fullWidth: "w-full",
             user: auth.user && auth.user.id,
             follower: user.id
           }
@@ -2107,24 +2261,22 @@ function ProfileInfo({ user, auth, totalPosts }) {
         auth.guest && !auth.following && /* @__PURE__ */ jsx(
           Follow,
           {
+            fullWidth: "w-full",
             user: auth.user && auth.user.id,
             following_id: user.id
           }
         ),
-        ((_a = auth.user) == null ? void 0 : _a.id) !== user.id && /* @__PURE__ */ jsx(PrimaryButton, { children: /* @__PURE__ */ jsx(Link, { href: route("chat.index", user.id), children: "Message" }) }),
-        !auth.guest && /* @__PURE__ */ jsx(Link, { href: route("profile.edit"), children: /* @__PURE__ */ jsxs("svg", { "aria-label": "Options", className: "x1lliihq x1n2onr6 x5n08af", fill: "currentColor", height: "24", role: "img", viewBox: "0 0 24 24", width: "24", children: [
-          /* @__PURE__ */ jsx("title", { children: "Options" }),
-          /* @__PURE__ */ jsx("circle", { cx: "12", cy: "12", fill: "none", r: "8.635", stroke: "currentColor", strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2" }),
-          /* @__PURE__ */ jsx("path", { d: "M14.232 3.656a1.269 1.269 0 0 1-.796-.66L12.93 2h-1.86l-.505.996a1.269 1.269 0 0 1-.796.66m-.001 16.688a1.269 1.269 0 0 1 .796.66l.505.996h1.862l.505-.996a1.269 1.269 0 0 1 .796-.66M3.656 9.768a1.269 1.269 0 0 1-.66.796L2 11.07v1.862l.996.505a1.269 1.269 0 0 1 .66.796m16.688-.001a1.269 1.269 0 0 1 .66-.796L22 12.93v-1.86l-.996-.505a1.269 1.269 0 0 1-.66-.796M7.678 4.522a1.269 1.269 0 0 1-1.03.096l-1.06-.348L4.27 5.587l.348 1.062a1.269 1.269 0 0 1-.096 1.03m11.8 11.799a1.269 1.269 0 0 1 1.03-.096l1.06.348 1.318-1.317-.348-1.062a1.269 1.269 0 0 1 .096-1.03m-14.956.001a1.269 1.269 0 0 1 .096 1.03l-.348 1.06 1.317 1.318 1.062-.348a1.269 1.269 0 0 1 1.03.096m11.799-11.8a1.269 1.269 0 0 1-.096-1.03l.348-1.06-1.317-1.318-1.062.348a1.269 1.269 0 0 1-1.03-.096", fill: "none", stroke: "currentColor", strokeLinejoin: "round", strokeWidth: "2" })
-        ] }) })
+        ((_a = auth.user) == null ? void 0 : _a.id) !== user.id && /* @__PURE__ */ jsx(PrimaryButton, { className: "ml-4 w-full", children: /* @__PURE__ */ jsx(Link, { href: route("chat.index", user.id), children: "Message" }) })
       ] }),
-      /* @__PURE__ */ jsx(CounterPanel, { user, totalPosts, styleClass: "hidden md:flex" }),
-      !!user.birthday && /* @__PURE__ */ jsxs("div", { className: "font-medium mb-3 flex items-center", children: [
-        /* @__PURE__ */ jsx("div", { className: "max-w-[42px] mr-3", children: /* @__PURE__ */ jsx("img", { src: public_url + "/calendar.png" }) }),
-        /* @__PURE__ */ jsx("div", { children: dayjs(user.birthday).format("MMM D YYYY") })
-      ] }),
-      !!user.biography && /* @__PURE__ */ jsx("div", { className: "max-w-xs leading-4 font-light", children: user.biography })
-    ] })
+      /* @__PURE__ */ jsx("div", { className: "col-span-2 hidden md:flex order-2 mt-2", children: /* @__PURE__ */ jsx(CounterPanel, { user, totalPosts }) }),
+      (user.biography || user.birthday) && /* @__PURE__ */ jsxs("div", { className: "mt-4 col-span-2 order-2 md:order-4", children: [
+        user.birthday && /* @__PURE__ */ jsxs("div", { className: "font-medium mb-3 flex items-center", children: [
+          /* @__PURE__ */ jsx("div", { className: "max-w-[42px] mr-3", children: /* @__PURE__ */ jsx("img", { src: public_url + "/calendar.png" }) }),
+          /* @__PURE__ */ jsx("div", { children: dayjs(user.birthday).format("MMM D YYYY") })
+        ] }),
+        user.biography && /* @__PURE__ */ jsx("div", { className: "max-w-xs leading-4 font-light", children: user.biography })
+      ] })
+    ] }) })
   ] }) });
 }
 const __vite_glob_0_18 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
@@ -2175,7 +2327,7 @@ function Profile({ auth, user }) {
             {
               user,
               totalPosts,
-              styleClass: "border-y border-slate-300 !mb-0 py-3 flex md:hidden justify-around",
+              styleClass: "border-y border-slate-300 py-3 flex md:hidden justify-around",
               isMobile: true
             }
           ),

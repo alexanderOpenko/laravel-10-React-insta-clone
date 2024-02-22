@@ -22,5 +22,16 @@ export function ordinalSuffix(number) {
     }
 }
 
+export function hoursAndMinutes(dateString) {
+    const date = new Date(dateString)
+
+    const hours = date.getUTCHours()
+    const minutes = date.getUTCMinutes()
+
+    const formattedTime = `${hours}:${minutes < 10 ? '0' : ''}${minutes}`
+
+    return formattedTime
+}
+
 export const appURL = import.meta.env.VITE_APP_URL;
 

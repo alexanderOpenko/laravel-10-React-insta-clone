@@ -2,20 +2,26 @@ import Avatar from "../Avatar";
 import { useRef, memo } from "react";
 import UseInfiniteScroll from "@/infinitePaginationHook"
 import TransparentButton from "../TransparentButton";
+import classNames from "classnames";
 
 export default memo(function ChatSidebar({ auth_id, nextPageUrl, chats, getChats, setReceiverHandler }) {
     const scrollRef = useRef(null)
 
     return (
         <>
-            {!!chats.length && 
+            {!!chats.length &&
                 <UseInfiniteScroll
                     ref={scrollRef}
                     request={getChats}
                     nextPageUrl={nextPageUrl}
                 >
-                    {chats.map((el, index) => (
-                        <TransparentButton
+                    {chats.map((el, index) => {
+                        const messageClasses =  classNames({
+                            "h-5 overflow-hidden text-base font-normal text-zinc-500": true,
+                            "font-bold text-gray-700": !el.message.status && auth_id !== el.message.sender_id
+                        }) 
+
+                        return <TransparentButton
                             type="button"
                             onClick={() => setReceiverHandler(el.user)}
                             key={index}
@@ -31,19 +37,13 @@ export default memo(function ChatSidebar({ auth_id, nextPageUrl, chats, getChats
                                         {el.user.name}
                                     </h3>
 
-                                    {!!el.user.online && <div className="rounded-full ml-2 bg-cyan-500 p-1 h-1/2"></div>}
+                                    {!!el.user.online && <div className="rounded-full ml-2 bg-emerald-500 p-1 h-1/2"></div>}
                                 </div>
 
                                 <div className="flex justify-between">
-                                    <p className={
-                                        !el.message.status && auth_id !== el.message.sender_id
-
-                                            ? "font-bold h-5 overflow-hidden text-sm"
-                                            :
-                                            "h-5 overflow-hidden text-sm font-light text-gray-400"
-                                    }>
+                                    <div className={messageClasses}>
                                         {el.message.message}
-                                    </p>
+                                    </div>
 
                                     {(!el.message.status && auth_id !== el.message.sender_id) && <div className="rounded-full bg-cyan-500 px-2 text-white">
                                         new
@@ -51,7 +51,7 @@ export default memo(function ChatSidebar({ auth_id, nextPageUrl, chats, getChats
                                 </div>
                             </div>
                         </TransparentButton>
-                    ))}
+                    })}
                 </UseInfiniteScroll>
             }
         </>

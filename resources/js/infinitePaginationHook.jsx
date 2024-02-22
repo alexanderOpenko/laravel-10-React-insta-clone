@@ -9,21 +9,34 @@ export default forwardRef(function UseInfiniteScroll({
     children,
     childrenClassNames = '',
     isReverseScroll = false,
-    isLoadMoreTop = false
+    isLoadMoreTop = false, 
+    bodyClasses = ''
 }, ref) {
     let usedUrls = []
 
-    function makeRequest() {
+    if (isReverseScroll) {
+        const target = ref.current
+
+        if (target && nextPageUrl) {
+            const scrollTopReal = Math.round(target.scrollTop)
+
+            if (!scrollTopReal) {
+                target.scrollTop = target.scrollHeight / 6
+            }
+        }
+    }
+
+    function makeRequest () {
         if (nextPageUrl) {
             request(nextPageUrl)
-            usedUrls.push(nextPageUrl)
+            
+            usedUrls.push(nextPageUrl)          
         }
     }
 
     function loadMoreHandler () {
         if (isReverseScroll) {
             const target = children ? ref.current : document
-            const scrollHeight = children ? target.scrollHeight : document.body.scrollHeight
 
             target.scrollTop = 50
         }
@@ -40,9 +53,10 @@ export default forwardRef(function UseInfiniteScroll({
             if (!isReverseScroll && scrollTop + clientHeight >= scrollHeight - 150 && !usedUrls.includes(nextPageUrl)) {
                 makeRequest()
             }
-console.log(scrollTop, ' top');
-console.log(scrollHeight/3, ' height');
+
             if (isReverseScroll && scrollTop <= (scrollHeight / 3) && !usedUrls.includes(nextPageUrl)) {
+                console.log(scrollTop, 'scrollTop');
+
                 makeRequest()
             }
         }
@@ -61,17 +75,17 @@ console.log(scrollHeight/3, ' height');
     })
 
     return (
-        <div ref={ref} className={childrenClassNames + "h-full scrollableChildren overflow-y-auto"}>
-            <div className={classes}>
+        <div ref={ref} className={childrenClassNames + " h-full scrollableChildren overflow-y-auto"}>
+            <div className={classes + bodyClasses}>
                 <div>
                     {!!children && children}
                 </div>
 
-                <div className="flex flex-col items-center p-2">
-                    {nextPageUrl ? <PrimaryButton type="button" onClick={loadMoreHandler} className="mx-auto">
+                {nextPageUrl && <div className="flex flex-col items-center py-4 p-2">
+                     <PrimaryButton type="button" onClick={loadMoreHandler} className="mx-auto">
                         Load More
-                    </PrimaryButton> : <div className="py-[17px]"></div>}
-                </div>
+                    </PrimaryButton>
+                </div>}
             </div>
         </div>
     )

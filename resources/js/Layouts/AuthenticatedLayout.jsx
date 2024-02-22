@@ -7,7 +7,7 @@ import { createContext } from 'react';
 
 export const AuthContext = createContext(null);
 
-export default function Authenticated({ user, auth, header, children }) {
+export default function Authenticated({ user, auth, header, children, zIndex = '' }) {
     const layoutClasses = classNames({
         "flex": !!auth.user
     })
@@ -49,7 +49,7 @@ export default function Authenticated({ user, auth, header, children }) {
                         <BaseNav />
                     }
 
-                    <div className='w-full'>
+                    <div className={"w-full " + zIndex}>
                         {children}
                     </div>
                 </div>

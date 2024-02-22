@@ -8,7 +8,6 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { appURL } from "@/services";
 
 export default function Chat({ auth, errors, receiver: companion = {} }) {
-    console.log(companion, 'companion');
     const [currentView, setCurrentView] = useState('showSidebar')
     const [receiver, setReceiver] = useState({})
     const [isMobileView, setIsMobileView] = useState(false)
@@ -45,6 +44,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
     const showSidebar = useCallback(() => {
         setCurrentView('showSidebar')
         setReceiver(null)
+        setIsLoading(false)
     }, [])
 
     const getChats = async (url) => {
@@ -128,7 +128,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
         setTimeout(() => {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight
             initialMessagesLoaded.current = false
-        }, 150)
+        }, 0)
     }
 
     useEffect(() => {
@@ -148,16 +148,23 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
     useEffect(() => {
         const windowWidth = window.innerWidth
 
-        if (windowWidth <= 768) {
-            setIsMobileView(true)
+        if (windowWidth <= 1024 && !isMobileView) {
+            setIsMobileView(true) 
 
-            if (!companion?.id) {
+            if (!receiver?.id) {
+                showSidebar()
+            } else {
+                hideSidebar()
+            }
+        } else if(isMobileView) {
+            if (!receiver?.id) {
                 showSidebar()
             } else {
                 hideSidebar()
             }
         }
-    }, [])
+
+    }, [receiver])
 
     useEffect(() => {
         getChats(`${appURL}/chatList`)
@@ -242,20 +249,19 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
     }, [receiver])
    
     const sidebarClasses = classNames({
-        "border-r border-slate-100 bg-white pt-3 h-[100vh]": true,
+        "border-r border-slate-100 bg-white pt-3 h-[100vh] whitespace-nowrap pb-[58px] md:pb-0": true,
         "hidden": currentView === 'hideSidebar' && isMobileView,
         "w-full": currentView === 'showSidebar',
-        "basis-2/6": !isMobileView
+        "basis-[25%]": !isMobileView
     })
 
     const chatWindowClasses = classNames({
-        "relative p-4 w-full h-screen": true,
-        "basis-4/6": !isMobileView,
+        "relative py-4 pl-[10px] pr-[5px] w-full h-screen bg-gradient-to-tl from-amber-100 from-5% via-emerald-300  to-amber-100 to-95%": true,
         "hidden": currentView === 'showSidebar' && isMobileView,
     })
 
     return (
-        <AuthenticatedLayout auth={auth} errors={errors}>
+        <AuthenticatedLayout auth={auth} errors={errors} zIndex={receiver?.id ? "z-[12]" : ""}>
             <div className="messanger">
                 <div className="flex h-screen">
                     <div className={sidebarClasses}>
@@ -271,7 +277,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                     <div className={chatWindowClasses}>
                         {receiver?.id ? (
                             <>
-                                <div className="flex items-center">
+                                <div className="flex items-center pl-[13px]">
                                     {
                                         isMobileView && <div className="mr-5 cursor-pointer" onClick={showSidebar}>
                                             <i class="fa fa-arrow-left" aria-hidden="true"></i>
@@ -282,7 +288,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                                 </div>
 
                                 <div className="messanger mt-4 h-[93%]">
-                                    <div className="flex flex-col h-full relative" style={{ maxHeight: 'calc(100vh - 82px)' }}>
+                                    <div className="flex chat-messages flex-col h-full relative" style={{ maxHeight: 'calc(100vh - 82px)' }}>
                                         <ChatMessages
                                             readedMesages={readedMesages}
                                             setMessages={setMessages}
@@ -298,15 +304,15 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                                             ref={scrollRef}
                                         />
 
-                                        <div>
+                                        <div className="max-w-xl w-full mx-auto md:relative">
                                             <ChatInput receiver={receiver} getLastChat={getLastChat} />
                                         </div>
                                     </div>
                                 </div>
                             </>
                         ) : (
-                            <div className="flex justify-center items-center bg-slate-100 h-screen">
-                                <p className="font-bold text-3xl text-gray-500">
+                            <div className="flex justify-center items-center bg-transparent h-screen">
+                                <p className="font-bold text-3xl text-zinc-500">
                                     Please select a User to start
                                     chatting...
                                 </p>

@@ -7,8 +7,14 @@ import NotificationSound from "./Notifications/PlayNotififcationSound";
 
 const MenuItem = ({ children: icone, linkUrl, linkTitle }) => {
     const { isChat } = usePage().props
+    const iconClasses = classNames({
+        "flex justify-center": true,
+        "w-full": isChat,
+        "lg:mr-3": !isChat
+    })
+
     return <Link href={linkUrl} className="flex items-center justify-center lg:justify-start font-medium py-4 cursor-pointer">
-        <div className="lg:mr-3">
+        <div className={iconClasses}>
             {icone}
         </div>
 
@@ -70,7 +76,7 @@ export default function BaseNav() {
 
     const classes = classNames({
         "border-t px-3 lg:px-6 fixed bottom-0 md:max-w-[72px] bg-white md:relative md:py-8 md:border-t-0 md:border-r lg:max-w-16 z-[11]": true,
-        "max-[769px]:w-full": isChat,
+        "max-[769px]:w-full lg:!px-3": isChat,
         "w-full": !isChat
     })
 
