@@ -15,13 +15,11 @@ export default forwardRef(function UseInfiniteScroll({
     let usedUrls = []
 
     if (isReverseScroll) {
-        const target = ref.current
-
-        if (target && nextPageUrl) {
-            const scrollTopReal = Math.round(target.scrollTop)
+        if (ref.current && nextPageUrl) {
+            const scrollTopReal = Math.round(ref.current.scrollTop)
 
             if (!scrollTopReal) {
-                target.scrollTop = target.scrollHeight / 6
+                ref.current.scrollTop = 50
             }
         }
     }

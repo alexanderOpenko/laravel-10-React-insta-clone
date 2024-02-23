@@ -18,7 +18,7 @@ class ChatRepository
         return Message::whereIn('sender_id', [$senderId, $receiverId])
             ->whereIn('receiver_id', [$senderId, $receiverId])
             ->orderBy('id', 'desc')
-            ->paginate(30);
+            ->paginate(35);
     }
 
     public function updateChatMessegesStatus($senderId, $receiverId)

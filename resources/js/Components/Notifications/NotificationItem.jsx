@@ -1,5 +1,5 @@
 import CommentLikeNotification from '@/Components/Notifications/CommentLikeNotification';
-import { ordinalSuffix } from '@/services';
+import { getMonth, ordinalSuffix } from '@/services';
 
 export default function NotificationItem({ el }) {
     let birhday = '';
@@ -7,8 +7,7 @@ export default function NotificationItem({ el }) {
     if (el.notifiable_type.includes('User')) {
         const date = new Date(el.data.user.birthday)
 
-        const month = date.toLocaleString('en', { month: 'long' })
-        console.log(date, 'date');
+        const month = getMonth(date)
         const number =  ordinalSuffix(date.getDate())
         birhday = month + " " + number
     }

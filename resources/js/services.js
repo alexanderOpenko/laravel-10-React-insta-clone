@@ -22,6 +22,10 @@ export function ordinalSuffix(number) {
     }
 }
 
+export function getMonth(date) {
+   return date.toLocaleString('en', { month: 'long' })
+}
+
 export function hoursAndMinutes(dateString) {
     const date = new Date(dateString)
 
