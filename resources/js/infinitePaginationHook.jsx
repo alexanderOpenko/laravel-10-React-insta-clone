@@ -73,7 +73,7 @@ export default forwardRef(function UseInfiniteScroll({
     })
 
     return (
-        <div ref={ref} className={childrenClassNames + " h-full scrollableChildren overflow-y-auto"}>
+        <div ref={ref} className={childrenClassNames + " scrollableChildren overflow-y-auto"}>
             <div className={classes + bodyClasses}>
                 <div className="min-h-full flex flex-col justify-end">
                     {!!children && children}
