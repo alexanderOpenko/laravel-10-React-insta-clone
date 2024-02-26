@@ -70,7 +70,7 @@ export default forwardRef(function ChatMessages({ receiver, auth_id, nextPageUrl
             <UseInfiniteScroll
                 request={getChatMessages}
                 nextPageUrl={nextPageUrl}
-                childrenClassNames="w-full mb-[75px]"
+                childrenClassNames="w-full"
                 bodyClasses=" max-w-xl mx-auto"
                 isReverseScroll={true}
                 ref={ref}
