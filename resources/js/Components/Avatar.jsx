@@ -5,7 +5,7 @@ export default function Avatar({ divClassName = '', imgClassName = '', size, use
 
     const sizeClass = {
         lg: 'w-[77px] h-[77px] lg:w-[150px] lg:h-[150px]',
-        sm: 'w-full max-w-[50px] h-[50px]',
+        sm: 'w-[50px] h-[50px]',
         xsm: 'w-[25px] h-[25px]'
     }[size]
 

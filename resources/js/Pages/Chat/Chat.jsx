@@ -148,7 +148,8 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
     useEffect(() => {
         const windowWidth = window.innerWidth
 
-        if (windowWidth <= 1024 && !isMobileView) {
+        if (windowWidth <= 768 && !isMobileView) {
+            document.body.style.overflow = 'hidden'
             setIsMobileView(true) 
 
             if (!receiver?.id) {
@@ -163,7 +164,6 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                 hideSidebar()
             }
         }
-
     }, [receiver])
 
     useEffect(() => {
@@ -180,6 +180,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
 
         return () => {
             Echo.leave(`chatmessages.${auth.user.id}`)
+            document.body.style.overflow = 'auto' 
         }
     }, [])
 
@@ -287,7 +288,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                                     <ChatUserInfoHeader receiver={receiver} />
                                 </div>
 
-                                <div className=" md:h-chat">
+                                <div>
                                     <div className="chat-messages flex-col relative" >
                                         <ChatMessages
                                             readedMesages={readedMesages}
