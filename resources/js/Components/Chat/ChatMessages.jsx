@@ -71,7 +71,7 @@ export default forwardRef(function ChatMessages({ receiver, auth_id, nextPageUrl
                 request={getChatMessages}
                 nextPageUrl={nextPageUrl}
                 childrenClassNames="w-full"
-                bodyClasses=" max-w-xl mx-auto h-full"
+                bodyClasses=" max-w-xl mx-auto min-h-full"
                 isReverseScroll={true}
                 ref={ref}
                 isLoadMoreTop={true}
