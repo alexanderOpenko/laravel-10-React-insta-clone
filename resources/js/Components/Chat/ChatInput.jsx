@@ -22,7 +22,7 @@ export default memo(function ChatInput({ receiver, getLastChat }) {
     }
 
     return (
-        <div className="py-2 px-[10px] md:px-0 bg-transparent">
+        <div className="pb-2 md:pb-0 px-[10px] md:px-0 bg-transparent">
             <form onSubmit={submit} className="flex">
                 <TextInput
                     className="h-16 w-full overflow-y-auto bg-white pt-3 mr-3"

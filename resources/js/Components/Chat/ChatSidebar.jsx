@@ -14,6 +14,7 @@ export default memo(function ChatSidebar({ auth_id, nextPageUrl, chats, getChats
                     ref={scrollRef}
                     request={getChats}
                     nextPageUrl={nextPageUrl}
+                    childrenClassNames="h-full"
                 >
                     {chats.map((el, index) => {
                         const messageClasses =  classNames({
