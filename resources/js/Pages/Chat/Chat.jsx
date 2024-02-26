@@ -149,7 +149,6 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
         const windowWidth = window.innerWidth
 
         if (windowWidth <= 768 && !isMobileView) {
-            document.body.style.overflow = 'hidden'
             setIsMobileView(true) 
 
             if (!receiver?.id) {
@@ -158,10 +157,15 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                 hideSidebar()
             }
         } else if(isMobileView) {
+
             if (!receiver?.id) {
                 showSidebar()
+                document.body.style.overflow = 'auto'
+
             } else {
                 hideSidebar()
+                document.body.style.overflow = 'hidden'
+
             }
         }
     }, [receiver])
