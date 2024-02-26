@@ -304,7 +304,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                                             ref={scrollRef}
                                         />
 
-                                        <div className="max-w-xl w-full mx-auto z-[12]">
+                                        <div className="max-w-xl w-full mx-auto z-[12] fixed bottom-0 left-0 right-0 md:relative">
                                             <ChatInput receiver={receiver} getLastChat={getLastChat} />
                                         </div>
                                     </div>
