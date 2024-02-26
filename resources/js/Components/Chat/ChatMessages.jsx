@@ -71,7 +71,7 @@ export default forwardRef(function ChatMessages({ receiver, auth_id, nextPageUrl
                 request={getChatMessages}
                 nextPageUrl={nextPageUrl}
                 childrenClassNames="w-full"
-                bodyClasses=" max-w-xl mx-auto"
+                bodyClasses=" max-w-xl mx-auto h-full"
                 isReverseScroll={true}
                 ref={ref}
                 isLoadMoreTop={true}
@@ -88,8 +88,7 @@ export default forwardRef(function ChatMessages({ receiver, auth_id, nextPageUrl
                     const prevDate = i ? new Date(messages[i - 1].created_at) : ''
                     const prevDateString = prevDate ? `${getMonth(prevDate)} ${prevDate.getDate()}` : ''
                     const date = currentDateString !== prevDateString ? currentDateString : ''
-console.log(prevDateString, 'prevDateString');
-console.log(currentDateString, 'currentDateString');
+
                     return <Message message={message} key={message.id} isReceivedMessage={isReceivedMessage} date={date} />
                 })}
             </UseInfiniteScroll>}
@@ -119,9 +118,11 @@ const Message = ({ message, isReceivedMessage, date }) => {
     })
 
     return <div>
-        <div className="flex justify-center">
-            {date}
-        </div>
+        {date && <div className="flex justify-center py-1 px-2 font-medium text-white">
+            <div className="bg-[#4a8e3a8c]/[.5] px-2 py-1 rounded-full">
+                {date}
+            </div>
+        </div>}
 
         <div className={messageGridClasses}>
             <div className={messageClasses}>
