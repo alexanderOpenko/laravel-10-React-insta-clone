@@ -256,7 +256,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
     })
 
     const chatWindowClasses = classNames({
-        "relative py-4 pl-[10px] pr-[5px] w-full h-screen bg-gradient-to-tl from-amber-100 from-5% via-emerald-300  to-amber-100 to-95%": true,
+        "relative pt-4 md:py-4 pl-[10px] pr-[5px] w-full h-screen bg-gradient-to-tl from-amber-100 from-5% via-emerald-300  to-amber-100 to-95%": true,
         "hidden": currentView === 'showSidebar' && isMobileView,
     })
 
@@ -287,7 +287,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                                     <ChatUserInfoHeader receiver={receiver} />
                                 </div>
 
-                                <div className="messanger h-full">
+                                <div className="messanger" style={{height: 'calc(100% - 70px)'}}>
                                     <div className="flex pt-[67px] md:pt-0 chat-messages flex-col h-full relative">
                                         <ChatMessages
                                             readedMesages={readedMesages}
