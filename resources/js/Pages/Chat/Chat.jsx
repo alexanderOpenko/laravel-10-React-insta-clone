@@ -287,8 +287,8 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                                     <ChatUserInfoHeader receiver={receiver} />
                                 </div>
 
-                                <div className="messanger h-[92%]">
-                                    <div className="flex pt-[67px] md:pt-0 chat-messages flex-col h-full relative" style={{ maxHeight: 'calc(100vh - 82px)' }}>
+                                <div className="messanger h-full">
+                                    <div className="flex pt-[67px] md:pt-0 chat-messages flex-col h-full relative">
                                         <ChatMessages
                                             readedMesages={readedMesages}
                                             setMessages={setMessages}
@@ -304,7 +304,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                                             ref={scrollRef}
                                         />
 
-                                        <div className="max-w-xl w-full mx-auto fixed md:relative right-0 bottom-0 left-0 z-[12]">
+                                        <div className="max-w-xl w-full mx-auto z-[12]">
                                             <ChatInput receiver={receiver} getLastChat={getLastChat} />
                                         </div>
                                     </div>
