@@ -287,8 +287,8 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                                     <ChatUserInfoHeader receiver={receiver} />
                                 </div>
 
-                                <div className="messanger" style={{height: 'calc(100% - 70px)'}}>
-                                    <div className="flex pt-[67px] md:pt-0 chat-messages flex-col h-full relative">
+                                <div className="h-full md:h-chat">
+                                    <div className="flex pt-[67px] md:pt-0 chat-messages flex-col h-full relative" >
                                         <ChatMessages
                                             readedMesages={readedMesages}
                                             setMessages={setMessages}

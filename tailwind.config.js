@@ -28,6 +28,9 @@ export default {
             maxWidth: {
                 '1/2': '50%',
                 '16': '16rem'
+            },
+            height: {
+                'chat': 'calc(100% - 70px)'
             }
         },
     },
