@@ -79,7 +79,7 @@ export default forwardRef(function ChatMessages({ receiver, auth_id, nextPageUrl
                 {messages.map((message, i) => {
                     const currentDate = new Date(message.created_at)
                     const currentYear = new Date().getFullYear();
-                    const currentDateString = `${getMonth(currentDate)} ${currentDate.getDate()}`
+                    let currentDateString = `${getMonth(currentDate)} ${currentDate.getDate()}`
 
                     if (currentDate.getFullYear() < currentYear) {
                         currentDateString += ` ${currentDate.getFullYear()}`

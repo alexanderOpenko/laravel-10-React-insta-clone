@@ -17,6 +17,7 @@ export default function NotificationItem({ el }) {
             {el.notifiable_type.includes('Like') ?
                 <CommentLikeNotification
                     userName={el.data.user.name}
+                    likerId={el.data.liker_id}
                     text={"liked your post: " + el.data.post.message}
                     imagePath={el.data.post.images[0].image_path}
                 />
