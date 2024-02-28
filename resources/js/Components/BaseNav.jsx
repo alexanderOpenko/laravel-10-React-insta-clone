@@ -145,7 +145,7 @@ export default function BaseNav() {
             </div>
         </div>
 
-        <div className="fixed right-0 bottom-0 p-4 pb-11 w-full sm:max-w-md  z-[100]">
+        <div className="fixed right-0 bottom-0 p-4 mb-11 w-full sm:max-w-md  z-[100]">
             {notifications.map((el) => {
                 return <div className="bg-slate-950 text-white p-4 pb-2 mb-3 rounded-[15px]">
                     <NotificationItem el={el} />
