@@ -6,7 +6,7 @@ import { strPlural } from "@/services";
 import PostHeader from "./PostHeader";
 import Likes from "@/Components/Post/Likes";
 import classNames from "classnames";
-import ExpandingText from "./ExpandingText";
+import PostMessage from "./PostMessage";
 
 export default function PostsList({ posts, postsRequest, nextPageUrl, grid = 'default' }) {
     const [isOpenPost, setIsOpenPost] = useState(false)
@@ -119,13 +119,8 @@ const Post = ({ post, posts, grid, showPost, postMobileClickHandler, postToSctol
                     </div>
 
                     <div className="leading-none">
-                        <span className="font-bold whitespace-nowrap text-sm mr-1 cursor-pointer">
-                            {post.user.name}
-                        </span>
-
-                        <ExpandingText text={post.message}/>
+                        <PostMessage name={post.user.name} userId={post.user.id} message={post.message} createdAt={post.created_at}/>
                     </div>
-
 
                     {!!post.post_comments_count &&
                         <div className="mt-2 font-normal text-gray-500 text-sm cursor-pointer leading-none"

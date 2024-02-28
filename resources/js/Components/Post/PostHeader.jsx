@@ -1,5 +1,6 @@
 import Avatar from "@/Components/Avatar";
 import { Link } from "@inertiajs/react";
+import CreatedAt from "../CreatedAt";
 
 export default function PostHeader({ post, classNames }) {
     return <div className={`post-user border-b border-slate-100 border-solid p-4 flex items-center justify-between ` + classNames}>
@@ -7,8 +8,14 @@ export default function PostHeader({ post, classNames }) {
             <div className="flex items-center">
                 <Avatar user={post.user} size="sm" divClassName="mr-4" />
 
-                <div className="font-bold text-sm">
-                    {post.user.name}
+                <div className="flex items-center">
+                    <div className="font-bold text-sm">
+                        {post.user.name} 
+                    </div>
+
+                    <code className="mx-2">&#8212;</code>
+
+                    <CreatedAt createdAt={post.created_at} />
                 </div>
             </div>
         </Link>

@@ -55,7 +55,7 @@ export default function ProfileAvatar({ user }) {
     return (
         <div className='user-avatar mr-5 md:mr-10 flex items-center'>
             <div onClick={openAvatarForm}>
-                <Avatar user={user} size="lg" />
+                <Avatar user={user} size="lg" isLinkable={false}/>
             </div>
 
             <Modal show={open} onClose={closeAvatarForm}>

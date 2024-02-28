@@ -5,6 +5,7 @@ import Unfollow from "./Unfollow";
 import Follow from "./Follow";
 import UseInfiniteScroll from "@/infinitePaginationHook";
 import { AuthContext } from "@/Layouts/AuthenticatedLayout";
+import { Link } from "@inertiajs/react";
 
 export const LoadUsersContext = createContext(null)
 
@@ -50,7 +51,9 @@ export default function LoadedUsersList({
                             <div className="flex items-center">
                                 <Avatar size='sm' user={el.user} divClassName="mr-4" />
 
-                                {el.user.name}
+                                <Link href={route('profile.show', el.user.id)}>
+                                    {el.user.name}
+                                </Link>
                             </div>
 
                             {auth.user.id !== el.user.id && <>{

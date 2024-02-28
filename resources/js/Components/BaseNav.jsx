@@ -139,7 +139,7 @@ export default function BaseNav() {
                     </MenuItem>
 
                     <MenuItem linkUrl={route('profile.show', auth.user.id)} linkTitle="Profile">
-                        <Avatar user={auth.user} size="xsm" />
+                        <Avatar user={auth.user} size="xsm" isLinkable={false}/>
                     </MenuItem>
                 </nav>
             </div>

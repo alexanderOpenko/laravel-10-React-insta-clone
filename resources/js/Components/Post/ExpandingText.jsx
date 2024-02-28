@@ -1,7 +1,8 @@
 import classNames from "classnames"
 import { useState } from "react"
 
-export default function ExpandingText ({ text }) {
+export default function ExpandingText (props) {
+    const { text } = props
     const [isExpanded, setIsExpanded] = useState(false)
 
     const expandTextHandler = () => {
@@ -10,11 +11,11 @@ export default function ExpandingText ({ text }) {
 
     const classes = classNames({
         "break-words":isExpanded, 
-        "max-h-[30px] text-ellipsis overflow-hidden truncate max-w-[65%]": !isExpanded,
+        "max-h-[30px] text-ellipsis overflow-hidden truncate max-w-[55%]": !isExpanded,
         "float-left": text.length > 50 && !isExpanded
     })
 
-    return <div>
+    return <div {...props}>
         <div className={classes}>
             { text }
         </div>

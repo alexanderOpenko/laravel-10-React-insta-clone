@@ -13,7 +13,7 @@ export function ordinalSuffix(number) {
     if (number % 100 >= 11 && number % 100 <= 13) {
         return number + 'th';
     }
-    
+
     switch (number % 10) {
         case 1: return number + 'st';
         case 2: return number + 'nd';
@@ -23,7 +23,7 @@ export function ordinalSuffix(number) {
 }
 
 export function getMonth(date) {
-   return date.toLocaleString('en', { month: 'long' })
+    return date.toLocaleString('en', { month: 'long' })
 }
 
 export function hoursAndMinutes(dateString) {
@@ -35,6 +35,18 @@ export function hoursAndMinutes(dateString) {
     const formattedTime = `${hours}:${minutes < 10 ? '0' : ''}${minutes}`
 
     return formattedTime
+}
+
+export default function dateString(created_at) {
+    const currentDate = new Date(created_at)
+    const currentYear = new Date().getFullYear();
+    let currentDateString = `${getMonth(currentDate)} ${currentDate.getDate()}`
+
+    if (currentDate.getFullYear() < currentYear) {
+        currentDateString += ` ${currentDate.getFullYear()}`
+    }
+
+    return currentDateString
 }
 
 export const appURL = import.meta.env.VITE_APP_URL;

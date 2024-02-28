@@ -1,5 +1,5 @@
 import UseInfiniteScroll from "@/infinitePaginationHook"
-import { getMonth, hoursAndMinutes } from "@/services";
+import dateString, { getMonth, hoursAndMinutes } from "@/services";
 import { usePage } from "@inertiajs/react";
 import classNames from "classnames";
 import { useEffect, useMemo, forwardRef, useCallback } from "react";
@@ -77,14 +77,8 @@ export default forwardRef(function ChatMessages({ receiver, auth_id, nextPageUrl
                 isLoadMoreTop={true}
             >
                 {messages.map((message, i) => {
-                    const currentDate = new Date(message.created_at)
-                    const currentYear = new Date().getFullYear();
-                    let currentDateString = `${getMonth(currentDate)} ${currentDate.getDate()}`
-
-                    if (currentDate.getFullYear() < currentYear) {
-                        currentDateString += ` ${currentDate.getFullYear()}`
-                    }
-
+                    const currentDateString = dateString(message.created_at)
+                    
                     const prevDate = i ? new Date(messages[i - 1].created_at) : ''
                     const prevDateString = prevDate ? `${getMonth(prevDate)} ${prevDate.getDate()}` : ''
                     const date = currentDateString !== prevDateString ? currentDateString : ''

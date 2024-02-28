@@ -5,7 +5,6 @@ import Avatar from "@/Components/Avatar";
 import PostHeader from "./PostHeader";
 import CommentsForm from "../CommentsForm";
 import { useState } from "react"
-import ExpandingText from "./ExpandingText";
 
 export default function ShowPostModal({ post, posts, ...props }) {
     const { public_url } = usePage().props
@@ -37,28 +36,11 @@ export default function ShowPostModal({ post, posts, ...props }) {
                 </div>
             }
 
-            <div className="w-full md:max-w-md overflow-y-auto relative flex flex-col justify-between">
+            <div className="w-full md:max-w-md relative flex flex-col justify-between">
                 <div className="overflow-y-auto">
                     <PostHeader post={post} />
 
-                    <div className="p-4">
-                        <div className="post-message">
-                            {
-                                !!post.message &&
-                                <div className="flex mb-4">
-                                    <Avatar size="sm" user={post.user} divClassName="w-[13%]" />
-
-                                    <div className="pl-3 py-1 w-[87%] overflow-y-auto">
-                                        <span className="font-bold whitespace-nowrap text-sm mr-1 cursor-pointer">
-                                            {post.user.name}
-                                        </span>
-
-                                        <ExpandingText text={post.message} />
-                                    </div>
-                                </div>
-                            }
-                        </div>
-
+                    <div className="p-4 pr-0">
                         <div className="post-comments w-full">
                             <Comments post={post} comments={comments} auth={auth} commentsRequest={commentsRequest} nextPageUrl={nextPageUrl} />
                         </div>

@@ -1,5 +1,5 @@
 import Modal from "@/Components/Modal"
-import { useForm } from "@inertiajs/react"
+import { Link, useForm } from "@inertiajs/react"
 import { useState, useEffect, useRef } from "react"
 import TransparentButton from "@/Components/TransparentButton"
 import Avatar from "@/Components/Avatar"
@@ -7,6 +7,8 @@ import UseInfiniteScroll from "@/infinitePaginationHook"
 import { appURL } from "@/services";
 import classNames from "classnames"
 import ExpandingText from "./ExpandingText"
+import CreatedAt from "../CreatedAt"
+import PostMessage from "./PostMessage"
 
 export default function Comments({ post, comments, commentsRequest, nextPageUrl, auth }) {
     const scrollRef = useRef(null)
@@ -18,9 +20,22 @@ export default function Comments({ post, comments, commentsRequest, nextPageUrl,
     return (
         <>
             <UseInfiniteScroll request={commentsRequest} nextPageUrl={nextPageUrl}
-                childrenClassNames="max-h-[400px] h-full"
+                childrenClassNames="max-h-[460px] h-full"
                 ref={scrollRef}
             >
+                <div className="post-message">
+                    {
+                        !!post.message &&
+                        <div className="flex mb-4">
+                            <Avatar size="sm" user={post.user} divClassName="w-[13%]" />
+
+                            <div className="pl-3 py-1 w-[87%]">
+                                <PostMessage name={post.user.name} userId={post.user.id} message={post.message} createdAt={post.created_at} />
+                            </div>
+                        </div>
+                    }
+                </div>
+
                 {comments.map((comment) => {
                     return <Comment key={comment.id} user={comment.user} comment={comment} auth={auth} />
                 })}
@@ -67,14 +82,18 @@ export function Comment({ user, comment, auth }) {
     return (
         <div className={classes}>
             <div className="flex">
-                <Avatar size="sm" user={user} divClassName="w-[13%]"/>
+                <Avatar size="sm" user={user} divClassName="w-[13%]" />
 
                 <div className="pl-3 py-1 w-[75%]">
-                    <span className="font-bold text-sm mr-1">
-                        {user.name}
-                    </span>
+                    <div className="font-bold text-sm mr-1 float-left">
+                        <Link href={route('profile.show', user.id)}>
+                            {user.name}
+                        </Link>
+                    </div>
 
-                    <ExpandingText text={comment.comment}/>
+                    <ExpandingText text={comment.comment} className="leading-5" />
+
+                    <CreatedAt createdAt={comment.created_at} />
                 </div>
             </div>
 
@@ -83,7 +102,7 @@ export function Comment({ user, comment, auth }) {
             </div>
 
             {/* comment options */}
-            <Modal show={isOpenOptions} onClose={close} maxWidth='sm'>
+            <Modal show={isOpenOptions} onClose={close} maxWidth='sm' dialogClasses="h-auto">
                 {
                     user.id === auth.user.id && <div className="delete_comment border-b border-slate-100">
                         <form onSubmit={deleteComment} className="flex justify-center">

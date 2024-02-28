@@ -29,7 +29,7 @@ export default memo(function ChatSidebar({ auth_id, nextPageUrl, chats, getChats
                             className="flex px-5 py-3 transition hover:cursor-pointer hover:bg-slate-100"
                         >
                             <div className="pr-4">
-                                <Avatar user={el.user} size="sm" />
+                                <Avatar user={el.user} size="sm" isLinkable={false}/>
                             </div>
 
                             <div className="w-full">
