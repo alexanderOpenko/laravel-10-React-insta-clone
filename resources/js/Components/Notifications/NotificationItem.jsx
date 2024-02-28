@@ -8,7 +8,7 @@ export default function NotificationItem({ el }) {
         const date = new Date(el.data.user.birthday)
 
         const month = getMonth(date)
-        const number =  ordinalSuffix(date.getDate())
+        const number = ordinalSuffix(date.getDate())
         birhday = month + " " + number
     }
 
@@ -24,14 +24,14 @@ export default function NotificationItem({ el }) {
                     userName={el.data.user.name}
                     text={"left a comment on your post: " + el.data.comment}
                     imagePath={el.data.post.images[0].image_path}
-                /> 
-                : (el.notifiable_type.includes('User')) ? <CommentLikeNotification
-                userName={el.data.user.name + "'s"}
-                text="birthday is approaching on"
-                birhday={birhday}
-                imagePath={el.data.user.avatar?.avatar}
                 />
-                : ''
+                    : (el.notifiable_type.includes('User')) ? <CommentLikeNotification
+                        userName={el.data.user.name + "'s"}
+                        text="birthday is approaching on"
+                        birhday={birhday}
+                        imagePath={el.data.user.avatar?.avatar}
+                    />
+                        : ''
             }
         </div>
     )

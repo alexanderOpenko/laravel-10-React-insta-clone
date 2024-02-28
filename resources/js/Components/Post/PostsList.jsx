@@ -6,6 +6,7 @@ import { strPlural } from "@/services";
 import PostHeader from "./PostHeader";
 import Likes from "@/Components/Post/Likes";
 import classNames from "classnames";
+import ExpandingText from "./ExpandingText";
 
 export default function PostsList({ posts, postsRequest, nextPageUrl, grid = 'default' }) {
     const [isOpenPost, setIsOpenPost] = useState(false)
@@ -41,7 +42,8 @@ export default function PostsList({ posts, postsRequest, nextPageUrl, grid = 'de
                         posts={posts}
                         show={isOpenPost}
                         onClose={closePost}
-                        maxWidth='6xl'
+                        maxWidth='5xl'
+                        dialogClasses='max-h-[97%] md:max-h-148'
                     />
                     : null
             }
@@ -108,7 +110,7 @@ const Post = ({ post, posts, grid, showPost, postMobileClickHandler, postToSctol
         {
             grid === 'vertical' && <>
                 <div className="px-3 md:px-0">
-                    <div className="flex leading-none mt-1 mb-2">
+                    <div className="flex mt-1 mb-2">
                         <Likes post={post} posts={posts} />
 
                         <div className="p-2 cursor-pointer" onClick={() => showPost(post)}>
@@ -117,13 +119,11 @@ const Post = ({ post, posts, grid, showPost, postMobileClickHandler, postToSctol
                     </div>
 
                     <div className="leading-none">
-                        <span className="font-bold text-sm mr-1 cursor-pointer">
+                        <span className="font-bold whitespace-nowrap text-sm mr-1 cursor-pointer">
                             {post.user.name}
                         </span>
 
-                        <span>
-                            {post.message}
-                        </span>
+                        <ExpandingText text={post.message}/>
                     </div>
 
 

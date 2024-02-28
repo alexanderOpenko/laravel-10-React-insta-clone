@@ -1,7 +1,7 @@
 import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 
-export default function Modal({ children, show = false, maxWidth = '2xl', closeable = true, onClose = () => {} }) {
+export default function Modal({ children, show = false, maxWidth = '2xl', dialogClasses = '', closeable = true, onClose = () => { } }) {
     const close = () => {
         if (closeable) {
             onClose();
@@ -16,7 +16,7 @@ export default function Modal({ children, show = false, maxWidth = '2xl', closea
         '2xl': 'sm:max-w-2xl',
         '5xl': 'max-w-5xl',
         '6xl': 'max-w-6xl',
-        '7xl': 'max-w-7xl'		
+        '7xl': 'max-w-7xl'
     }[maxWidth];
 
     return (
@@ -49,12 +49,16 @@ export default function Modal({ children, show = false, maxWidth = '2xl', closea
                     leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                 >
                     <Dialog.Panel
-                        className={`max-h-148 items-center bg-white rounded-lg overflow-hidden shadow-xl
-                         transform transition-all w-full sm:mx-auto ${maxWidthClass}`}
+                        className={`h-full items-center bg-white shadow-xl
+                         transform transition-all w-full sm:mx-auto ${maxWidthClass} ${dialogClasses}`}
                     >
                         {children}
                     </Dialog.Panel>
                 </Transition.Child>
+
+                <div className="absolute text-3xl text-white top-[9px] right-[18px] z-[10]" onClick={close}>
+                    <i className="fa fa-times cursor-pointer" aria-hidden="true"></i>
+                </div>
             </Dialog>
         </Transition>
     );

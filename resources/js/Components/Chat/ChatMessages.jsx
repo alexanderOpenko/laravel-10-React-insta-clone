@@ -106,7 +106,7 @@ const Message = ({ message, isReceivedMessage, date }) => {
     })
 
     const messageClasses = classNames({
-        "mb-2 max-w-[80%] flex pl-[8px] pr-[6px] py-[5px] font-roboto rounded-2xl break-words": true,
+        "mb-2 max-w-[80%] flex justify-between pl-[8px] pr-[6px] py-[5px] font-roboto rounded-2xl break-words": true,
         "bg-white rounded-bl-none": isReceived,
         "bg-[#eeffde] rounded-br-none": !isReceived
     })
@@ -126,11 +126,11 @@ const Message = ({ message, isReceivedMessage, date }) => {
 
         <div className={messageGridClasses}>
             <div className={messageClasses}>
-                <div className="w-[87%] mr-[11px] leading-[1.3] text-zinc-700 font-[450]">
+                <div className="w-[78%] mr-[11px] leading-[1.3] text-zinc-700 font-[450]">
                     {message?.message}
                 </div>
 
-                <div className="w-full flex items-end text-xs leading-[1]">
+                <div className="flex items-end text-xs leading-[1]">
                     <div className={timeColor}>
                         {time}
                     </div>

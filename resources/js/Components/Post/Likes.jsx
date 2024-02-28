@@ -31,7 +31,7 @@ export default function Likes ({ post, posts }) {
 
     return <div className="z-10">
         <div className="py-2 cursor-pointer">
-            <form onSubmit={likeRequest}>
+            <form onSubmit={likeRequest} className="leading-none">
                 <TransparentButton disabled={processing}>
                     <i className={likeBTNclassNames} aria-hidden="true"></i>
                 </TransparentButton>

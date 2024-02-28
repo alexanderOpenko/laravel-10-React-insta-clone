@@ -1,33 +1,15 @@
 import Modal from "@/Components/Modal"
-import { useForm, usePage } from "@inertiajs/react"
+import { useForm } from "@inertiajs/react"
 import { useState, useEffect, useRef } from "react"
 import TransparentButton from "@/Components/TransparentButton"
 import Avatar from "@/Components/Avatar"
 import UseInfiniteScroll from "@/infinitePaginationHook"
 import { appURL } from "@/services";
-import CommentsForm from "@/Components/CommentsForm";
 import classNames from "classnames"
+import ExpandingText from "./ExpandingText"
 
-export default function Comments({ post, posts }) {
-    const { auth } = usePage().props
-    const [comments, setComments] = useState([])
-    const [nextPageUrl, setNextPageUrl] = useState('')
-
+export default function Comments({ post, comments, commentsRequest, nextPageUrl, auth }) {
     const scrollRef = useRef(null)
-
-    const commentsRequest = async (url) => {
-        const resp = await fetch(url)
-        const json = await resp.json()
-        setNextPageUrl(json.next_page_url)
-
-        setComments(prevComments => {
-            const uniqueComments = json.data.filter(newComment => {
-                return !prevComments.some(prevComment => prevComment.id === newComment.id);
-            });
-
-            return [...prevComments, ...uniqueComments];
-        });
-    }
 
     useEffect(() => {
         commentsRequest(`${appURL}/post-comments/${post.id}`)
@@ -36,17 +18,13 @@ export default function Comments({ post, posts }) {
     return (
         <>
             <UseInfiniteScroll request={commentsRequest} nextPageUrl={nextPageUrl}
-                childrenClassNames="max-h-[400px] h-full mb-[100px]"
+                childrenClassNames="max-h-[400px] h-full"
                 ref={scrollRef}
             >
                 {comments.map((comment) => {
                     return <Comment key={comment.id} user={comment.user} comment={comment} auth={auth} />
                 })}
             </UseInfiniteScroll>
-
-            <div className="absolute bottom-[14px] left-[14px] right-[15px]">
-                <CommentsForm post={post} posts={posts} auth={auth} setComments={setComments} />
-            </div>
         </>
     )
 }
@@ -82,27 +60,25 @@ export function Comment({ user, comment, auth }) {
     };
 
     const classes = classNames({
-        "mb-4 flex justify-between": true,
+        "mb-4 relative": true,
         "hidden": isDeleted
     })
 
     return (
         <div className={classes}>
             <div className="flex">
-                <Avatar size="sm" user={user} />
+                <Avatar size="sm" user={user} divClassName="w-[13%]"/>
 
-                <div className="px-4 py-1">
+                <div className="pl-3 py-1 w-[75%]">
                     <span className="font-bold text-sm mr-1">
                         {user.name}
                     </span>
 
-                    <span>
-                        {comment.comment}
-                    </span>
+                    <ExpandingText text={comment.comment}/>
                 </div>
             </div>
 
-            <div onClick={open}>
+            <div onClick={open} className="absolute right-3 top-0">
                 <svg aria-label="More options" fill="currentColor" height="24" role="img" viewBox="0 0 24 24" width="24"><title>More options</title><circle cx="12" cy="12" r="1.5"></circle><circle cx="6" cy="12" r="1.5"></circle><circle cx="18" cy="12" r="1.5"></circle></svg>
             </div>
 

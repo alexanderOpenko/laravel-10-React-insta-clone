@@ -34,11 +34,11 @@ export default function LoadedUsersList({
     return (
         <LoadUsersContext.Provider value={{ isOpenUsersList, setIsOpenUsersList, usersListRequest }}>
             {children}
-            {isOpenUsersList && <Modal maxWidth="md" show={isOpenUsersList} onClose={closeUsersListModal}>
+            {isOpenUsersList && <Modal maxWidth="md" show={isOpenUsersList} onClose={closeUsersListModal} dialogClasses="max-h-[430px]">
                 <UseInfiniteScroll
                     request={usersListRequest}
                     nextPageUrl={nextPageUrl}
-                    childrenClassNames="users_list max-h-96 h-full"
+                    childrenClassNames="users_list h-full"
                     ref={scrollRef}
                 >
                     <div className="border-b text-center p-3 font-medium" onClick={closeUsersListModal}>
@@ -46,7 +46,7 @@ export default function LoadedUsersList({
                     </div>
 
                     {usersList.map((el) => {
-                        return <div className="flex items-center p-4 justify-between">
+                        return <div className="flex items-center py-3 px-4 justify-between">
                             <div className="flex items-center">
                                 <Avatar size='sm' user={el.user} divClassName="mr-4" />
 

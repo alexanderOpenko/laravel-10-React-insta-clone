@@ -37,10 +37,10 @@ export default function CommentsForm({ post, posts, auth, setComments }) {
     }
 
     return (
-        <div className="post_comments_form mt-5 bg-white">
+        <div className="post_comments_form bg-white">
             <Likes post={post} posts={posts} />
 
-            <form onSubmit={submitComment} className="flex items-start">
+            <form onSubmit={submitComment} className="flex items-start mt-2">
                 <div className="mr-5 w-full">
                     <TextInput
                         type='text'

@@ -18,7 +18,7 @@ export default memo(function ChatSidebar({ auth_id, nextPageUrl, chats, getChats
                 >
                     {chats.map((el, index) => {
                         const messageClasses =  classNames({
-                            "h-5 overflow-hidden text-base font-normal text-zinc-500": true,
+                            "h-5 overflow-hidden text-base font-normal text-zinc-500 max-w-[150px]": true,
                             "font-bold text-gray-700": !el.message.status && auth_id !== el.message.sender_id
                         }) 
 

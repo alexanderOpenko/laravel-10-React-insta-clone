@@ -257,7 +257,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
         "border-r border-slate-100 bg-white pt-3 h-[100vh] whitespace-nowrap pb-[58px] md:pb-0": true,
         "hidden": currentView === 'hideSidebar' && isMobileView,
         "w-full": currentView === 'showSidebar',
-        "basis-[25%]": !isMobileView
+        "basis-[30%]": !isMobileView
     })
 
     const chatWindowClasses = classNames({

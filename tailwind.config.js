@@ -17,7 +17,7 @@ export default {
                 roboto: ['Roboto', 'sans-serif'],
             },
             maxHeight: {
-                '148': '48rem',
+                '148': '44rem',
             },
             padding: {
                 '59': '59%',
