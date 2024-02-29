@@ -53,8 +53,6 @@ export default forwardRef(function UseInfiniteScroll({
             }
 
             if (isReverseScroll && scrollTop <= (scrollHeight / 3) && !usedUrls.includes(nextPageUrl)) {
-                console.log(scrollTop, 'scrollTop');
-
                 makeRequest()
             }
         }

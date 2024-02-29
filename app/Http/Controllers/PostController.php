@@ -2,9 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Like;
+use App\Models\Notification;
+use App\Models\Post;
+use App\Models\PostComment;
+use App\Models\PostImage;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
@@ -88,8 +95,28 @@ class PostController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(User $user, Post $post)
     {
-        //
+        function deleteInNotifications (Collection $collection): void
+        {
+            foreach($collection as $comment) {
+                Notification::where('notifiable_id', $comment->id)->delete();
+            }
+        }
+
+        $comments = PostComment::where('post_id', $post->id)->get();
+        if ($comments->isNotEmpty()) {
+            deleteInNotifications($comments);
+        }
+
+        $likes = Like::where('post_id', $post->id)->get();
+        if ($likes->isNotEmpty()) {
+            deleteInNotifications($likes);
+        }
+
+        $image = PostImage::where('post_id', $post->id)->get();
+        Storage::disk('public')->delete($image->first()->image_path);
+
+        $post->delete();
     }
 }

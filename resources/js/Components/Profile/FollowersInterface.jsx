@@ -4,9 +4,10 @@ import { appURL, strPlural } from "@/services"
 import classNames from "classnames"
 
 export default function FollowersInterface({ user, isMobile = false }) {
-    const { setIsOpenUsersList, usersListRequest } = useContext(LoadUsersContext)
+    const { setIsOpenUsersList, usersListRequest, setHeading } = useContext(LoadUsersContext)
 
     const usersReuestHandler = (path) => {
+        setHeading(path)
         usersListRequest(`${appURL}/${path}/${user.id}`)
         setIsOpenUsersList(true)
     }

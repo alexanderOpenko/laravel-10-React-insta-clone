@@ -6,7 +6,6 @@ import PrimaryButton from "@/Components/PrimaryButton";
 import SecondaryButton from "@/Components/SecondaryButton";
 import TextArea from "@/Components/TextArea";
 import { router, useForm, useRemember } from "@inertiajs/react";
-import { useRef, useState } from "react";
 
 export default function CreatePost(props) {
     const [formState, setFormState] = useRemember({
@@ -30,7 +29,7 @@ export default function CreatePost(props) {
 
         post(route('users.posts.store', props.user.id), {
             onSuccess: () => {
-                router.visit('/profile/1')
+                router.visit(`/profile/${props.user.id}`)
             }
         })
     }

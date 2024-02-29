@@ -24,16 +24,16 @@ export default function Authenticated({ user, auth, header, children, zIndex = '
 
                         <div className='flex space-x-4'>
                             <div>
-                                <PrimaryButton>
-                                    <Link href={route('login')}>
+                                <PrimaryButton className='!p-0'>
+                                    <Link href={route('login')} className='px-4 py-2'> 
                                         Log In
                                     </Link>
                                 </PrimaryButton>
                             </div>
 
                             <div>
-                                <PrimaryButton>
-                                    <Link href={route('register')}>
+                                <PrimaryButton className='!p-0'>
+                                    <Link href={route('register')} className='px-4 py-2'>
                                         Sign Up
                                     </Link>
                                 </PrimaryButton>

@@ -35,9 +35,9 @@ class ChatController extends Controller
         ]);
     }
 
-    public function getChatMessages(Request $request, string $receiverId)
+    public function getChatMessages(string $receiverId)
     {
-        $messages = $this->chat->getUserMessages((int) $request->user()->id, (int) $receiverId);
+        $messages = $this->chat->getUserMessages((int) Auth::id(), (int) $receiverId);
 
         return $messages;
     }
@@ -48,7 +48,7 @@ class ChatController extends Controller
 
     public function getChatList(Request $request) 
     {
-        return $this->chat->getRecentUsersWithMessage((int) $request->user()->id, (int) $request->query('limit'));
+        return $this->chat->getRecentUsersWithMessage((int) Auth::id(), (int) $request->query('limit'));
     }
 
     public function lastMessage(string $receiver_id) 
@@ -102,12 +102,12 @@ class ChatController extends Controller
 
         try {
             $this->chat->sendMessage([
-                'sender_id' => (int) $request->user()->id,
+                'sender_id' => (int) Auth::id(),
                 'receiver_id' => $receiverId,
                 'message' => $request->message,
             ]);
 
-            $sortedUserIds = [$request->user()->id, $receiverId];
+            $sortedUserIds = [Auth::id(), $receiverId];
             sort($sortedUserIds);
             $roomId = implode('', $sortedUserIds);
 

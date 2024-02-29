@@ -8,6 +8,7 @@ use App\Models\PostComment;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Events\NotificationSent as EventsNotificationSent;
+use Illuminate\Support\Facades\Auth;
 
 class PostCommentController extends Controller
 {
@@ -40,7 +41,7 @@ class PostCommentController extends Controller
             'comment' => 'required|string|min:3',
         ]);
     
-        $user = User::find($request->user()->id);
+        $user = User::find(Auth::id());
     
         $comment = $post->postComments()->create([
             'comment' => $validated['comment'],

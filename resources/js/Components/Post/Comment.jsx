@@ -102,12 +102,12 @@ export function Comment({ user, comment, auth }) {
             </div>
 
             {/* comment options */}
-            <Modal show={isOpenOptions} onClose={close} maxWidth='sm' dialogClasses="h-auto">
+            <Modal show={isOpenOptions} onClose={close} maxWidth='sm' dialogClasses="!h-auto">
                 {
-                    user.id === auth.user.id && <div className="delete_comment border-b border-slate-100">
+                    (auth.user && user.id === auth.user.id) && <div className="delete_comment border-b border-slate-100">
                         <form onSubmit={deleteComment} className="flex justify-center">
                             <TransparentButton disableAutofocus={true} className="h-full w-full text-red-700 p-4">
-                                Delete
+                                Delete comment
                             </TransparentButton>
                         </form>
                     </div>

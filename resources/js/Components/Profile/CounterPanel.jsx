@@ -1,5 +1,5 @@
-import FollowersInterface from "@/Pages/Profile/FollowersInterface";
-import LoadedUsersList from "@/Pages/Profile/LoadedUsersList";
+import FollowersInterface from "@/Components/Profile/FollowersInterface";
+import LoadedUsersList from "@/Components/Profile/LoadedUsersList";
 import { strPlural } from "@/services";
 import classNames from "classnames";
 
@@ -20,9 +20,7 @@ export default function CounterPanel ({ totalPosts, user, styleClass = '', isMob
         </span>
     </div>
 
-    <LoadedUsersList 
-        heading="Followers"
-    >
+    <LoadedUsersList>
         <FollowersInterface user={user} isMobile={isMobile}/>
     </LoadedUsersList>
 </div>

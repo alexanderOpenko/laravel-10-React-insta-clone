@@ -1,12 +1,13 @@
 import { useContext } from "react"
-import { LoadUsersContext } from "../../Pages/Profile/LoadedUsersList"
+import { LoadUsersContext } from "../Profile/LoadedUsersList"
 import { appURL } from "@/services"
 import { strPlural } from "@/services";
 
 export default function PostLikesInterface({ postLikesCount, post }) {
-    const { setIsOpenUsersList, usersListRequest } = useContext(LoadUsersContext)
+    const { setIsOpenUsersList, usersListRequest, setHeading } = useContext(LoadUsersContext)
 
     const usersReuestHandler = () => {
+        setHeading('Likes')
         usersListRequest(`${appURL}/like/likers/${post.id}`)
         setIsOpenUsersList(true)
     }

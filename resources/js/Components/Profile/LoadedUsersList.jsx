@@ -10,14 +10,13 @@ import { Link } from "@inertiajs/react";
 export const LoadUsersContext = createContext(null)
 
 export default function LoadedUsersList({ 
-    heading,
     children
 }) {
     const auth = useContext(AuthContext)
     const [usersList, setUsersList] = useState([])
     const [isOpenUsersList, setIsOpenUsersList] = useState(false)
     const [nextPageUrl, setNextPageUrl] = useState('')
-
+    const [heading, setHeading] = useState('')
     const scrollRef = useRef(null)
 
     async function usersListRequest(url) {
@@ -33,7 +32,7 @@ export default function LoadedUsersList({
         setIsOpenUsersList(false)
     }
     return (
-        <LoadUsersContext.Provider value={{ isOpenUsersList, setIsOpenUsersList, usersListRequest }}>
+        <LoadUsersContext.Provider value={{ isOpenUsersList, setIsOpenUsersList, usersListRequest, setHeading }}>
             {children}
             {isOpenUsersList && <Modal maxWidth="md" show={isOpenUsersList} onClose={closeUsersListModal} dialogClasses="max-h-[430px]">
                 <UseInfiniteScroll
@@ -56,7 +55,7 @@ export default function LoadedUsersList({
                                 </Link>
                             </div>
 
-                            {auth.user.id !== el.user.id && <>{
+                            {(auth.user && auth.user.id !== el.user.id) && <>{
                                 el.authUserFollowed ? <Unfollow
                                     user={auth.user.id}
                                     follower={el.user.id}

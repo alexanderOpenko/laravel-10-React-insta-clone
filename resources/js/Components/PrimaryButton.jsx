@@ -1,4 +1,6 @@
-export default function PrimaryButton({ className = '', disabled, children, ...props }) {
+import { useRef } from "react"
+
+export default function PrimaryButton({ className = '', disabled, children,...props }) {
     return (
         <button
             {...props}

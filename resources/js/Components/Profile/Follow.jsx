@@ -1,6 +1,6 @@
 import { useForm } from "@inertiajs/react";
 import PrimaryButton from "@/Components/PrimaryButton"
-import Login from "../Auth/Login";
+import Login from "../../Pages/Auth/Login";
 import Modal from "@/Components/Modal";
 import { useState } from "react";
 

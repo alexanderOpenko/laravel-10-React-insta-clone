@@ -1,6 +1,6 @@
 import TransparentButton from "@/Components/TransparentButton";
 import classNames from "classnames";
-import LoadedUsersList from "@/Pages/Profile/LoadedUsersList";
+import LoadedUsersList from "@/Components/Profile/LoadedUsersList";
 import PostLikesInterface from "@/Components/Post/PostLikesInterface";
 import { useForm } from "@inertiajs/react"
 
@@ -40,7 +40,7 @@ export default function Likes ({ post, posts }) {
 
         {
             !!post.likes_count &&
-            <LoadedUsersList heading="Likes">
+            <LoadedUsersList>
                 <PostLikesInterface postLikesCount={post.likes_count} post={post} />
             </LoadedUsersList>
         }

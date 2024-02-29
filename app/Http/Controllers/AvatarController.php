@@ -26,6 +26,8 @@ class AvatarController extends Controller
     }
 
     public function deleteAvatar(User $user) {
+        $this->authorize('apply', $user);
+
         $isAvatarExists = count($user->avatar()->get());
 
         if ($isAvatarExists) { 

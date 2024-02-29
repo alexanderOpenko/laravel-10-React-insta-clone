@@ -1,5 +1,5 @@
 import { Link, usePage } from "@inertiajs/react";
-import ProfileAvatar from "./Partials/ProfileAvatar";
+import ProfileAvatar from "../../Pages/Profile/Partials/ProfileAvatar";
 import dayjs from 'dayjs';
 import PrimaryButton from '@/Components/PrimaryButton';
 import Unfollow from './Unfollow';
@@ -51,8 +51,8 @@ export default function ProfileInfo({ user, auth, totalPosts }) {
                         }
 
                         {
-                            auth.user?.id !== user.id && <PrimaryButton className="ml-4 w-full">
-                                <Link href={route('chat.index', user.id)}>
+                            auth.user?.id !== user.id && <PrimaryButton className="ml-4 w-full !p-0">
+                                <Link href={route('chat.index', user.id)} className="px-4 py-2">
                                     Message
                                 </Link>
                             </PrimaryButton>

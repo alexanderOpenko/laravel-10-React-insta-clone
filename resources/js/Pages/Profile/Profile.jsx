@@ -4,7 +4,7 @@ import Content from '@/Components/Content';
 import CreatePost from '../../Components/Post/Create';
 import { useEffect, useState } from 'react';
 import PostsList from '../../Components/Post/PostsList';
-import ProfileInfo from './ProfileInfo';
+import ProfileInfo from '../../Components/Profile/ProfileInfo';
 import PrimaryButton from '@/Components/PrimaryButton';
 import CounterPanel from '@/Components/Profile/CounterPanel';
 
