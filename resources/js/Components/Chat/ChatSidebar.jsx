@@ -1,6 +1,6 @@
 import Avatar from "../Avatar";
 import { useRef, memo } from "react";
-import UseInfiniteScroll from "@/infinitePaginationHook"
+import UseInfiniteScroll from "@/Components/infinitePaginationHook"
 import TransparentButton from "../TransparentButton";
 import classNames from "classnames";
 

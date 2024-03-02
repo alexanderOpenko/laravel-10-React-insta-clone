@@ -1,7 +1,7 @@
 import { router, usePage } from "@inertiajs/react"
 import { useEffect, useRef, useState } from "react"
 import ShowPostModal from './Show';
-import UseInfiniteScroll from "@/infinitePaginationHook";
+import UseInfiniteScroll from "@/Components/infinitePaginationHook";
 import { strPlural } from "@/services";
 import PostHeader from "./PostHeader";
 import Likes from "@/Components/Post/Likes";

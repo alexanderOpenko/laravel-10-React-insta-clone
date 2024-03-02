@@ -8,6 +8,7 @@ use App\Models\Like;
 use App\Models\Notification;
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class LikeController extends Controller
 {
@@ -15,14 +16,14 @@ class LikeController extends Controller
 
     public function store(Request $request, string $post)
     {
-        $like = Like::where('post_id', $post)->where('liker_id', $request->user()->id)->get();
+        $like = Like::where('post_id', $post)->where('liker_id', Auth::id())->get();
 
         if (count($like)) {
-            Like::where('post_id', $post)->where('liker_id', $request->user()->id)->delete();
+            Like::where('post_id', $post)->where('liker_id', Auth::id())->delete();
             Notification::where('notifiable_id', $like[0]['id'])->delete();
         } else {
             $p = Post::find($post);
-            $like = $p->likes()->create(['liker_id' => $request->user()->id]);
+            $like = $p->likes()->create(['liker_id' => Auth::id()]);
 
             $notification = new Notification();
             $notification->user_id = $p['user_id'];

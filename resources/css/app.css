@@ -39,3 +39,9 @@ body {
     text-overflow: ellipsis;
     display: -webkit-box;
 }
+
+@layer components {
+    .inlineForm {
+        @apply flex mt-2 w-full justify-between items-center
+    }
+}

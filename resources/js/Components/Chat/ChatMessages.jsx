@@ -1,4 +1,4 @@
-import UseInfiniteScroll from "@/infinitePaginationHook"
+import UseInfiniteScroll from "@/Components/infinitePaginationHook"
 import dateString, { getMonth, hoursAndMinutes } from "@/services";
 import { usePage } from "@inertiajs/react";
 import classNames from "classnames";

@@ -3,7 +3,7 @@ import { Link, useForm } from "@inertiajs/react"
 import { useState, useEffect, useRef } from "react"
 import TransparentButton from "@/Components/TransparentButton"
 import Avatar from "@/Components/Avatar"
-import UseInfiniteScroll from "@/infinitePaginationHook"
+import UseInfiniteScroll from "@/Components/infinitePaginationHook"
 import { appURL } from "@/services";
 import classNames from "classnames"
 import ExpandingText from "./ExpandingText"

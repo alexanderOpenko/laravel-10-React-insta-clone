@@ -31,9 +31,10 @@ class FollowerController extends Controller
      */
     public function store(Request $request, User $user)
     {
+        $this->authorize('apply', $user);
+
         $following_id = $request->query('following_id');
         $user->following()->create(['follower_id' => $following_id]);
-        return redirect()->back();
     }
 
     /**
@@ -64,9 +65,9 @@ class FollowerController extends Controller
      */
     public function destroy(User $user, $follower)
     {
-        $user->following()->where('follower_id', $follower)->delete();
+        $this->authorize('apply', $user);
 
-        // return redirect()->back();
+        $user->following()->where('follower_id', $follower)->delete();
     }
 
     public function followers(User $user)

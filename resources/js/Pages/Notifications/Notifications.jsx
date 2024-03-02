@@ -2,7 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { useEffect, useState } from "react";
 import { appURL } from "@/services";
 import NotificationItem from '@/Components/Notifications/NotificationItem';
-import UseInfiniteScroll from "@/infinitePaginationHook";
+import UseInfiniteScroll from "@/Components/infinitePaginationHook";
 
 export default function Notifications({ auth }) {
     const [notifications, setNotifications] = useState([])

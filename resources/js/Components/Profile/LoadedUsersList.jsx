@@ -1,18 +1,13 @@
-import { useContext, useState, useRef, createContext } from "react"
+import { useState, useRef, createContext } from "react"
 import Modal from "@/Components/Modal";
-import Avatar from "@/Components/Avatar";
-import Unfollow from "./Unfollow";
-import Follow from "./Follow";
-import UseInfiniteScroll from "@/infinitePaginationHook";
-import { AuthContext } from "@/Layouts/AuthenticatedLayout";
-import { Link } from "@inertiajs/react";
+import UseInfiniteScroll from "@/Components/infinitePaginationHook";
+import UserCard from "../Users/UserCard";
 
 export const LoadUsersContext = createContext(null)
 
 export default function LoadedUsersList({ 
     children
 }) {
-    const auth = useContext(AuthContext)
     const [usersList, setUsersList] = useState([])
     const [isOpenUsersList, setIsOpenUsersList] = useState(false)
     const [nextPageUrl, setNextPageUrl] = useState('')
@@ -46,31 +41,7 @@ export default function LoadedUsersList({
                     </div>
 
                     {usersList.map((el) => {
-                        return <div className="flex items-center py-3 px-4 justify-between">
-                            <div className="flex items-center">
-                                <Avatar size='sm' user={el.user} divClassName="mr-4" />
-
-                                <Link href={route('profile.show', el.user.id)}>
-                                    {el.user.name}
-                                </Link>
-                            </div>
-
-                            {(auth.user && auth.user.id !== el.user.id) && <>{
-                                el.authUserFollowed ? <Unfollow
-                                    user={auth.user.id}
-                                    follower={el.user.id}
-                                    setUsersList={setUsersList}
-                                />
-                                    :
-                                    <Follow
-                                        user={auth.user?.id}
-                                        following_id={el.user.id}
-                                        setUsersList={setUsersList}
-
-                                    />
-                                }</>
-                            }
-                        </div>
+                        return <UserCard user={el.user} authUserFollowed={el.authUserFollowed} setUsersList={setUsersList}/>
                     })}
                 </UseInfiniteScroll>
             </Modal>}

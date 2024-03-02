@@ -2,9 +2,10 @@ import TransparentButton from "@/Components/TransparentButton";
 import classNames from "classnames";
 import LoadedUsersList from "@/Components/Profile/LoadedUsersList";
 import PostLikesInterface from "@/Components/Post/PostLikesInterface";
-import { useForm } from "@inertiajs/react"
+import { useForm, usePage } from "@inertiajs/react"
 
 export default function Likes ({ post, posts }) {
+    const { auth } = usePage().props
     const { post: store, processing } = useForm()
 
     const likeRequest = (e) => {

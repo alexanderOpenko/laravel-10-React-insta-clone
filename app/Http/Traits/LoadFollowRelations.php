@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Traits;
 
 use App\Models\Follower;
@@ -6,20 +7,25 @@ use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 
-trait LoadFollowRelations 
+trait LoadFollowRelations
 {
-    public function loadFollowRelations (Collection $collection, string $followerOrFollowing) 
+    public function checkIfFollowed($follower, $userIdRowName)
     {
-        foreach ($collection as $follower) 
-        {
-            $follower['user'] = User::findOrFail($follower[$followerOrFollowing])->load('avatar');
-            $follower['authUserFollowed'] = false;
+        $follower['authUserFollowed'] = false;
 
-            if (Follower::where('user_id', Auth::id())
-                ->where('follower_id', $follower[$followerOrFollowing])->exists()
-            ) {
-                $follower['authUserFollowed'] = true;
-            }
+        if (
+            Follower::where('user_id', Auth::id())->where('follower_id', $follower[$userIdRowName])->exists()
+        ) {
+            $follower['authUserFollowed'] = true;
+        }
+
+        return $follower;
+    }
+    public function loadFollowRelations(Collection $collection, string $userIdRowName)
+    {
+        foreach ($collection as $follower) {
+            $follower['user'] = User::findOrFail($follower[$userIdRowName])->load('avatar');
+            $this->checkIfFollowed($follower, $userIdRowName);
         }
 
         return $collection;

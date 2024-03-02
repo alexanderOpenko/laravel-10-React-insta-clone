@@ -50,7 +50,7 @@ export default function Modal({ children, show = false, maxWidth = '2xl', dialog
                 >
                     <Dialog.Panel
                         className={`h-full items-center bg-white shadow-xl
-                         transform transition-all w-full sm:mx-auto ${maxWidthClass} ${dialogClasses}`}
+                         transform transition-all w-full sm:mx-auto rounded-lg ${maxWidthClass} ${dialogClasses}`}
                     >
                         {children}
                     </Dialog.Panel>

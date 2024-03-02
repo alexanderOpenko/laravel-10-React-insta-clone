@@ -109,7 +109,7 @@ export default function BaseNav() {
                         <i className="fa fa-home autowidth" aria-hidden="true"></i>
                     </MenuItem>
 
-                    <MenuItem linkUrl={route('home')} linkTitle="Users">
+                    <MenuItem linkUrl={route('users.index')} linkTitle="Users">
                         <i className="fa fa-user autowidth" aria-hidden="true"></i>
                     </MenuItem>
 

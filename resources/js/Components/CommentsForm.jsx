@@ -40,7 +40,7 @@ export default function CommentsForm({ post, posts, auth, setComments }) {
         <div className="post_comments_form bg-white">
             <Likes post={post} posts={posts} />
 
-            <form onSubmit={submitComment} className="flex items-start mt-2">
+            <form onSubmit={submitComment} className="inlineForm">
                 <div className="mr-5 w-full">
                     <TextInput
                         type='text'

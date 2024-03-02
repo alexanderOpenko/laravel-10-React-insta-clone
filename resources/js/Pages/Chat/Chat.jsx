@@ -317,9 +317,8 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                             </>
                         ) : (
                             <div className="flex justify-center items-center bg-transparent h-screen">
-                                <p className="font-bold text-3xl text-zinc-500">
-                                    Please select a User to start
-                                    chatting...
+                                <p className="text-2xl text-zinc-500 font-serif">
+                                    Select a user to start chatting
                                 </p>
                             </div>
                         )}
