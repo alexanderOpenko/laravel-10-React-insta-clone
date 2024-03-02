@@ -17,7 +17,7 @@ class UsersController extends Controller
 
     public function list(?string $name = null)
     {
-        $users = $name ? User::where('name', 'like', '%' . $name . '%')->paginate(10) : User::with('avatar')->paginate(10);
+        $users = $name ? User::where('name', 'like', '%' . $name . '%')->with('avatar')->paginate(10) : User::with('avatar')->paginate(10);
         
         $usersCollection = $users->getCollection();
         $users = $users->toArray();
