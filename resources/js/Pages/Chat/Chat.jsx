@@ -162,11 +162,13 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
             if (!receiver?.id) {
                 showSidebar()
                 document.body.style.overflow = 'auto'
-
+                document.body.style.height = 'auto'
+                document.querySelector('#app').style.height = 'auto'
             } else {
                 hideSidebar()
                 document.body.style.overflow = 'hidden'
-
+                document.body.style.height = 'calc(100vh - 56px)'
+                document.querySelector('#app').style.height = '100%'
             }
         }
     }, [receiver])
@@ -262,16 +264,17 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
     })
 
     const chatWindowClasses = classNames({
-        "relative md:py-1 pl-[10px] pr-[5px] w-full bg-gradient-to-tl from-amber-100 from-5% via-emerald-300  to-amber-100 to-95%": true,
+        "relative h-full md:py-1 pl-[10px] pr-[5px] w-full bg-gradient-to-tl from-amber-100 from-5% via-emerald-300  to-amber-100 to-95%": true,
         "hidden": currentView === 'showSidebar' && isMobileView,
     })
 
-    const mobileChatHeight = browserName === 'Chrome' ? 'h-[79%]' : 'h-[73%]'
+    // const mobileChatHeight = browserName === 'Chrome' ? 'h-[79%]' : 'h-[73%]'
+    const mobileChatHeight = 'h-[86%]';
 
     return (
         <AuthenticatedLayout auth={auth} errors={errors} zIndex={receiver?.id ? "z-[12]" : ""}>
-            <div className="messanger">
-                <div className="flex h-screen">
+            <div className="messanger h-full">
+                <div className="flex h-full">
                     <div className={sidebarClasses}>
                         <ChatSidebar
                             setReceiverHandler={setReceiverHandler}
@@ -296,7 +299,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                                 </div>
 
                                 {/* height */}
-                                <div className={"chat-messages flex flex-col md:h-full relative " + mobileChatHeight}>
+                                <div className={"chat-messages flex flex-col md:h-chat relative " + mobileChatHeight}>
                                     <ChatMessages
                                         readedMesages={readedMesages}
                                         setMessages={setMessages}

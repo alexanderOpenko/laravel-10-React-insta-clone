@@ -30,7 +30,7 @@ export default {
                 '16': '16rem'
             },
             height: {
-                'chat': 'calc(100vh - 46px)',
+                'chat': 'calc(100vh - 110px)',
             }
         },
     },

@@ -9,12 +9,13 @@ export const AuthContext = createContext(null);
 
 export default function Authenticated({ user, auth, header, children, zIndex = '' }) {
     const layoutClasses = classNames({
+        "h-full": true,
         "flex": !!auth.user
     })
 
     return (
         <AuthContext.Provider value={auth}>
-        <div className="min-h-screen">
+        <div className="h-full">
             {!auth.user && (
                 <header className="bg-white shadow">
                     <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
@@ -43,7 +44,7 @@ export default function Authenticated({ user, auth, header, children, zIndex = '
                 </header>
             )}
 
-            <main>
+            <main className='h-full'>
                 <div className={layoutClasses}>
                     {!!auth.user &&
                         <BaseNav />
