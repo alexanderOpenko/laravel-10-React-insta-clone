@@ -299,7 +299,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                                 </div>
 
                                 {/* height */}
-                                <div className={"chat-messages flex flex-1 md:flex-none flex-col md:h-chat relative h-[75vh] pt-[35px]"}>
+                                <div className={"chat-messages flex flex-1 md:flex-none flex-col md:h-chat relative h-[75vh] pt-[35px] pb-[70px] md:py-0"}>
                                     <ChatMessages
                                         readedMesages={readedMesages}
                                         setMessages={setMessages}
@@ -316,12 +316,12 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                                     />
                                 </div>
 
-                                <div className="max-w-xl w-full mx-auto z-[102] left-0 md:relative">
+                                <div className="max-w-xl fixed md:relative bottom-0 right-0 w-full mx-auto z-[102] left-0 md:relative">
                                     <ChatInput receiver={receiver} getLastChat={getLastChat} />
                                 </div>
                             </>
                         ) : (
-                            <div className="flex fixed md:relative bottom-0 right-0 left-0 justify-center items-center bg-transparent h-screen">
+                            <div className="flex left-0 justify-center items-center bg-transparent h-screen">
                                 <p className="text-2xl text-zinc-500 font-serif">
                                     Select a user to start chatting
                                 </p>
