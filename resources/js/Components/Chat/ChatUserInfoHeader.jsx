@@ -2,7 +2,7 @@ import Avatar from "../Avatar";
 
 export default function ChatUserInfoHeader({ receiver }) {
     return (
-        <div className="user-info-header Wpy-3">
+        <div className="user-info-header">
             <div className="flex justify-between">
                 <div className="flex items-center">
                     <Avatar user={receiver} size="2sm"/>

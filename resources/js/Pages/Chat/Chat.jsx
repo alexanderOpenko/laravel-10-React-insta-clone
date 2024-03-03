@@ -288,7 +288,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                     <div className={chatWindowClasses}>
                         {receiver?.id ? (
                             <>
-                                <div className="flex items-center pl-[13px] py-[2px] bg-white z-[12] md:relative md:bg-transparent">
+                                <div className="flex items-center pl-[13px] mx-[10px] py-[2px] bg-white z-[12] md:relative md:bg-transparent">
                                     {
                                         isMobileView && <div className="mr-5 cursor-pointer" onClick={showSidebar}>
                                             <i class="fa fa-arrow-left" aria-hidden="true"></i>
@@ -299,7 +299,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                                 </div>
 
                                 {/* height */}
-                                <div className={"chat-messages flex flex-1 md:flex-none flex-col md:h-chat relative " + mobileChatHeight}>
+                                <div className={"chat-messages flex flex-1 md:flex-none flex-col md:h-chat relative h-[75vh]"}>
                                     <ChatMessages
                                         readedMesages={readedMesages}
                                         setMessages={setMessages}
