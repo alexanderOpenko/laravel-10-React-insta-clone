@@ -71,7 +71,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                     if (el.id === json.message.sender_id) {
                         if (!el.messages.some(el => el.id === json.message.id)) {
 
-                        el.messages.push(json.message)
+                            el.messages.push(json.message)
                         }
                     }
                     return el
@@ -150,14 +150,14 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
         const windowWidth = window.innerWidth
 
         if (windowWidth <= 768 && !isMobileView) {
-            setIsMobileView(true) 
+            setIsMobileView(true)
 
             if (!receiver?.id) {
                 showSidebar()
             } else {
                 hideSidebar()
             }
-        } else if(isMobileView) {
+        } else if (isMobileView) {
 
             if (!receiver?.id) {
                 showSidebar()
@@ -185,7 +185,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
 
         return () => {
             Echo.leave(`chatmessages.${auth.user.id}`)
-            document.body.style.overflow = 'auto' 
+            document.body.style.overflow = 'auto'
         }
     }, [])
 
@@ -253,7 +253,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
 
         scrollDown()
     }, [receiver])
-   
+
     const sidebarClasses = classNames({
         "border-r border-slate-100 bg-white pt-3 h-[100vh] whitespace-nowrap pb-[58px] md:pb-0": true,
         "hidden": currentView === 'hideSidebar' && isMobileView,
@@ -262,11 +262,11 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
     })
 
     const chatWindowClasses = classNames({
-        "relative pt-[35px] md:py-1 pl-[10px] pr-[5px] w-full h-screen bg-gradient-to-tl from-amber-100 from-5% via-emerald-300  to-amber-100 to-95%": true,
+        "relative md:py-1 pl-[10px] pr-[5px] w-full h-screen bg-gradient-to-tl from-amber-100 from-5% via-emerald-300  to-amber-100 to-95%": true,
         "hidden": currentView === 'showSidebar' && isMobileView,
     })
 
-    const mobileChatHeight = browserName === 'Chrome' ? 'calc(100vh - 162px)': 'calc(100vh - 206px)'
+    const mobileChatHeight = browserName === 'Chrome' ? 'calc(100vh - 162px)' : 'calc(100vh - 206px)'
 
     return (
         <AuthenticatedLayout auth={auth} errors={errors} zIndex={receiver?.id ? "z-[12]" : ""}>
@@ -285,7 +285,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                     <div className={chatWindowClasses}>
                         {receiver?.id ? (
                             <>
-                                <div className="flex items-center pl-[13px] fixed top-0 right-0 left-0 py-[2px] bg-white z-[12] md:relative md:bg-transparent">
+                                <div className="flex items-center pl-[13px] py-[2px] bg-white z-[12] md:relative md:bg-transparent">
                                     {
                                         isMobileView && <div className="mr-5 cursor-pointer" onClick={showSidebar}>
                                             <i class="fa fa-arrow-left" aria-hidden="true"></i>
@@ -295,27 +295,26 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                                     <ChatUserInfoHeader receiver={receiver} />
                                 </div>
 
-                                <div className="md:!h-chat" style={{height: mobileChatHeight}}>
-                                    <div className="chat-messages flex flex-col h-full relative">
-                                        <ChatMessages
-                                            readedMesages={readedMesages}
-                                            setMessages={setMessages}
-                                            setSavedMessages={setSavedMessages}
-                                            handleReadedMessage={handleReadedMessage}
-                                            preloader={preloader}
-                                            getChatMessages={getChatMessages}
-                                            messages={messages}
-                                            receiver={receiver}
-                                            auth_id={auth.user.id}
-                                            nextPageUrl={nextPageMessagesUrl}
-                                            getLastMessage={getLastMessage}
-                                            ref={scrollRef}
-                                        />
+                                {/* height */}
+                                <div className="chat-messages flex flex-col h-full relative" style={{ height: 'calc(100% - 102px)'}}>
+                                    <ChatMessages
+                                        readedMesages={readedMesages}
+                                        setMessages={setMessages}
+                                        setSavedMessages={setSavedMessages}
+                                        handleReadedMessage={handleReadedMessage}
+                                        preloader={preloader}
+                                        getChatMessages={getChatMessages}
+                                        messages={messages}
+                                        receiver={receiver}
+                                        auth_id={auth.user.id}
+                                        nextPageUrl={nextPageMessagesUrl}
+                                        getLastMessage={getLastMessage}
+                                        ref={scrollRef}
+                                    />
+                                </div>
 
-                                        <div className="max-w-xl w-full mx-auto z-[12] fixed left-0 right-0 bottom-0 md:relative">
-                                            <ChatInput receiver={receiver} getLastChat={getLastChat} />
-                                        </div>
-                                    </div>
+                                <div className="max-w-xl w-full mx-auto z-[12] left-0 md:relative">
+                                    <ChatInput receiver={receiver} getLastChat={getLastChat} />
                                 </div>
                             </>
                         ) : (
