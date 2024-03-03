@@ -288,7 +288,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                     <div className={chatWindowClasses}>
                         {receiver?.id ? (
                             <>
-                                <div className="flex items-center pl-[13px] mx-[10px] py-[2px] bg-white z-[12] md:relative md:bg-transparent">
+                                <div className="flex fixed md:relative top-0 right-0 left-0 items-center pl-[13px] mx-[-10px] md:mx-0 py-[2px] bg-white z-[12] md:relative md:bg-transparent">
                                     {
                                         isMobileView && <div className="mr-5 cursor-pointer" onClick={showSidebar}>
                                             <i class="fa fa-arrow-left" aria-hidden="true"></i>
@@ -299,7 +299,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                                 </div>
 
                                 {/* height */}
-                                <div className={"chat-messages flex flex-1 md:flex-none flex-col md:h-chat relative h-[75vh]"}>
+                                <div className={"chat-messages flex flex-1 md:flex-none flex-col md:h-chat relative h-[75vh] pt-[35px]"}>
                                     <ChatMessages
                                         readedMesages={readedMesages}
                                         setMessages={setMessages}
@@ -321,7 +321,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                                 </div>
                             </>
                         ) : (
-                            <div className="flex justify-center items-center bg-transparent h-screen">
+                            <div className="flex fixed md:relative bottom-0 right-0 left-0 justify-center items-center bg-transparent h-screen">
                                 <p className="text-2xl text-zinc-500 font-serif">
                                     Select a user to start chatting
                                 </p>
