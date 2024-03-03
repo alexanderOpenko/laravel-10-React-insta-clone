@@ -268,7 +268,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
         "hidden": currentView === 'showSidebar' && isMobileView,
     })
 
-    const mobileChatHeight = browserName === 'Safari' ? 'h-[70vh]' : 'h-[73vh]'
+    const mobileChatHeight = browserName === 'Chrome' ? 'h-[86vh]' : 'h-[73vh]'
 
     return (
         <AuthenticatedLayout auth={auth} errors={errors} zIndex={receiver?.id ? "z-[12]" : ""}>
