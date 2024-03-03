@@ -6,6 +6,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import classNames from "classnames";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { appURL } from "@/services";
+import { browserName } from "react-device-detect";
 
 export default function Chat({ auth, errors, receiver: companion = {} }) {
     const [currentView, setCurrentView] = useState('showSidebar')
@@ -261,9 +262,11 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
     })
 
     const chatWindowClasses = classNames({
-        "relative pt-[30px] md:py-1 pl-[10px] pr-[5px] w-full h-screen bg-gradient-to-tl from-amber-100 from-5% via-emerald-300  to-amber-100 to-95%": true,
+        "relative pt-[35px] md:py-1 pl-[10px] pr-[5px] w-full h-screen bg-gradient-to-tl from-amber-100 from-5% via-emerald-300  to-amber-100 to-95%": true,
         "hidden": currentView === 'showSidebar' && isMobileView,
     })
+
+    const mobileChatHeight = browserName === 'Chrome' ? 'calc(100vh - 110px)': 'calc(100vh - 206px)'
 
     return (
         <AuthenticatedLayout auth={auth} errors={errors} zIndex={receiver?.id ? "z-[12]" : ""}>
@@ -292,7 +295,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                                     <ChatUserInfoHeader receiver={receiver} />
                                 </div>
 
-                                <div className="h-chat-messages-mobile md:h-chat">
+                                <div className="md:!h-chat" style={{height: mobileChatHeight}}>
                                     <div className="chat-messages flex flex-col h-full relative">
                                         <ChatMessages
                                             readedMesages={readedMesages}

@@ -30,8 +30,7 @@ export default {
                 '16': '16rem'
             },
             height: {
-                'chat': 'calc(100vh - 110px)',
-                'chat-messages-mobile': 'calc(100vh - 206px)'
+                'chat': 'calc(100vh - 46px)',
             }
         },
     },

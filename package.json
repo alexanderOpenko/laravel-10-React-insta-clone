@@ -25,6 +25,7 @@
         "@inertiajs/inertia-react": "^0.8.1",
         "classnames": "^2.5.1",
         "dayjs": "^1.11.10",
+        "react-device-detect": "^2.2.3",
         "ziggy-js": "^1.8.1"
     }
 }
