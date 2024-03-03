@@ -173,6 +173,20 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
     }, [receiver])
 
     useEffect(() => {
+        const setChatHeight = () => {
+            setMobileChatHeight(document.body.clientHeight - 140);
+        };
+    
+        document.addEventListener('DOMContentLoaded', setChatHeight);
+    
+        setChatHeight();
+    
+        return () => {
+            document.removeEventListener('DOMContentLoaded', setChatHeight);
+        };
+    }, []);
+
+    useEffect(() => {
         getChats(`${appURL}/chatList`)
 
         if (companion) {
@@ -206,8 +220,6 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
 
     useEffect(() => {
         if (receiver?.id) {
-            setMobileChatHeight(document.body.clientHeight - 107)
-
             initialMessagesLoaded.current = true
 
             const savedReceivermessages = savedMessages.find(el => el.id === receiver.id)
