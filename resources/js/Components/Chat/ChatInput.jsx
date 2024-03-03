@@ -2,6 +2,7 @@ import { useForm } from "@inertiajs/react";
 import TextInput from "../TextInput";
 import TransparentButton from "../TransparentButton";
 import { memo } from 'react';
+import TextArea from "../TextArea";
 
 export default memo(function ChatInput({ receiver, getLastChat }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -24,7 +25,7 @@ export default memo(function ChatInput({ receiver, getLastChat }) {
     return (
         <div className="pb-2 md:pb-0 px-[10px] md:px-0 bg-transparent">
             <form onSubmit={submit} className="flex">
-                <TextInput
+                <TextArea
                     className="h-16 w-full overflow-y-auto bg-white pt-3 mr-3"
                     placeholder="Write a message"
                     name="message"

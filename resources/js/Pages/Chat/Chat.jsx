@@ -268,7 +268,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
         "hidden": currentView === 'showSidebar' && isMobileView,
     })
 
-    const mobileChatHeight = browserName === 'Chrome' ? 'h-[86%]' : 'h-[79%]'
+    const mobileChatHeight = browserName === 'Chrome' ? 'h-[83%]' : 'h-[79%]'
     // const mobileChatHeight = 'h-[86%]';
 
     return (
@@ -316,7 +316,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                                     />
                                 </div>
 
-                                <div className="max-w-xl w-full mx-auto z-[12] left-0 md:relative">
+                                <div className="max-w-xl w-full mx-auto z-[102] left-0 md:relative">
                                     <ChatInput receiver={receiver} getLastChat={getLastChat} />
                                 </div>
                             </>

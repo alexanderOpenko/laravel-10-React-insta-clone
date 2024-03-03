@@ -28,7 +28,6 @@ export default function Unfollow({ user, follower, setUsersList = null, fullWidt
                     setUsersList(prevUsersList => {
                         prevUsersList.forEach((el) => {
                             const userId = el.user ? el.user.id : el.id
-
                             if (userId === follower) {
                                 el.authUserFollowed = false
                             }
