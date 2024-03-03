@@ -26,7 +26,7 @@ export default memo(function ChatInput({ receiver, getLastChat }) {
         <div className="pb-2 md:pb-0 px-[10px] md:px-0 bg-transparent">
             <form onSubmit={submit} className="flex">
                 <TextArea
-                    className="h-16 w-full overflow-y-auto bg-white pt-3 mr-3"
+                    className="h-16 z-[102] w-full overflow-y-auto bg-white pt-3 mr-3"
                     placeholder="Write a message"
                     name="message"
                     value={data.message}
