@@ -6,7 +6,6 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import classNames from "classnames";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { appURL } from "@/services";
-import { browserName } from "react-device-detect";
 
 export default function Chat({ auth, errors, receiver: companion = {} }) {
     const [currentView, setCurrentView] = useState('showSidebar')
@@ -16,7 +15,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
     const [nextPageUrl, setNextPageUrl] = useState('')
     const [preloader, setPreloader] = useState(false)
     const [readedMesages, setReadedMessages] = useState(false)
-
+    const [mobileChatHeight, setMobileChatHeight] = useState(0)
     const [nextPageMessagesUrl, setNextPageMessagesUrl] = useState('')
     const [messages, setMessages] = useState([])
 
@@ -147,6 +146,8 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
     }, [messages])
 
     useEffect(() => {
+        setMobileChatHeight(document.body.clientHeight - 107)
+
         const windowWidth = window.innerWidth
 
         if (windowWidth <= 768 && !isMobileView) {
@@ -268,8 +269,6 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
         "hidden": currentView === 'showSidebar' && isMobileView,
     })
 
-    // const mobileChatHeight = browserName === 'Chrome' ? 'h-[86vh]' : 'h-[73vh]'
-    
     return (
         <AuthenticatedLayout auth={auth} errors={errors} zIndex={receiver?.id ? "z-[12]" : ""}>
             <div className="messanger h-full">
@@ -301,7 +300,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                             {receiver?.id ? (
                                 <>
                                     {/* height */}
-                                    <div className={"chat-messages flex flex-1 md:flex-none flex-col md:h-chat h-mobile-chat-height"}>
+                                    <div className="chat-messages flex flex-1 md:flex-none flex-col md:h-chat" style={{height: mobileChatHeight}}>
                                         <ChatMessages
                                             readedMesages={readedMesages}
                                             setMessages={setMessages}
