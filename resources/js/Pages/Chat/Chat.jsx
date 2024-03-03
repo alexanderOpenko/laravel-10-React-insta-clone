@@ -162,13 +162,13 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
             if (!receiver?.id) {
                 showSidebar()
                 document.body.style.overflow = 'auto'
-                document.body.style.height = 'auto'
-                document.querySelector('#app').style.height = 'auto'
+                // document.body.style.height = 'auto'
+                // document.querySelector('#app').style.height = 'auto'
             } else {
                 hideSidebar()
                 document.body.style.overflow = 'hidden'
-                document.body.style.height = 'calc(100vh - 56px)'
-                document.querySelector('#app').style.height = '100%'
+                // document.body.style.height = 'calc(100vh - 56px)'
+                // document.querySelector('#app').style.height = '100%'
             }
         }
     }, [receiver])
@@ -264,7 +264,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
     })
 
     const chatWindowClasses = classNames({
-        "relative h-full flex flex-col md:py-1 pl-[10px] pr-[5px] w-full bg-gradient-to-tl from-amber-100 from-5% via-emerald-300  to-amber-100 to-95%": true,
+        "relative h-full flex flex-col md:py-1 w-full bg-gradient-to-tl from-amber-100 from-5% via-emerald-300  to-amber-100 to-95%": true,
         "hidden": currentView === 'showSidebar' && isMobileView,
     })
 
@@ -286,47 +286,51 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                     </div>
 
                     <div className={chatWindowClasses}>
-                        {receiver?.id ? (
-                            <>
-                                <div className="flex fixed md:relative top-0 right-0 left-0 items-center pl-[13px] mx-[-10px] md:mx-0 py-[2px] bg-white z-[12] md:relative md:bg-transparent">
-                                    {
-                                        isMobileView && <div className="mr-5 cursor-pointer" onClick={showSidebar}>
-                                            <i class="fa fa-arrow-left" aria-hidden="true"></i>
-                                        </div>
-                                    }
-
-                                    <ChatUserInfoHeader receiver={receiver} />
+                    {receiver?.id &&
+                        <div className="flex items-center pl-[13px] md:mx-0 py-[2px] bg-white z-[12] md:relative md:bg-transparent">
+                            {
+                                isMobileView && <div className="mr-5 cursor-pointer" onClick={showSidebar}>
+                                    <i class="fa fa-arrow-left" aria-hidden="true"></i>
                                 </div>
+                            }
 
-                                {/* height */}
-                                <div className={"chat-messages flex flex-1 md:flex-none flex-col md:h-chat relative h-[75vh] pt-[35px] pb-[109px] md:py-0"}>
-                                    <ChatMessages
-                                        readedMesages={readedMesages}
-                                        setMessages={setMessages}
-                                        setSavedMessages={setSavedMessages}
-                                        handleReadedMessage={handleReadedMessage}
-                                        preloader={preloader}
-                                        getChatMessages={getChatMessages}
-                                        messages={messages}
-                                        receiver={receiver}
-                                        auth_id={auth.user.id}
-                                        nextPageUrl={nextPageMessagesUrl}
-                                        getLastMessage={getLastMessage}
-                                        ref={scrollRef}
-                                    />
-                                </div>
+                            <ChatUserInfoHeader receiver={receiver} />
+                        </div>
+                    }
 
-                                <div className="max-w-xl pl-[5px] fixed md:relative bottom-0 right-0 w-full mx-auto z-[102] left-0 md:relative">
-                                    <ChatInput receiver={receiver} getLastChat={getLastChat} />
+                        <div className="pl-[10px] pr-[5px]">
+                            {receiver?.id ? (
+                                <>
+                                    {/* height */}
+                                    <div className={"chat-messages flex flex-1 md:flex-none flex-col md:h-chat h-[75vh]"}>
+                                        <ChatMessages
+                                            readedMesages={readedMesages}
+                                            setMessages={setMessages}
+                                            setSavedMessages={setSavedMessages}
+                                            handleReadedMessage={handleReadedMessage}
+                                            preloader={preloader}
+                                            getChatMessages={getChatMessages}
+                                            messages={messages}
+                                            receiver={receiver}
+                                            auth_id={auth.user.id}
+                                            nextPageUrl={nextPageMessagesUrl}
+                                            getLastMessage={getLastMessage}
+                                            ref={scrollRef}
+                                        />
+                                    </div>
+
+                                    <div className="shrink-0 max-w-xl pl-[5px] w-full mx-auto z-[102]">
+                                        <ChatInput receiver={receiver} getLastChat={getLastChat} />
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="flex left-0 justify-center items-center bg-transparent h-screen">
+                                    <p className="text-2xl text-zinc-500 font-serif">
+                                        Select a user to start chatting
+                                    </p>
                                 </div>
-                            </>
-                        ) : (
-                            <div className="flex left-0 justify-center items-center bg-transparent h-screen">
-                                <p className="text-2xl text-zinc-500 font-serif">
-                                    Select a user to start chatting
-                                </p>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
