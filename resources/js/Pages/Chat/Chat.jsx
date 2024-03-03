@@ -266,7 +266,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
         "hidden": currentView === 'showSidebar' && isMobileView,
     })
 
-    const mobileChatHeight = browserName === 'Chrome' ? 'calc(100vh - 162px)' : 'calc(100vh - 206px)'
+    const mobileChatHeight = browserName === 'Chrome' ? '79%' : '73%'
 
     return (
         <AuthenticatedLayout auth={auth} errors={errors} zIndex={receiver?.id ? "z-[12]" : ""}>
@@ -296,7 +296,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                                 </div>
 
                                 {/* height */}
-                                <div className="chat-messages flex flex-col h-[73%] md:h-full relative">
+                                <div className={"chat-messages flex flex-col md:h-full relative " + mobileChatHeight}>
                                     <ChatMessages
                                         readedMesages={readedMesages}
                                         setMessages={setMessages}
