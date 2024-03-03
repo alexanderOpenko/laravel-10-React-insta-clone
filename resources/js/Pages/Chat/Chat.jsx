@@ -292,7 +292,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                                     <ChatUserInfoHeader receiver={receiver} />
                                 </div>
 
-                                <div style={{ height: 'calc(100% )'}}>
+                                <div className="h-chat-messages-mobile md:h-chat">
                                     <div className="chat-messages flex flex-col h-full relative">
                                         <ChatMessages
                                             readedMesages={readedMesages}
