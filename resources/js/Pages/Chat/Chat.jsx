@@ -302,7 +302,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                             {receiver?.id ? (
                                 <>
                                     {/* height */}
-                                    <div className={"chat-messages flex flex-1 md:flex-none flex-col md:h-chat h-[75vh]"}>
+                                    <div className={"chat-messages flex flex-1 md:flex-none flex-col md:h-chat h-[73vh]"}>
                                         <ChatMessages
                                             readedMesages={readedMesages}
                                             setMessages={setMessages}
