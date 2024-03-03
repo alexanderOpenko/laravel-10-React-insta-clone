@@ -146,8 +146,6 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
     }, [messages])
 
     useEffect(() => {
-        setMobileChatHeight(document.body.clientHeight - 107)
-
         const windowWidth = window.innerWidth
 
         if (windowWidth <= 768 && !isMobileView) {
@@ -208,6 +206,8 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
 
     useEffect(() => {
         if (receiver?.id) {
+            setMobileChatHeight(document.body.clientHeight - 107)
+
             initialMessagesLoaded.current = true
 
             const savedReceivermessages = savedMessages.find(el => el.id === receiver.id)
