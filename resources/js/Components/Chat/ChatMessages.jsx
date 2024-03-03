@@ -113,7 +113,7 @@ const Message = ({ message, isReceivedMessage, date }) => {
 
     return <div>
         {date && <div className="flex justify-center py-1 px-2 font-medium text-white">
-            <div className="bg-[#4a8e3a8c]/[.5] px-2 py-1 rounded-full">
+            <div className="bg-[#4a8e3a8c]/[.5] px-2 py-1 rounded-full leading-[1]">
                 {date}
             </div>
         </div>}
