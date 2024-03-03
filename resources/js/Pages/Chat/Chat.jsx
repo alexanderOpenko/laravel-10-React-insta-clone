@@ -268,8 +268,8 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
         "hidden": currentView === 'showSidebar' && isMobileView,
     })
 
-    const mobileChatHeight = browserName === 'Chrome' ? 'h-[86vh]' : 'h-[73vh]'
-
+    // const mobileChatHeight = browserName === 'Chrome' ? 'h-[86vh]' : 'h-[73vh]'
+    
     return (
         <AuthenticatedLayout auth={auth} errors={errors} zIndex={receiver?.id ? "z-[12]" : ""}>
             <div className="messanger h-full">
@@ -286,7 +286,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
 
                     <div className={chatWindowClasses}>
                     {receiver?.id &&
-                        <div className="flex items-center pl-[13px] md:mx-0 py-[2px] bg-white z-[12] md:relative md:bg-transparent">
+                        <div className="flex fixed top-0 left-0 right-0 items-center pl-[13px] md:mx-0 py-[2px] bg-white z-[12] md:relative md:bg-transparent">
                             {
                                 isMobileView && <div className="mr-5 cursor-pointer" onClick={showSidebar}>
                                     <i class="fa fa-arrow-left" aria-hidden="true"></i>
@@ -297,11 +297,11 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                         </div>
                     }
 
-                        <div className="pl-[10px] pr-[5px]">
+                        <div className="pl-[10px] pr-[5px] pt-[35px] md:pt-0">
                             {receiver?.id ? (
                                 <>
                                     {/* height */}
-                                    <div className={"chat-messages flex flex-1 md:flex-none flex-col md:h-chat " + mobileChatHeight}>
+                                    <div className={"chat-messages flex flex-1 md:flex-none flex-col md:h-chat h-mobile-chat-height"}>
                                         <ChatMessages
                                             readedMesages={readedMesages}
                                             setMessages={setMessages}
@@ -318,7 +318,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                                         />
                                     </div>
 
-                                    <div className="shrink-0 max-w-xl pl-[5px] w-full mx-auto z-[102]">
+                                    <div className="shrink-0 md:relative fixed bottom-0 left-0 right-0 max-w-xl pl-[5px] w-full mx-auto z-[102]">
                                         <ChatInput receiver={receiver} getLastChat={getLastChat} />
                                     </div>
                                 </>
