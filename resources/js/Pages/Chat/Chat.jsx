@@ -261,7 +261,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
     })
 
     const chatWindowClasses = classNames({
-        "relative md:py-1 pl-[10px] pr-[5px] w-full h-screen bg-gradient-to-tl from-amber-100 from-5% via-emerald-300  to-amber-100 to-95%": true,
+        "relative pt-[75px] md:py-1 pl-[10px] pr-[5px] w-full h-screen bg-gradient-to-tl from-amber-100 from-5% via-emerald-300  to-amber-100 to-95%": true,
         "hidden": currentView === 'showSidebar' && isMobileView,
     })
 
@@ -282,7 +282,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                     <div className={chatWindowClasses}>
                         {receiver?.id ? (
                             <>
-                                <div className="flex items-center pl-[13px] py-3 bg-white z-[12] md:bg-transparent">
+                                <div className="flex fixed left-0 right-0 top-0 md:relative items-center pl-[13px] py-3 bg-white z-[12] md:bg-transparent">
                                     {
                                         isMobileView && <div className="mr-5 cursor-pointer" onClick={showSidebar}>
                                             <i class="fa fa-arrow-left" aria-hidden="true"></i>
@@ -309,7 +309,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                                             ref={scrollRef}
                                         />
 
-                                        <div className="max-w-xl w-full mx-auto z-[12]">
+                                        <div className="max-w-xl w-full mx-auto z-[12] fixed left-0 right-0 bottom-0 md:relative">
                                             <ChatInput receiver={receiver} getLastChat={getLastChat} />
                                         </div>
                                     </div>

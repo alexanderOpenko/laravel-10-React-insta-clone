@@ -31,7 +31,7 @@ export default {
             },
             height: {
                 'chat': 'calc(100vh - 87px)',
-                'chat-messages-mobile': 'calc(100vh - 103px)'
+                'chat-messages-mobile': 'calc(100vh - 173px)'
             }
         },
     },
