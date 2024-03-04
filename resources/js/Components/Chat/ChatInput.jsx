@@ -59,7 +59,7 @@ export default memo(function ChatInput({ receiver, getLastChat }) {
                     onPaste={onPasteHandler()}
                 />
 
-                <TransparentButton disabled={processing} className="px-[5px]">
+                <TransparentButton disabled={processing} className="px-[10px]">
                     <i className="fa fa-paper-plane fa-lg" aria-hidden="true"></i>
                 </TransparentButton>
             </form>

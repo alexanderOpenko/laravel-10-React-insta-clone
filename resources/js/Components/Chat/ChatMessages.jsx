@@ -94,13 +94,13 @@ const Message = ({ message, isReceivedMessage, date }) => {
     const isReceived = isReceivedMessage(message)
 
     const messageGridClasses = classNames({
-        "relative flex": true,
+        "flex": true,
         "receive-chat justify-start": isReceived,
         "send-chat justify-end": !isReceived
     })
 
     const messageClasses = classNames({
-        "mb-2 max-w-[80%] flex justify-between pl-[8px] pr-[6px] py-[5px] font-roboto rounded-2xl break-words": true,
+        "mb-2 max-w-[85%] pl-[8px] pr-[6px] py-[5px] font-roboto rounded-2xl break-words": true,
         "bg-white rounded-bl-none": isReceived,
         "bg-[#eeffde] rounded-br-none": !isReceived
     })
@@ -108,23 +108,23 @@ const Message = ({ message, isReceivedMessage, date }) => {
     const timeColor = classNames({
         "mr-[2px] leading-[0.65]": true,
         "text-[#4fae4e]": !isReceived,
-        "text-zinc-400": isReceived
+        "text-zinc-400 pt-[5px]": isReceived
     })
 
-    return <div>
-        {date && <div className="flex justify-center py-1 px-2 font-medium text-white">
-            <div className="bg-[#4a8e3a8c]/[.5] px-2 py-1 rounded-full leading-[1]">
+    return <>
+        {date && <div className={"flex justify-center py-1 px-2 font-medium text-white sticky top-0 " + `z-[${message.id}]`}>
+            <div className="bg-zinc-400 px-2 py-1 rounded-full leading-[1] text-center text-sm md:text-base min-w-[102px]" >
                 {date}
             </div>
         </div>}
 
         <div className={messageGridClasses}>
             <div className={messageClasses}>
-                <div className="w-[78%] mr-[11px] leading-[1.3] text-zinc-700 font-[450]">
+                <div className="leading-[1.3] text-zinc-700 font-[450]">
                     {message?.message}
                 </div>
 
-                <div className="flex items-end text-xs leading-[1]">
+                <div className="flex items-end mb-[3px] justify-end text-xs leading-[1]">
                     <div className={timeColor}>
                         {time}
                     </div>
@@ -145,6 +145,6 @@ const Message = ({ message, isReceivedMessage, date }) => {
                 </div>
             </div>
         </div>
-    </div>
+    </>
 }
 
