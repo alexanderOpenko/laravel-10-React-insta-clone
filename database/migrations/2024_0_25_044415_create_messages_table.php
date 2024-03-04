@@ -17,8 +17,8 @@ return new class extends Migration
             $table->id();
             $table->boolean('status')->default(0);
             $table->text('message');
-            $table->unsignedBigInteger('sender_id');
-            $table->unsignedBigInteger('receiver_id');
+            $table->foreignId('sender_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('receiver_id')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
         });
 

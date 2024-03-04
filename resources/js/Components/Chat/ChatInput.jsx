@@ -26,7 +26,6 @@ export default memo(function ChatInput({ receiver, getLastChat }) {
     }
 
     const onPasteHandler = (e) => {
-        console.log(e.clipboardData.getData('Text'), 'onPasteHandler')
         const textLength = e.clipboardData.getData('Text').length
 
         if (textLength > 50) {
@@ -64,7 +63,7 @@ export default memo(function ChatInput({ receiver, getLastChat }) {
                     onPaste={(e) => onPasteHandler(e)}
                 />
 
-                <TransparentButton disabled={processing} className="px-[10px]">
+                <TransparentButton disabled={processing} className="px-[15px]">
                     <i className="fa fa-paper-plane fa-lg" aria-hidden="true"></i>
                 </TransparentButton>
             </form>

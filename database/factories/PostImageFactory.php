@@ -17,7 +17,7 @@ class PostImageFactory extends Factory
     public function definition(): array
     {
         return [
-            'image_path' => 'image/5/EWYzN9s9ujdmu2ja69x13xMNBEm0GkfoAdlRNO2r.png'
+            'image_path' => 'image/26/KpTQIZ3HA6Tc5N80ZgSzW2A5lUF3htkMx4SEvbBM.png'
         ];
     }
 }

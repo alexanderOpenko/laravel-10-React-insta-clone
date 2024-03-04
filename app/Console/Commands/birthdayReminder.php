@@ -41,6 +41,7 @@ class birthdayReminder extends Command
                 $user = $follower->user()->first();
                 $notification = new Notification();
                 $notification->user_id = $user['id'];
+                $notification->notifier_id = Auth::id();
                 $notification->notifiable()->associate($userBirthday);
                 $notification->save();
 

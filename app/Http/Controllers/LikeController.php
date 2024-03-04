@@ -27,6 +27,7 @@ class LikeController extends Controller
 
             $notification = new Notification();
             $notification->user_id = $p['user_id'];
+            $notification->notifier_id = Auth::id();
             $notification->notifiable()->associate($like);
             $notification->save();
 

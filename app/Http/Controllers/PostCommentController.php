@@ -51,7 +51,7 @@ class PostCommentController extends Controller
 
         $notification = new Notification();
         $notification->user_id = $post['user_id'];
-
+        $notification->notifier_id = Auth::id();
         $notification->notifiable()->associate($comment);
         $notification->save();
 
