@@ -159,12 +159,12 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
 
             if (!receiver?.id) {
                 showSidebar()
-                document.body.style.overflow = 'auto'
+                // document.body.style.overflow = 'auto'
                 // document.body.style.height = 'auto'
                 // document.querySelector('#app').style.height = 'auto'
             } else {
                 hideSidebar()
-                document.body.style.overflow = 'hidden'
+                // document.body.style.overflow = 'hidden'
                 // document.body.style.height = 'calc(100vh - 56px)'
                 // document.querySelector('#app').style.height = '100%'
             }
