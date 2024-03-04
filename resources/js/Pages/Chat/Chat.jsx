@@ -26,8 +26,8 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
 
     const [savedMessages, setSavedMessages] = useState([])
 
-    const [chatHeight, setChatHeight] = useState('100vh');
-
+    const [chatMobileHeightDifference, setChatMobileHeightDifference] = useState('100vh');
+    const [mobileHeight, setMobileHeight] = useState(0)
     // useEffect(() => {
     //     if (!chatHeightRef.current) {
     //         return
@@ -162,8 +162,11 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
 
         if (initialMessagesLoaded.current) {
             const menuHeight = window.innerHeight - chatHeightRef.current.clientHeight
-            setChatHeight(`calc(100vh - ${menuHeight}px)`)
-            console.log(chatHeightRef.current.clientHeight, 'chatHeightRef.current.clientHeight');
+            if (menuHeight) {
+                setChatMobileHeightDifference(menuHeight)
+                setMobileHeight(`calc(100vh - (107px + ${menuHeight}px)`)
+            }
+
             scrollDown()
         }
     }, [messages])
@@ -290,6 +293,8 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
         "hidden": currentView === 'showSidebar' && isMobileView,
     })
 
+    const chatHeightStyles = mobileHeight ? {height: mobileHeight} : {}
+
     return (
         <AuthenticatedLayout auth={auth} errors={errors} zIndex={receiver?.id ? "z-[12]" : ""}>
             <div className="messanger h-full">
@@ -305,10 +310,10 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                     </div>
 
                     <div className={chatWindowClasses}>
-                        <div ref={chatHeightRef} className="pl-[10px] md:h-screen pr-[5px] md:pt-0 flex flex-col" style={{height: chatHeight}}>
+                        <div ref={chatHeightRef} className="pl-[10px] md:h-screen pr-[5px] md:pt-0 flex flex-col" style={{ height: `calc(100vh - ${chatMobileHeightDifference}px)` }}>
                             {receiver?.id ? (
                                 <>
-                                    <div className="flex flex-[0_0_5%] items-center pl-[13px] md:mx-0 py-[2px] bg-white z-[12] md:bg-transparent">
+                                    <div className="flex items-center pl-[13px] md:mx-0 py-[2px] bg-white z-[12] md:bg-transparent">
                                         {
                                             isMobileView && <div className="mr-5 cursor-pointer" onClick={showSidebar}>
                                                 <i class="fa fa-arrow-left" aria-hidden="true"></i>
@@ -318,7 +323,9 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                                         <ChatUserInfoHeader receiver={receiver} />
                                     </div>
 
-                                    <div className="chat-messages flex flex-1 md:flex-none flex-col md:h-chat" style={{height: 'calc(100vh - 112px)'}}>
+                                    <div className={"chat-messages flex md:flex-none flex-col md:h-chat " +
+                                        !mobileHeight ? 'h-mobile-chat-height' : ''
+                                    } style={chatHeightStyles}>
                                         <ChatMessages
                                             readedMesages={readedMesages}
                                             setMessages={setMessages}
@@ -335,7 +342,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                                         />
                                     </div>
 
-                                    <div className="max-w-xl flex-[0_0_5%] pl-[5px] w-full mx-auto z-[102]">
+                                    <div className="max-w-xl pl-[5px] w-full mx-auto z-[102]">
                                         <ChatInput receiver={receiver} getLastChat={getLastChat} />
                                     </div>
                                 </>
