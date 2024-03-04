@@ -28,23 +28,23 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
 
     const [chatHeight, setChatHeight] = useState('100vh');
 
-    useEffect(() => {
-        if (!chatHeightRef.current) {
-            return
-        }
+    // useEffect(() => {
+    //     if (!chatHeightRef.current) {
+    //         return
+    //     }
 
-        const calculateHeight = () => {
-            const menuHeight = window.innerHeight - chatHeightRef.current.clientHeight
-            setChatHeight(`calc(100vh - ${menuHeight}px)`)
-        };
+    //     const calculateHeight = () => {
+    //         const menuHeight = window.innerHeight - chatHeightRef.current.clientHeight
+    //         setChatHeight(`calc(100vh - ${menuHeight}px)`)
+    //     };
 
-        calculateHeight()
+    //     calculateHeight()
 
-        window.addEventListener('resize', calculateHeight)
-        return () => {
-            window.removeEventListener('resize', calculateHeight)
-        }
-    }, [receiver])
+    //     window.addEventListener('resize', calculateHeight)
+    //     return () => {
+    //         window.removeEventListener('resize', calculateHeight)
+    //     }
+    // }, [receiver])
 
     const setReceiverHandler = (messagesReceiver) => {
         if (receiver === messagesReceiver) {
@@ -161,6 +161,9 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
         }
 
         if (initialMessagesLoaded.current) {
+            const menuHeight = window.innerHeight - chatHeightRef.current.clientHeight
+            setChatHeight(`calc(100vh - ${menuHeight}px)`)
+            console.log(chatHeightRef.current.clientHeight, 'chatHeightRef.current.clientHeight');
             scrollDown()
         }
     }, [messages])
@@ -302,7 +305,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                     </div>
 
                     <div className={chatWindowClasses}>
-                        <div className="pl-[10px] h-screen pr-[5px] md:pt-0 flex flex-col">
+                        <div ref={chatHeightRef} className="pl-[10px] md:h-screen pr-[5px] md:pt-0 flex flex-col" style={{height: chatHeight}}>
                             {receiver?.id ? (
                                 <>
                                     <div className="flex flex-[0_0_5%] items-center pl-[13px] md:mx-0 py-[2px] bg-white z-[12] md:bg-transparent">
@@ -315,7 +318,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                                         <ChatUserInfoHeader receiver={receiver} />
                                     </div>
 
-                                    <div ref={chatHeightRef} className="chat-messages flex flex-1 md:flex-none flex-col md:h-chat" style={{height: chatHeight}}>
+                                    <div className="chat-messages flex flex-1 md:flex-none flex-col md:h-chat" style={{height: 'calc(100vh - 112px)'}}>
                                         <ChatMessages
                                             readedMesages={readedMesages}
                                             setMessages={setMessages}
