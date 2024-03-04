@@ -22,8 +22,29 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
     const [isLoading, setIsLoading] = useState(false);
 
     const scrollRef = useRef(null)
+    const chatHeightRef = useRef(null)
 
     const [savedMessages, setSavedMessages] = useState([])
+
+    const [chatHeight, setChatHeight] = useState('100vh');
+
+    useEffect(() => {
+        if (!chatHeightRef.current) {
+            return
+        }
+
+        const calculateHeight = () => {
+            const menuHeight = window.innerHeight - chatHeightRef.current.clientHeight
+            setChatHeight(`calc(100vh - ${menuHeight}px)`)
+        };
+
+        calculateHeight()
+
+        window.addEventListener('resize', calculateHeight)
+        return () => {
+            window.removeEventListener('resize', calculateHeight)
+        }
+    }, [receiver])
 
     const setReceiverHandler = (messagesReceiver) => {
         if (receiver === messagesReceiver) {
@@ -294,7 +315,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                                         <ChatUserInfoHeader receiver={receiver} />
                                     </div>
 
-                                    <div className="chat-messages flex flex-1 md:flex-none flex-col md:h-chat h-mobile-chat-height">
+                                    <div ref={chatHeightRef} className="chat-messages flex flex-1 md:flex-none flex-col md:h-chat" style={{height: chatHeight}}>
                                         <ChatMessages
                                             readedMesages={readedMesages}
                                             setMessages={setMessages}
