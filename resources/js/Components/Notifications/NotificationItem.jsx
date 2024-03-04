@@ -32,7 +32,11 @@ export default function NotificationItem({ el }) {
                         birhday={birhday}
                         imagePath={el.data.user.avatar?.avatar}
                     />
-                        : ''
+                        : (el.notifiable_type.includes('Follower')) ? <CommentLikeNotification
+                            userName={el.data.user.name}
+                            text="started following you"
+                            imagePath={el.data.user.avatar?.avatar}
+                        /> : ''
             }
         </div>
     )

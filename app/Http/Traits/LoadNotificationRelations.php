@@ -2,8 +2,8 @@
 
 namespace App\Http\Traits;
 
+use App\Models\Follower;
 use App\Models\Like;
-use App\Models\Post;
 use App\Models\PostComment;
 use App\Models\User;
 use Carbon\Carbon;
@@ -18,6 +18,8 @@ trait LoadNotificationRelations
             $model = Like::class;
          } else if (strpos($notification['notifiable_type'], 'Comment')) {
             $model = PostComment::class;
+         } else if (strpos($notification['notifiable_type'], 'Follower')) {
+            $model = Follower::class;
          } else {
             $notification['data'] = [];
             $notification['data'] = array_merge(
@@ -29,7 +31,11 @@ trait LoadNotificationRelations
          }
 
          if ($model::find($notification['notifiable_id'])) {
-            $notification['data'] = $model::find($notification['notifiable_id'])->load(['post.images', 'user']);
+            if (!strpos($notification['notifiable_type'], 'Follower')) {
+               $notification['data'] = $model::find($notification['notifiable_id'])->load(['post.images', 'user']);
+            } else {
+               $notification['data'] = $model::find($notification['notifiable_id'])->load(['user.avatar']);
+            }
          }
       }
 

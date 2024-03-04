@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Traits\LoadFollowRelations;
 use App\Models\Follower;
+use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Events\NotificationSent as EventsNotificationSent;
 
 class FollowerController extends Controller
 {
@@ -34,7 +36,15 @@ class FollowerController extends Controller
         $this->authorize('apply', $user);
 
         $following_id = $request->query('following_id');
-        $user->following()->create(['follower_id' => $following_id]);
+        $follow = $user->following()->create(['follower_id' => $following_id]);
+
+        $notification = new Notification();
+        $notification->user_id = $following_id;
+        $notification->notifier_id = $user->id;
+        $notification->notifiable()->associate($follow);
+        $notification->save();
+
+        EventsNotificationSent::dispatch($following_id, $notification);
     }
 
     /**
@@ -66,8 +76,11 @@ class FollowerController extends Controller
     public function destroy(User $user, $follower)
     {
         $this->authorize('apply', $user);
+        $follow = $user->following()->where('follower_id', $follower)->first();
 
         $user->following()->where('follower_id', $follower)->delete();
+
+        Notification::where('notifiable_id', $follow->id)->delete();
     }
 
     public function followers(User $user)

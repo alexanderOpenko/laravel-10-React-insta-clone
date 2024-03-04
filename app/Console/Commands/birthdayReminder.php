@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Models\Notification;
 use Illuminate\Console\Command;
 use App\Events\NotificationSent as EventsNotificationSent;
+use Illuminate\Support\Facades\Auth;
+
 class birthdayReminder extends Command
 {
     /**
@@ -41,7 +43,7 @@ class birthdayReminder extends Command
                 $user = $follower->user()->first();
                 $notification = new Notification();
                 $notification->user_id = $user['id'];
-                $notification->notifier_id = Auth::id();
+                $notification->notifier_id = $user['id'];
                 $notification->notifiable()->associate($userBirthday);
                 $notification->save();
 
