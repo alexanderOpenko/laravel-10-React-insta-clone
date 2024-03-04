@@ -26,7 +26,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
 
     const [savedMessages, setSavedMessages] = useState([])
 
-    const [chatMobileHeightDifference, setChatMobileHeightDifference] = useState('100vh');
+    const [chatMobileHeightDifference, setChatMobileHeightDifference] = useState(0);
     const [mobileHeight, setMobileHeight] = useState('')
     // useEffect(() => {
     //     if (!chatHeightRef.current) {
