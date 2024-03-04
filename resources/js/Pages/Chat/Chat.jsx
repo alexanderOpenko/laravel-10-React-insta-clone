@@ -27,7 +27,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
     const [savedMessages, setSavedMessages] = useState([])
 
     const [chatMobileHeightDifference, setChatMobileHeightDifference] = useState('100vh');
-    const [mobileHeight, setMobileHeight] = useState(0)
+    const [mobileHeight, setMobileHeight] = useState('')
     // useEffect(() => {
     //     if (!chatHeightRef.current) {
     //         return
@@ -164,7 +164,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
             const menuHeight = window.innerHeight - chatHeightRef.current.clientHeight
             if (menuHeight) {
                 setChatMobileHeightDifference(menuHeight)
-                setMobileHeight(`calc(100vh - (107px + ${menuHeight}px)`)
+                setMobileHeight(`calc(100vh - (107px - ${menuHeight}px)`)
             }
 
             scrollDown()
@@ -310,7 +310,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                     </div>
 
                     <div className={chatWindowClasses}>
-                        <div ref={chatHeightRef} className="pl-[10px] md:h-screen pr-[5px] md:pt-0 flex flex-col" style={{ height: `calc(100vh - ${chatMobileHeightDifference}px)` }}>
+                        <div ref={chatHeightRef} className="pl-[10px] md:h-screen pr-[5px] md:pt-0 flex flex-col" style={{ height: `calc(100vh + ${chatMobileHeightDifference}px)` }}>
                             {receiver?.id ? (
                                 <>
                                     <div className="flex items-center pl-[13px] md:mx-0 py-[2px] bg-white z-[12] md:bg-transparent">
