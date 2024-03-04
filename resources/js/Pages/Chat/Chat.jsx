@@ -310,7 +310,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                     </div>
 
                     <div className={chatWindowClasses}>
-                        <div ref={chatHeightRef} className="pl-[10px] md:h-screen pr-[5px] md:pt-0 flex flex-col" style={{ height: `calc(100vh + ${chatMobileHeightDifference}px)` }}>
+                        <div ref={chatHeightRef} className="md:h-screen md:pt-0 flex flex-col" style={{ height: `calc(100vh + ${chatMobileHeightDifference}px)` }}>
                             {receiver?.id ? (
                                 <>
                                     <div className="flex items-center pl-[13px] md:mx-0 py-[2px] bg-white z-[12] md:bg-transparent">

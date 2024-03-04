@@ -17,15 +17,20 @@ export default memo(function ChatInput({ receiver, getLastChat }) {
     
         if (event.target.value && event.target.value.length % 50 === 0) {
             const currentHeight = textAreaRef.current.clientHeight
-            textAreaRef.current.style.height = (currentHeight + 10) + 'px'
+            const operator = event.target.value.length > data.message.length ? 'plus' : 'minus'
+
+            textAreaRef.current.style.height = operator === 'plus' ? (currentHeight + 10) + 'px' : (currentHeight - 10) + 'px'
         }
 
         setData(event.target.name, event.target.value)
     }
 
-    const onPasteHandler = () => {
-        if (data.message.length > 50) {
-            const rowsCount = Math.ceil(data.message.length / 50)
+    const onPasteHandler = (e) => {
+        console.log(e.clipboardData.getData('Text'), 'onPasteHandler')
+        const textLength = e.clipboardData.getData('Text').length
+
+        if (textLength > 50) {
+            const rowsCount = Math.ceil(textLength / 50)
             const increasingHeight = rowsCount * 10
 
             const currentHeight = textAreaRef.current.clientHeight
@@ -56,7 +61,7 @@ export default memo(function ChatInput({ receiver, getLastChat }) {
                     value={data.message}
                     onChange={onHandleChange}
                     style={{resize:"none"}}
-                    onPaste={onPasteHandler()}
+                    onPaste={(e) => onPasteHandler(e)}
                 />
 
                 <TransparentButton disabled={processing} className="px-[10px]">

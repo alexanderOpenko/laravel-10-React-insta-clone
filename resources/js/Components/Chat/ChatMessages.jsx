@@ -64,13 +64,13 @@ export default forwardRef(function ChatMessages({ receiver, auth_id, nextPageUrl
     return (<>
         {preloader ?
             <div className="bg-transparent z-[2] w-full h-full flex items-center justify-center">
-                <img className="w-1/2 h-1/2" src={public_url + "/" + "loader.png"} />
+                <img className="w-1/4 h-1/4" src={public_url + "/" + "loader.png"} />
             </div>
             :
             <UseInfiniteScroll
                 request={getChatMessages}
                 nextPageUrl={nextPageUrl}
-                childrenClassNames="w-full h-full"
+                childrenClassNames="w-full h-full pl-[10px] pr-[5px]"
                 bodyClasses=" max-w-xl mx-auto min-h-full"
                 isReverseScroll={true}
                 ref={ref}
@@ -113,7 +113,7 @@ const Message = ({ message, isReceivedMessage, date }) => {
 
     return <>
         {date && <div className={"flex justify-center py-1 px-2 font-medium text-white sticky top-0 " + `z-[${message.id}]`}>
-            <div className="bg-zinc-400 px-2 py-1 rounded-full leading-[1] text-center text-sm md:text-base min-w-[102px]" >
+            <div className="bg-zinc-400 px-2 py-1 rounded-full leading-[1] text-center text-sm min-w-[102px]" >
                 {date}
             </div>
         </div>}
