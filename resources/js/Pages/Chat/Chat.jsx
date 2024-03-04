@@ -342,12 +342,12 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
                                         />
                                     </div>
 
-                                    <div className="max-w-xl pl-[5px] w-full mx-auto z-[102]">
+                                    <div className="max-w-xl fixed bottom-0 left-0 right-0 md:relative pl-[10px] w-full mx-auto z-[102]">
                                         <ChatInput receiver={receiver} getLastChat={getLastChat} />
                                     </div>
                                 </>
                             ) : (
-                                <div className="flex left-0 justify-center items-center bg-transparent h-screen">
+                                <div className="flex justify-center items-center bg-transparent h-screen">
                                     <p className="text-2xl text-zinc-500 font-serif">
                                         Select a user to start chatting
                                     </p>

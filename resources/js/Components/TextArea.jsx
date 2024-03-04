@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, forwardRef } from 'react';
 
-export default function TextArea({ type = 'text', className = '', isFocused = false, ...props }) {
-    const input = useRef(null);
+export default forwardRef(function TextArea({ type = 'text', className = '', isFocused = false, ...props }, ref) {
+    const input = ref ? ref : useRef();
 
     useEffect(() => {
         if (isFocused) {
@@ -20,4 +20,4 @@ export default function TextArea({ type = 'text', className = '', isFocused = fa
             ref={input}
         />
     );
-};
+})
