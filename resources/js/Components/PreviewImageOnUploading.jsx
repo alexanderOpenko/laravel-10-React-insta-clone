@@ -29,8 +29,8 @@ export default function PreviewImageOnUploading ({ setData, inputName, errors, b
         <>
             {
                 previewImage &&
-                <div className="mb-6">
-                    <img src={previewImage} className="max-h-[500px] w-full object-contain"/>
+                <div className="mb-6 flex justify-center">
+                    <img src={previewImage} className="max-w-1/2 w-full object-contain"/>
                 </div>
             }
 

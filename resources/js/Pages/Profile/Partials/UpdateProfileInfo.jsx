@@ -10,8 +10,8 @@ export default function UpdateProfileInfo ({ className = ''}) {
     const user = usePage().props.auth.user;
 
     const { data, setData, patch, errors, processing, recentlySuccessful } = useForm({
-        birthday: '',
-        biography: '',
+        birthday: user.birthday,
+        biography: user.biography,
     });
 
     const submit = (e) => {

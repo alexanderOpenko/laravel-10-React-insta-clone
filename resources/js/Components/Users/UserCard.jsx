@@ -11,7 +11,7 @@ export default function UserCard({ user, authUserFollowed, setUsersList = null }
     <div className="flex items-center">
         <Avatar size='sm' user={user} divClassName="mr-4" />
 
-        <Link href={route('profile.show',  user.id)} className="truncate max-w-[180px]">
+        <Link href={route('profile.show',  user.id)} className="text-sm md:text-base truncate max-w-[130px] md:max-w-full">
             {user.name} 
         </Link>
     </div>

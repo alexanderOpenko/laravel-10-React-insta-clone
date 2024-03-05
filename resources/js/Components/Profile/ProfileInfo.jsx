@@ -17,7 +17,7 @@ export default function ProfileInfo({ user, auth, totalPosts }) {
 
     return <div className='profile-info mb-5 lg:mb-10'>
         <div className='flex'>
-            <ProfileAvatar user={user} />
+            <ProfileAvatar user={user} auth={auth}/>
             <div className="w-full md:w-auto">
                 <div className="mt-4 md:mt-0 grid grid-cols-2">
                     <div className={nameClasses}>

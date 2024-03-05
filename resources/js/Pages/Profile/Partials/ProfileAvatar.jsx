@@ -6,11 +6,13 @@ import SecondaryButton from "@/Components/SecondaryButton";
 import { useForm, usePage } from "@inertiajs/react";
 import { useState } from "react";
 
-export default function ProfileAvatar({ user }) {
+export default function ProfileAvatar({ user, auth }) {
     const [open, setOpen] = useState(false)
 
     const openAvatarForm = () => {
-        setOpen(true)
+        if (auth.user?.id === user.id) {
+            setOpen(true)
+        }
     }
 
     const closeAvatarForm = () => {
@@ -55,7 +57,7 @@ export default function ProfileAvatar({ user }) {
     return (
         <div className='user-avatar mr-5 md:mr-10 flex items-center'>
             <div onClick={openAvatarForm}>
-                <Avatar user={user} size="lg" isLinkable={false}/>
+                <Avatar divClassName={auth.user?.id !== user.id ? "!cursor-auto" : ""} user={user} size="lg" isLinkable={false}/>
             </div>
 
             <Modal show={open} onClose={closeAvatarForm}>
