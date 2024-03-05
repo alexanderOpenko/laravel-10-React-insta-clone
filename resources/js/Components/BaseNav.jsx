@@ -125,7 +125,6 @@ export default function BaseNav() {
                         </div>
                     </MenuItem>
 
-
                     <MenuItem linkUrl={route('notifications.index', auth.user.id)} linkTitle="Notifications">
                         <div className="flex relative">
                             <i className="fa fa-bell autowidth" aria-hidden="true"></i>
