@@ -12,7 +12,7 @@ export default forwardRef(function ChatMessages({ receiver, auth_id, nextPageUrl
     }, [receiver])
 
     const roomId = useMemo(() => {
-        const sortedUserIds = [auth_id, receiver.id].sort()
+        const sortedUserIds = [auth_id, receiver.id].sort((a, b) => a - b)
         const roomId = sortedUserIds.join('')
 
         return roomId
@@ -41,6 +41,7 @@ export default forwardRef(function ChatMessages({ receiver, auth_id, nextPageUrl
                     })
                 })
             })
+            console.log(roomId, 'roomId');
 
         Echo.join(`messenger.${roomId}`)
             .listen('MessageSent', (e) => {
@@ -90,7 +91,8 @@ export default forwardRef(function ChatMessages({ receiver, auth_id, nextPageUrl
 })
 
 const Message = ({ message, isReceivedMessage, date }) => {
-    const time = hoursAndMinutes(message.created_at)
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+    const time = hoursAndMinutes(message.created_at, timezone)
     const isReceived = isReceivedMessage(message)
 
     const messageGridClasses = classNames({

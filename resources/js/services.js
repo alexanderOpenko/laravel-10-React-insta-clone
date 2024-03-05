@@ -26,15 +26,19 @@ export function getMonth(date) {
     return date.toLocaleString('en', { month: 'long' })
 }
 
-export function hoursAndMinutes(dateString) {
+export function hoursAndMinutes(dateString, timeZone) {
     const date = new Date(dateString)
 
-    const hours = date.getUTCHours()
-    const minutes = date.getUTCMinutes()
+    const options = {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false, 
+        timeZone: timeZone,
+    };
 
-    const formattedTime = `${hours}:${minutes < 10 ? '0' : ''}${minutes}`
+    const formattedTime = date.toLocaleTimeString('en-US', options);
 
-    return formattedTime
+    return formattedTime;
 }
 
 export default function dateString(created_at) {

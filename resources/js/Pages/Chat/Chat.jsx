@@ -84,6 +84,8 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
             return [json, ...newChats]
         })
 
+        // setMessages(prevMessages => [...prevMessages, json.message])
+
         if (savedMessages.length) {
             setSavedMessages(prevSavedMeassages => {
                 return prevSavedMeassages.map(el => {

@@ -445,8 +445,8 @@ function TransparentButton({ className = "", disableAutofocus = true, disabled, 
     }
   );
 }
-function TextArea({ type = "text", className = "", isFocused = false, ...props }) {
-  const input = useRef(null);
+const TextArea = forwardRef(function TextArea2({ type = "text", className = "", isFocused = false, ...props }, ref) {
+  const input = ref ? ref : useRef();
   useEffect(() => {
     if (isFocused) {
       input.current.focus();
@@ -461,18 +461,39 @@ function TextArea({ type = "text", className = "", isFocused = false, ...props }
       ref: input
     }
   );
-}
+});
 const ChatInput = memo(function ChatInput2({ receiver, getLastChat }) {
   const { data, setData, post, processing, errors, reset } = useForm({
     message: ""
   });
+  const textAreaRef = useRef(null);
   const onHandleChange = (event) => {
+    if (event.target.value === "") {
+      textAreaRef.current.style.height = "64px";
+    }
+    if (event.target.value && event.target.value.length % 50 === 0) {
+      const currentHeight = textAreaRef.current.clientHeight;
+      const operator = event.target.value.length > data.message.length ? "plus" : "minus";
+      textAreaRef.current.style.height = operator === "plus" ? currentHeight + 10 + "px" : currentHeight - 10 + "px";
+    }
     setData(event.target.name, event.target.value);
+  };
+  const onPasteHandler = (e) => {
+    const textLength = e.clipboardData.getData("Text").length;
+    if (textLength > 50) {
+      const rowsCount = Math.ceil(textLength / 50);
+      const increasingHeight = rowsCount * 10;
+      const currentHeight = textAreaRef.current.clientHeight;
+      textAreaRef.current.style.height = currentHeight + increasingHeight + "px";
+    }
   };
   const submit = (e) => {
     e.preventDefault();
     post(route("chat.store", receiver == null ? void 0 : receiver.id), {
-      onSuccess: () => getLastChat(receiver == null ? void 0 : receiver.id)
+      onSuccess: () => {
+        getLastChat(receiver == null ? void 0 : receiver.id);
+        textAreaRef.current.style.height = "64px";
+      }
     });
     reset("message");
   };
@@ -480,14 +501,17 @@ const ChatInput = memo(function ChatInput2({ receiver, getLastChat }) {
     /* @__PURE__ */ jsx(
       TextArea,
       {
-        className: "h-16 z-[102] w-full overflow-y-auto bg-white pt-3",
+        ref: textAreaRef,
+        className: "h-16 z-[102] w-full overflow-y-auto bg-white pt-3 max-h-[300px]",
         placeholder: "Write a message",
         name: "message",
         value: data.message,
-        onChange: onHandleChange
+        onChange: onHandleChange,
+        style: { resize: "none" },
+        onPaste: (e) => onPasteHandler(e)
       }
     ),
-    /* @__PURE__ */ jsx(TransparentButton, { disabled: processing, className: "px-[5px]", children: /* @__PURE__ */ jsx("i", { className: "fa fa-paper-plane fa-lg", "aria-hidden": "true" }) })
+    /* @__PURE__ */ jsx(TransparentButton, { disabled: processing, className: "px-[15px]", children: /* @__PURE__ */ jsx("i", { className: "fa fa-paper-plane fa-lg", "aria-hidden": "true" }) })
   ] }) });
 });
 const UseInfiniteScroll = forwardRef(function UseInfiniteScroll2({
@@ -529,6 +553,7 @@ const UseInfiniteScroll = forwardRef(function UseInfiniteScroll2({
       if (!isReverseScroll && scrollTop + clientHeight >= scrollHeight - 150 && !usedUrls.includes(nextPageUrl)) {
         makeRequest();
       }
+      console.log(scrollTop, scrollHeight, "gffgfg");
       if (isReverseScroll && scrollTop <= scrollHeight / 3 && !usedUrls.includes(nextPageUrl)) {
         makeRequest();
       }
@@ -634,51 +659,49 @@ const ChatMessages = forwardRef(function ChatMessages2({ receiver, auth_id, next
       Echo.leave(`messagereaded.${auth_id}`);
     };
   }, [receiver]);
-  return /* @__PURE__ */ jsx(Fragment, { children: preloader ? /* @__PURE__ */ jsx("div", { className: "bg-transparent z-[2] w-full h-full flex items-center justify-center", children: /* @__PURE__ */ jsx("img", { className: "w-1/2 h-1/2", src: public_url + "/loader.png" }) }) : /* @__PURE__ */ jsxs(Fragment, { children: [
-    messages.map((message, i) => {
-      const currentDateString = dateString(message.created_at);
-      const prevDate = i ? new Date(messages[i - 1].created_at) : "";
-      const prevDateString = prevDate ? `${getMonth(prevDate)} ${prevDate.getDate()}` : "";
-      const date = currentDateString !== prevDateString ? currentDateString : "";
-      return /* @__PURE__ */ jsx(Message, { message, isReceivedMessage, date }, message.id);
-    }),
-    /* @__PURE__ */ jsx(
-      UseInfiniteScroll,
-      {
-        request: getChatMessages,
-        nextPageUrl,
-        childrenClassNames: "w-full h-full",
-        bodyClasses: " max-w-xl mx-auto min-h-full",
-        isReverseScroll: true,
-        ref,
-        isLoadMoreTop: true
-      }
-    )
-  ] }) });
+  return /* @__PURE__ */ jsx(Fragment, { children: preloader ? /* @__PURE__ */ jsx("div", { className: "bg-transparent z-[2] w-full h-full flex items-center justify-center", children: /* @__PURE__ */ jsx("img", { className: "w-1/4 h-1/4", src: public_url + "/loader.png" }) }) : /* @__PURE__ */ jsx(
+    UseInfiniteScroll,
+    {
+      request: getChatMessages,
+      nextPageUrl,
+      childrenClassNames: "w-full h-full pl-[10px] pr-[5px]",
+      bodyClasses: " max-w-xl mx-auto min-h-full",
+      isReverseScroll: true,
+      ref,
+      isLoadMoreTop: true,
+      children: messages.map((message, i) => {
+        const currentDateString = dateString(message.created_at);
+        const prevDate = i ? new Date(messages[i - 1].created_at) : "";
+        const prevDateString = prevDate ? `${getMonth(prevDate)} ${prevDate.getDate()}` : "";
+        const date = currentDateString !== prevDateString ? currentDateString : "";
+        return /* @__PURE__ */ jsx(Message, { message, isReceivedMessage, date }, message.id);
+      })
+    }
+  ) });
 });
 const Message = ({ message, isReceivedMessage, date }) => {
   const time = hoursAndMinutes(message.created_at);
   const isReceived = isReceivedMessage(message);
   const messageGridClasses = classNames({
-    "relative flex": true,
+    "flex": true,
     "receive-chat justify-start": isReceived,
     "send-chat justify-end": !isReceived
   });
   const messageClasses = classNames({
-    "mb-2 max-w-[80%] flex justify-between pl-[8px] pr-[6px] py-[5px] font-roboto rounded-2xl break-words": true,
+    "mb-2 max-w-[85%] pl-[8px] pr-[6px] py-[5px] font-roboto rounded-2xl break-words": true,
     "bg-white rounded-bl-none": isReceived,
     "bg-[#eeffde] rounded-br-none": !isReceived
   });
   const timeColor = classNames({
     "mr-[2px] leading-[0.65]": true,
     "text-[#4fae4e]": !isReceived,
-    "text-zinc-400": isReceived
+    "text-zinc-400 pt-[5px]": isReceived
   });
-  return /* @__PURE__ */ jsxs("div", { children: [
-    date && /* @__PURE__ */ jsx("div", { className: "flex justify-center py-1 px-2 font-medium text-white", children: /* @__PURE__ */ jsx("div", { className: "bg-[#4a8e3a8c]/[.5] px-2 py-1 rounded-full leading-[1]", children: date }) }),
+  return /* @__PURE__ */ jsxs(Fragment, { children: [
+    date && /* @__PURE__ */ jsx("div", { className: `flex justify-center py-1 px-2 font-medium text-white sticky top-0 z-[${message.id}]`, children: /* @__PURE__ */ jsx("div", { className: "bg-zinc-400 px-2 py-1 rounded-full leading-[1] text-center text-sm min-w-[102px]", children: date }) }),
     /* @__PURE__ */ jsx("div", { className: messageGridClasses, children: /* @__PURE__ */ jsxs("div", { className: messageClasses, children: [
-      /* @__PURE__ */ jsx("div", { className: "w-[78%] mr-[11px] leading-[1.3] text-zinc-700 font-[450]", children: message == null ? void 0 : message.message }),
-      /* @__PURE__ */ jsxs("div", { className: "flex items-end text-xs leading-[1]", children: [
+      /* @__PURE__ */ jsx("div", { className: "leading-[1.3] text-zinc-700 font-[450]", children: message == null ? void 0 : message.message }),
+      /* @__PURE__ */ jsxs("div", { className: "flex items-end mb-[3px] justify-end text-xs leading-[1]", children: [
         /* @__PURE__ */ jsx("div", { className: timeColor, children: time }),
         !isReceived && /* @__PURE__ */ jsx("div", { className: "text-[#eeffde]", children: message.status ? /* @__PURE__ */ jsxs("div", { className: "whitespace-nowrap", children: [
           /* @__PURE__ */ jsx("i", { className: "fa fa-check fa-lg check-icon relative w-[14px]", "aria-hidden": "true" }),
@@ -776,7 +799,7 @@ function CommentLikeNotification({ userName, text, imagePath = null, birhday = n
   ] });
 }
 function NotificationItem({ el }) {
-  var _a;
+  var _a, _b;
   let birhday = "";
   if (el.notifiable_type.includes("User")) {
     const date = new Date(el.data.user.birthday);
@@ -806,6 +829,13 @@ function NotificationItem({ el }) {
       text: "birthday is approaching on",
       birhday,
       imagePath: (_a = el.data.user.avatar) == null ? void 0 : _a.avatar
+    }
+  ) : el.notifiable_type.includes("Follower") ? /* @__PURE__ */ jsx(
+    CommentLikeNotification,
+    {
+      userName: el.data.user.name,
+      text: "started following you",
+      imagePath: (_b = el.data.user.avatar) == null ? void 0 : _b.avatar
     }
   ) : "" });
 }
@@ -936,13 +966,15 @@ function Chat({ auth, errors, receiver: companion = {} }) {
   const [nextPageUrl, setNextPageUrl] = useState("");
   const [preloader, setPreloader] = useState(false);
   const [readedMesages, setReadedMessages] = useState(false);
-  const [mobileChatHeight, setMobileChatHeight] = useState(0);
   const [nextPageMessagesUrl, setNextPageMessagesUrl] = useState("");
   const [messages, setMessages] = useState([]);
   const initialMessagesLoaded = useRef(false);
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef(null);
+  const chatHeightRef = useRef(null);
   const [savedMessages, setSavedMessages] = useState([]);
+  const [chatMobileHeightDifference, setChatMobileHeightDifference] = useState(0);
+  const [mobileHeight, setMobileHeight] = useState("");
   const setReceiverHandler = (messagesReceiver) => {
     if (receiver === messagesReceiver) {
       return;
@@ -1035,6 +1067,11 @@ function Chat({ auth, errors, receiver: companion = {} }) {
       setPreloader(false);
     }
     if (initialMessagesLoaded.current) {
+      const menuHeight = window.innerHeight - chatHeightRef.current.clientHeight;
+      if (menuHeight) {
+        setChatMobileHeightDifference(menuHeight);
+        setMobileHeight(`calc(100vh - (107px - ${menuHeight}px)`);
+      }
       scrollDown();
     }
   }, [messages]);
@@ -1050,10 +1087,8 @@ function Chat({ auth, errors, receiver: companion = {} }) {
     } else if (isMobileView) {
       if (!(receiver == null ? void 0 : receiver.id)) {
         showSidebar();
-        document.body.style.overflow = "auto";
       } else {
         hideSidebar();
-        document.body.style.overflow = "hidden";
       }
     }
   }, [receiver]);
@@ -1128,9 +1163,10 @@ function Chat({ auth, errors, receiver: companion = {} }) {
     "basis-[30%]": !isMobileView
   });
   const chatWindowClasses = classNames({
-    "relative h-full flex flex-col md:py-1 w-full bg-gradient-to-tl from-amber-100 from-5% via-emerald-300  to-amber-100 to-95%": true,
+    "h-full flex flex-col w-full bg-gradient-to-tl from-amber-100 from-5% via-emerald-300  to-amber-100 to-95%": true,
     "hidden": currentView === "showSidebar" && isMobileView
   });
+  const chatHeightStyles = mobileHeight ? { height: mobileHeight } : {};
   return /* @__PURE__ */ jsx(Authenticated, { auth, errors, zIndex: (receiver == null ? void 0 : receiver.id) ? "z-[12]" : "", children: /* @__PURE__ */ jsx("div", { className: "messanger h-full", children: /* @__PURE__ */ jsxs("div", { className: "flex h-full", children: [
     /* @__PURE__ */ jsx("div", { className: sidebarClasses, children: /* @__PURE__ */ jsx(
       ChatSidebar,
@@ -1142,32 +1178,30 @@ function Chat({ auth, errors, receiver: companion = {} }) {
         getChats
       }
     ) }),
-    /* @__PURE__ */ jsxs("div", { className: chatWindowClasses, children: [
-      (receiver == null ? void 0 : receiver.id) && /* @__PURE__ */ jsxs("div", { className: "flex fixed top-0 left-0 right-0 items-center pl-[13px] md:mx-0 py-[2px] bg-white z-[12] md:relative md:bg-transparent", children: [
+    /* @__PURE__ */ jsx("div", { className: chatWindowClasses, children: /* @__PURE__ */ jsx("div", { ref: chatHeightRef, className: "md:h-screen md:pt-0 flex flex-col", style: { height: `calc(100vh + ${chatMobileHeightDifference}px)` }, children: (receiver == null ? void 0 : receiver.id) ? /* @__PURE__ */ jsxs(Fragment, { children: [
+      /* @__PURE__ */ jsxs("div", { className: "flex items-center pl-[13px] md:mx-0 py-[2px] bg-white z-[12] md:bg-transparent", children: [
         isMobileView && /* @__PURE__ */ jsx("div", { className: "mr-5 cursor-pointer", onClick: showSidebar, children: /* @__PURE__ */ jsx("i", { class: "fa fa-arrow-left", "aria-hidden": "true" }) }),
         /* @__PURE__ */ jsx(ChatUserInfoHeader, { receiver })
       ] }),
-      /* @__PURE__ */ jsx("div", { className: "pl-[10px] pr-[5px] pt-[35px] md:pt-0", children: (receiver == null ? void 0 : receiver.id) ? /* @__PURE__ */ jsxs(Fragment, { children: [
-        /* @__PURE__ */ jsx("div", { className: "chat-messages flex flex-1 md:flex-none flex-col md:h-chat", style: { height: mobileChatHeight }, children: /* @__PURE__ */ jsx(
-          ChatMessages,
-          {
-            readedMesages,
-            setMessages,
-            setSavedMessages,
-            handleReadedMessage,
-            preloader,
-            getChatMessages,
-            messages,
-            receiver,
-            auth_id: auth.user.id,
-            nextPageUrl: nextPageMessagesUrl,
-            getLastMessage,
-            ref: scrollRef
-          }
-        ) }),
-        /* @__PURE__ */ jsx("div", { className: "shrink-0 md:relative fixed bottom-0 left-0 right-0 max-w-xl pl-[5px] w-full mx-auto z-[102]", children: /* @__PURE__ */ jsx(ChatInput, { receiver, getLastChat }) })
-      ] }) : /* @__PURE__ */ jsx("div", { className: "flex left-0 justify-center items-center bg-transparent h-screen", children: /* @__PURE__ */ jsx("p", { className: "text-2xl text-zinc-500 font-serif", children: "Select a user to start chatting" }) }) })
-    ] })
+      /* @__PURE__ */ jsx("div", { className: !mobileHeight ? "h-mobile-chat-height relative chat-messages" : "relative chat-messages", style: chatHeightStyles, children: /* @__PURE__ */ jsx(
+        ChatMessages,
+        {
+          readedMesages,
+          setMessages,
+          setSavedMessages,
+          handleReadedMessage,
+          preloader,
+          getChatMessages,
+          messages,
+          receiver,
+          auth_id: auth.user.id,
+          nextPageUrl: nextPageMessagesUrl,
+          getLastMessage,
+          ref: scrollRef
+        }
+      ) }),
+      /* @__PURE__ */ jsx("div", { className: "max-w-xl fixed bottom-0 left-0 right-0 md:relative pl-[10px] w-full mx-auto z-[102]", children: /* @__PURE__ */ jsx(ChatInput, { receiver, getLastChat }) })
+    ] }) : /* @__PURE__ */ jsx("div", { className: "flex justify-center items-center bg-transparent h-screen", children: /* @__PURE__ */ jsx("p", { className: "text-2xl text-zinc-500 font-serif", children: "Select a user to start chatting" }) }) }) })
   ] }) }) });
 }
 const __vite_glob_0_6 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({

@@ -51,7 +51,7 @@ export default forwardRef(function UseInfiniteScroll({
             if (!isReverseScroll && scrollTop + clientHeight >= scrollHeight - 150 && !usedUrls.includes(nextPageUrl)) {
                 makeRequest()
             }
-console.log(scrollTop, scrollHeight,  'gffgfg');
+
             if (isReverseScroll && scrollTop <= (scrollHeight / 3) && !usedUrls.includes(nextPageUrl)) {
                 makeRequest()
             }
