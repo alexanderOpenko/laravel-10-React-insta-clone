@@ -61,6 +61,11 @@ export default memo(function ChatInput({ receiver, getLastChat }) {
                     onChange={onHandleChange}
                     style={{resize:"none"}}
                     onPaste={(e) => onPasteHandler(e)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            submit(e)
+                        }
+                    }}
                 />
 
                 <TransparentButton disabled={processing} className="px-[15px]">

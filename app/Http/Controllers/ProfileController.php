@@ -52,6 +52,20 @@ class ProfileController extends Controller
         return Redirect::route('profile.edit');
     }
 
+    public function profileInfoUpdate(Request $request, User $user)
+    {
+        $this->authorize('update', $user);
+
+        $validated = $request->validate([
+            'birthday' => 'nullable|date',
+            'biography' => 'nullable|string|max:500',
+        ]);
+
+        $user->update($validated);
+
+        return redirect(route('profile.edit'));
+    }
+
     /**
      * Delete the user's account.
      */
