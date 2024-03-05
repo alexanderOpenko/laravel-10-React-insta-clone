@@ -28,23 +28,6 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
 
     const [chatMobileHeightDifference, setChatMobileHeightDifference] = useState(0);
     const [mobileHeight, setMobileHeight] = useState('')
-    // useEffect(() => {
-    //     if (!chatHeightRef.current) {
-    //         return
-    //     }
-
-    //     const calculateHeight = () => {
-    //         const menuHeight = window.innerHeight - chatHeightRef.current.clientHeight
-    //         setChatHeight(`calc(100vh - ${menuHeight}px)`)
-    //     };
-
-    //     calculateHeight()
-
-    //     window.addEventListener('resize', calculateHeight)
-    //     return () => {
-    //         window.removeEventListener('resize', calculateHeight)
-    //     }
-    // }, [receiver])
 
     const setReceiverHandler = (messagesReceiver) => {
         if (receiver === messagesReceiver) {

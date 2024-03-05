@@ -35,7 +35,7 @@ export default function Home({ auth }) {
                     />
                         :
                     <div className='h-full flex items-center'>
-                        <h1 className='font-medium text-lg'>🔔 Stay Updated! Subscribe to See New Posts 🔔</h1>
+                        <h1 className='font-medium text-sm md:text-lg'>🔔 Stay Updated! Subscribe to See New Posts 🔔</h1>
                     </div>
                 }
             </div>

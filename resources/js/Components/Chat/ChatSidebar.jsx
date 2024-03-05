@@ -1,15 +1,31 @@
 import Avatar from "../Avatar";
-import { useRef, memo } from "react";
+import { useRef, memo, useEffect, useState } from "react";
 import UseInfiniteScroll from "@/Components/infinitePaginationHook"
 import TransparentButton from "../TransparentButton";
 import classNames from "classnames";
+import { appURL } from "@/services";
+import UserCard from "../Users/UserCard";
 
 export default memo(function ChatSidebar({ auth_id, nextPageUrl, chats, getChats, setReceiverHandler }) {
     const scrollRef = useRef(null)
+    const [following, setFollowing] = useState([])
+
+    const followingRequest = async () => {
+        const resp = await fetch(`${appURL}/following/${auth_id}?nopaginate=1`)
+        const json = await resp.json()
+
+        setFollowing([...following, ...json.data])
+    }
+
+    useEffect(() => {
+        if (!chats.length) {
+            followingRequest()
+        }
+    }, [])
 
     return (
         <>
-            {!!chats.length &&
+            {!!chats.length ?
                 <UseInfiniteScroll
                     ref={scrollRef}
                     request={getChats}
@@ -17,10 +33,10 @@ export default memo(function ChatSidebar({ auth_id, nextPageUrl, chats, getChats
                     childrenClassNames="h-full"
                 >
                     {chats.map((el, index) => {
-                        const messageClasses =  classNames({
+                        const messageClasses = classNames({
                             "h-5 overflow-hidden text-base font-normal text-zinc-500 max-w-[150px]": true,
                             "font-bold text-gray-700": !el.message.status && auth_id !== el.message.sender_id
-                        }) 
+                        })
 
                         return <TransparentButton
                             type="button"
@@ -29,7 +45,7 @@ export default memo(function ChatSidebar({ auth_id, nextPageUrl, chats, getChats
                             className="flex px-5 py-3 transition hover:cursor-pointer hover:bg-slate-100"
                         >
                             <div className="pr-4">
-                                <Avatar user={el.user} size="sm" isLinkable={false}/>
+                                <Avatar user={el.user} size="sm" isLinkable={false} />
                             </div>
 
                             <div className="w-full">
@@ -54,6 +70,14 @@ export default memo(function ChatSidebar({ auth_id, nextPageUrl, chats, getChats
                         </TransparentButton>
                     })}
                 </UseInfiniteScroll>
+                : following.length ? <div className="overflow-y-auto h-full">
+                    {following.map((el) => {
+                        return <UserCard user={el.user} authUserFollowed={el.authUserFollowed} isMessageButton={true}/>
+                    })}
+                </div>
+                : <div className="font-medium text-sm h-full flex items-center p-3">
+                    🔔 Follow users or send messages to users to see chats 🔔
+                </div>
             }
         </>
     )

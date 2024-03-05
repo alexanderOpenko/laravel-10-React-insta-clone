@@ -93,9 +93,9 @@ class FollowerController extends Controller
         return $followers;
     }
 
-    public function following(User $user)
+    public function following(Request $request, User $user)
     {
-        $following = $user->following()->paginate(5);
+        $following = $user->following()->paginate(!$request->query('nopaginate') ? 5 : 1000000);
         $followersCollection = $following->getCollection();
         $following = $following->toArray();
 
