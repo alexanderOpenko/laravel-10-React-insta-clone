@@ -32,14 +32,6 @@ if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php'))
 */
 
 require __DIR__.'/../vendor/autoload.php';
-use Intervention\Image\ImageManager;
-use Intervention\Image\Drivers\Imagick\Driver;
-
-// create new manager instance with desired driver
-$manager = new ImageManager(
-    new Intervention\Image\Drivers\Gd\Driver()
-);
-
 /*
 |--------------------------------------------------------------------------
 | Run The Application

@@ -21,6 +21,7 @@ export default function PreviewImageOnUploading ({ setData, inputName, errors, b
     }
 
     const handleDeletingPostImage = () => {
+        addImageInput.current.value = null
         setData(inputName, '')
         setPreviewImage('')
     }
@@ -61,10 +62,9 @@ export default function PreviewImageOnUploading ({ setData, inputName, errors, b
                     ref={addImageInput}
                 />
 
-                {
-                    !previewImage &&
-                    <InputError message={errors.images} className="mt-2" />
-                }
+                
+                <InputError message={errors[inputName]} className="mt-2" />
+                
             </div>
         </>
     )

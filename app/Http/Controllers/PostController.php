@@ -59,7 +59,7 @@ class PostController extends Controller
 
         $validated = $request->validate([
             'message' => 'string|required|min:3',
-            'images' => 'required|mimes:jpg,bmp,png,jpeg'
+            'images' => 'required|mimes:jpg,bmp,png,jpeg|max:2048'
         ]);
 
         $manager = new ImageManager(

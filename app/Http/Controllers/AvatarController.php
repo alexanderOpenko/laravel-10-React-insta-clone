@@ -28,12 +28,13 @@ class AvatarController extends Controller
         //
     }
 
-    public function deleteAvatar(User $user) {
+    public function deleteAvatar(User $user)
+    {
         $this->authorize('apply', $user);
 
         $isAvatarExists = count($user->avatar()->get());
 
-        if ($isAvatarExists) { 
+        if ($isAvatarExists) {
             Storage::disk('public')->delete($user->avatar()->first()["avatar"]);
             $user->avatar()->delete();
         }
@@ -47,9 +48,9 @@ class AvatarController extends Controller
         $this->authorize('apply', $user);
 
         $this->deleteAvatar($user);
-        
+
         $request->validate([
-            'avatar' => 'required|mimes:jpg,bmp,png'
+            'avatar' => 'required|mimes:jpg,bmp,png|max:2048'
         ]);
 
         $manager = new ImageManager(
@@ -63,7 +64,7 @@ class AvatarController extends Controller
         $image = $manager->read($image_name);
         $encoded = $image->encode(new JpegEncoder(quality: 50));
         $encoded->save($image_name);
-        
+
         $user->avatar()->create(['avatar' => $image_path]);
 
         return back();
