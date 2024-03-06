@@ -12,6 +12,9 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\Encoders\JpegEncoder;
 
 class PostController extends Controller
 {
@@ -56,12 +59,21 @@ class PostController extends Controller
 
         $validated = $request->validate([
             'message' => 'string|required|min:3',
-            'images' => 'required'
+            'images' => 'required|mimes:jpg,bmp,png,jpeg'
         ]);
+
+        $manager = new ImageManager(
+            new Driver()
+        );
 
         $image_path = $request->file('images')->store('image/' . $request->user()->id, 'public');
 
+        $image_name = public_path('storage') . '/' . $image_path;
         $post = $user->posts()->create($validated);
+
+        $image = $manager->read($image_name);
+        $encoded = $image->encode(new JpegEncoder(quality: 50));
+        $encoded->save($image_name);
 
         $post->images()->create(['image_path' => $image_path]);
 

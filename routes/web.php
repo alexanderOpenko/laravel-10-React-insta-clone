@@ -29,6 +29,7 @@ use Inertia\Inertia;
 */
 
 Route::get('/', function () {
+    
     return redirect()->route('profile.show', ['id' => 1]);
 })->name('mainUser');
 

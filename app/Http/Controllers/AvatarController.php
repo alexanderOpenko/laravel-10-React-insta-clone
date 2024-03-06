@@ -6,6 +6,9 @@ use App\Models\Avatar;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\Encoders\JpegEncoder;
 
 class AvatarController extends Controller
 {
@@ -49,8 +52,18 @@ class AvatarController extends Controller
             'avatar' => 'required|mimes:jpg,bmp,png'
         ]);
 
+        $manager = new ImageManager(
+            new Driver()
+        );
+
         $image_path = $request->file('avatar')->store('avatars/' . $request->user()->id, 'public');
 
+        $image_name = public_path('storage') . '/' . $image_path;
+
+        $image = $manager->read($image_name);
+        $encoded = $image->encode(new JpegEncoder(quality: 50));
+        $encoded->save($image_name);
+        
         $user->avatar()->create(['avatar' => $image_path]);
 
         return back();
