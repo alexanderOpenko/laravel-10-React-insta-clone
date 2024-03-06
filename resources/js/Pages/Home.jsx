@@ -34,8 +34,8 @@ export default function Home({ auth }) {
                         grid="vertical"
                     />
                         :
-                    <div className='h-full flex items-center'>
-                        <h1 className='font-medium text-sm md:text-lg'>🔔 Stay Updated! Subscribe to See New Posts 🔔</h1>
+                    <div className='h-full flex items-center justify-center py-[100px] px-[15px]'>
+                        <h1 className='font-medium text-sm md:text-lg'>🔔 Stay Updated! Follow Users to See New Posts 🔔</h1>
                     </div>
                 }
             </div>
