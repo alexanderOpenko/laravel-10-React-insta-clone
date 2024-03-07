@@ -37,7 +37,7 @@ export default function UpdateProfileInfo ({ className = ''}) {
                         className="mt-1 block w-full"
                         value={data.birthday}
                         onChange={(e) => setData('birthday', e.target.value)}
-                        isFocused
+                        isFocused={false}
                         autoComplete="birthday"
                         type="date"
                     />
@@ -53,7 +53,7 @@ export default function UpdateProfileInfo ({ className = ''}) {
                         className="mt-1 block w-full"
                         value={data.biography}
                         onChange={(e) => setData('biography', e.target.value)}
-                        isFocused
+                        isFocused={false}
                         autoComplete="birthday"
                         type="text"
                     />

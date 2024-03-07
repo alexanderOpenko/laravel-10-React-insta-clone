@@ -1,5 +1,6 @@
 import CommentLikeNotification from '@/Components/Notifications/CommentLikeNotification';
 import { getMonth, ordinalSuffix } from '@/services';
+import CreatedAt from '../CreatedAt';
 
 export default function NotificationItem({ el }) {
     let birhday = '';
@@ -11,7 +12,7 @@ export default function NotificationItem({ el }) {
         const number = ordinalSuffix(date.getDate())
         birhday = month + " " + number
     }
-
+console.log(el ,' el');
     return (
         <div className='mb-2'>
             {el.notifiable_type.includes('Like') ?
@@ -38,6 +39,7 @@ export default function NotificationItem({ el }) {
                             imagePath={el.data.user.avatar?.avatar}
                         /> : ''
             }
+            <CreatedAt createdAt={el.created_at} time={true}/>
         </div>
     )
 }

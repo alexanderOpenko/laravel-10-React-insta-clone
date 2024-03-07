@@ -105,10 +105,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/chatList', [ChatController::class, 'getChatList'])->name('getChatList');
 
-    Route::group(['prefix' => 'like', 'as' => 'like.'], function () {
-        Route::post('/{post}', [LikeController::class, 'store'])->name('index');
-        Route::get('/likers/{post}', [LikeController::class, 'list'])->name('list');
-    });
+    Route::post('like/{post}', [LikeController::class, 'store'])->name('like.index');
 
     Route::group(['prefix' => 'notifications', 'as' => 'notifications.'], function () {
         Route::get('/', function () {
@@ -122,5 +119,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/list/{name?}', [UsersController::class, 'list'])->name('list');
     });
 });
+
+Route::get('like/likers/{post}', [LikeController::class, 'list'])->name('like.list');
 
 require __DIR__ . '/auth.php';

@@ -24,7 +24,10 @@ export default memo(function ChatSidebar({ auth_id, nextPageUrl, chats, getChats
     }, [])
 
     return (
-        <>
+        <>  
+            <div className="md:text-2xl text-base font-semibold mb-4 px-5">
+                Messages
+            </div>
             {!!chats.length ?
                 <UseInfiniteScroll
                     ref={scrollRef}

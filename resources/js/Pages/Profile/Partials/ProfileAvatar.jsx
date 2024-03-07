@@ -81,9 +81,9 @@ export default function ProfileAvatar({ user, auth }) {
                         />
 
                         <div className="flex">
-                            <PrimaryButton disabled={processing} className="!mr-3">
+                            {data.avatar && <PrimaryButton disabled={processing} className="!mr-3">
                                 Save
-                            </PrimaryButton>
+                            </PrimaryButton>}
 
                             <SecondaryButton onClick={closeAvatarForm}>
                                 Cancel
