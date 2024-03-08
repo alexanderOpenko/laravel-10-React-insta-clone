@@ -31,7 +31,10 @@ export default {
             },
             height: {
                 'chat': 'calc(100vh - 110px)',
-                'mobile-chat-height': 'calc(100vh - 106px)'
+                'mobile-chat-height': 'calc(100vh - 106px)',
+            },
+            maxHeight: {
+                'chat-sidebar-height': 'calc(100% - 48px)'
             }
         },
     },
