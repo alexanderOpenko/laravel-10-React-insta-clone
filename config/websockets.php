@@ -8,8 +8,7 @@ return [
      * Set a custom dashboard configuration
      */
     'dashboard' => [
-        'port' => env('LARAVEL_WEBSOCKETS_PORT', 6001),
-    ],
+        'port' => env('LARAVEL_WEBSOCKETS_PORT', 6001),    ],
 
     /*
      * This package comes with multi tenancy out of the box. Here you can
@@ -103,6 +102,8 @@ return [
          * default is to resolve everything to 127.0.0.1.
          */
         'perform_dns_lookup' => false,
+	/*'verify_peer' => false,
+	'verify_peer_name' => false*/
     ],
 
     /*
@@ -116,19 +117,19 @@ return [
          * certificate chain of issuers. The private key also may be contained
          * in a separate file specified by local_pk.
          */
-        'local_cert' => env('LARAVEL_WEBSOCKETS_SSL_LOCAL_CERT', null),
+        'local_cert' => '/etc/letsencrypt/live/chatts.space/fullchain.pem',
 
         /*
          * Path to local private key file on filesystem in case of separate files for
          * certificate (local_cert) and private key.
          */
-        'local_pk' => env('LARAVEL_WEBSOCKETS_SSL_LOCAL_PK', null),
+        'local_pk' => '/etc/letsencrypt/live/chatts.space/privkey.pem',
 
         /*
          * Passphrase for your local_cert file.
          */
-        'passphrase' => env('LARAVEL_WEBSOCKETS_SSL_PASSPHRASE', null),
-    ],
+        'passphrase' => env('LARAVEL_WEBSOCKETS_SSL_PASSPHRASE', null)
+],
 
     /*
      * Channel Manager
