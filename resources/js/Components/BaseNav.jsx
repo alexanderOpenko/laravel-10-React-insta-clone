@@ -7,6 +7,7 @@ import NotificationSound from "./Notifications/PlayNotififcationSound";
 
 const MenuItem = ({ children: icone, linkUrl, linkTitle }) => {
     const { isChat } = usePage().props
+
     const iconClasses = classNames({
         "flex justify-center": true,
         "w-full": isChat,
