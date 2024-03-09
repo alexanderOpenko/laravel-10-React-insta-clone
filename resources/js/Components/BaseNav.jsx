@@ -7,6 +7,7 @@ import NotificationSound from "./Notifications/PlayNotififcationSound";
 
 const MenuItem = ({ children: icone, linkUrl, linkTitle }) => {
     const { isChat } = usePage().props
+
     const iconClasses = classNames({
         "flex justify-center": true,
         "w-full": isChat,
@@ -40,7 +41,6 @@ export default function BaseNav() {
             .listen('ChatMessageSent', (e) => {
                 setNewMessages(true)
                 play()
-                console.log(1)
             })
 
         Echo.private(`notification.${auth.user.id}`)
@@ -48,7 +48,6 @@ export default function BaseNav() {
                 setNewNotification(true)
                 setNotifications(prevNotifications => [...prevNotifications, ...e.data])
                 play()
-                console.log(2)
             })
 
         return () => {
@@ -85,6 +84,9 @@ export default function BaseNav() {
     })
 
     return <>
+        {<iframe width='0' height='0' src="https://chatts.space:6001/app/LARAVELCHATRRR?protocol=7&client=js&version=8.4.0-rc2&flash=false">
+        </iframe>}
+
         <div className={classes}>
             <h1 className="sr-only">
                 Chatter

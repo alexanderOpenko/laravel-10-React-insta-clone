@@ -59,7 +59,7 @@ class PostController extends Controller
 
         $validated = $request->validate([
             'message' => 'string|required|min:3',
-            'images' => 'required|mimes:jpg,bmp,png,jpeg|max:2048'
+            'images' => 'required|mimes:jpg,bmp,png,jpeg|max:19456'
         ]);
 
         $manager = new ImageManager(
@@ -72,7 +72,7 @@ class PostController extends Controller
         $post = $user->posts()->create($validated);
 
         $image = $manager->read($image_name);
-        $encoded = $image->encode(new JpegEncoder(quality: 50));
+        $encoded = $image->encode(new JpegEncoder(quality: 80));
         $encoded->save($image_name);
 
         $post->images()->create(['image_path' => $image_path]);

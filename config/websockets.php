@@ -101,9 +101,8 @@ return [
          * Use an DNS resolver to make the requests to the statistics logger
          * default is to resolve everything to 127.0.0.1.
          */
-        'perform_dns_lookup' => false,
-	/*'verify_peer' => false,
-	'verify_peer_name' => false*/
+        /*'perform_dns_lookup' => false,*/
+	/*'verify_peer_name' => false*/
     ],
 
     /*

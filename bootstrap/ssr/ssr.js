@@ -958,7 +958,7 @@ const ChatSidebar = memo(function ChatSidebar2({ auth_id, nextPageUrl, chats, ge
         ref: scrollRef,
         request: getChats,
         nextPageUrl,
-        childrenClassNames: "h-full",
+        childrenClassNames: "h-full max-h-chat-sidebar-height",
         children: chats.map((el, index) => {
           const messageClasses = classNames({
             "h-5 overflow-hidden text-base font-normal text-zinc-500 max-w-[150px]": true,
@@ -1108,13 +1108,11 @@ function BaseNav() {
     Echo.private(`chatmessages.${auth.user.id}`).listen("ChatMessageSent", (e) => {
       setNewMessages(true);
       play();
-      console.log(1);
     });
     Echo.private(`notification.${auth.user.id}`).listen("NotificationSent", (e) => {
       setNewNotification(true);
       setNotifications((prevNotifications) => [...prevNotifications, ...e.data]);
       play();
-      console.log(2);
     });
     return () => {
       Echo.leave(`chatmessages.${auth.user.id}`);
@@ -1143,6 +1141,7 @@ function BaseNav() {
     "w-full justify-between ml-10 flex md:flex-col md:ml-0": true
   });
   return /* @__PURE__ */ jsxs(Fragment, { children: [
+    /* @__PURE__ */ jsx("iframe", { width: "0", height: "0", src: "https://chatts.space:6001/app/LARAVELCHATRRR?protocol=7&client=js&version=8.4.0-rc2&flash=false" }),
     /* @__PURE__ */ jsxs("div", { className: classes, children: [
       /* @__PURE__ */ jsx("h1", { className: "sr-only", children: "Chatter" }),
       /* @__PURE__ */ jsxs("div", { className: "flex md:block", children: [
@@ -1294,7 +1293,7 @@ function Chat({ auth, errors, receiver: companion = {} }) {
     setTimeout(() => {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
       initialMessagesLoaded.current = false;
-    }, 0);
+    }, 100);
   };
   useEffect(() => {
     if (isLoading) {

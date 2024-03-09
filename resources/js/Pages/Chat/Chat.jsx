@@ -133,7 +133,7 @@ export default function Chat({ auth, errors, receiver: companion = {} }) {
         setTimeout(() => {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight
             initialMessagesLoaded.current = false
-        }, 0)
+        }, 100)
     }
 
     useEffect(() => {
